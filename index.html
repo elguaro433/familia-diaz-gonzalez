@@ -1745,7 +1745,6 @@ function renderCreditos() {
   const badge = document.getElementById('creditos-total-badge');
   if (badge) badge.textContent = fmt(totalPend) + ' pendiente';
 
-  const totalCuota = CREDITOS.filter(c=>!c.pagado).reduce((s,c)=>s+c.cuota,0);
   // Update saldo panel
   const saldoVal = document.getElementById('saldo-val');
   if (saldoVal) saldoVal.textContent = fmt(Math.round(totalPend)) + ' en deuda';

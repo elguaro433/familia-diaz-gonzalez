@@ -561,19 +561,43 @@ body {
 
 /* ── MOBILE ── */
 @media (max-width: 768px) {
-  .app { grid-template-columns: 1fr; grid-template-rows: 60px auto 1fr; }
-  .side { flex-direction: row; flex-wrap: wrap; min-height: unset; padding: 10px; border-right: none; border-bottom: 1px solid var(--border); }
-  .nav-item { width: auto; padding: 6px 12px; }
+  .app { grid-template-columns: 1fr; grid-template-rows: auto auto 1fr; }
+  .side { flex-direction: row; flex-wrap: wrap; min-height: unset; padding: 8px; border-right: none; border-bottom: 1px solid var(--border); gap: 2px; }
+  .nav-item { width: auto; padding: 6px 10px; font-size: 12px; border-left: none !important; }
   .side-mes { display: none; }
-  .content { padding: 16px; }
+  .content { padding: 12px; }
   .two-col { grid-template-columns: 1fr; }
   .three-col { grid-template-columns: 1fr 1fr; }
-  .metrics { grid-template-columns: 1fr !important; }
+  .metrics { grid-template-columns: 1fr 1fr !important; }
+  .hdr { padding: 0 12px; }
+  .hdr-logo { font-size: 13px; }
+  .hdr-sub { font-size: 10px; }
   .ahorro-panel { flex-direction: column; }
   .mobile-mes { display: flex; gap: 8px; margin-bottom: 16px; }
   .mobile-mes select { flex:1; padding:9px 12px; border:1px solid var(--border); border-radius:var(--r-sm); background:var(--card); color:var(--text); font-size:14px; outline:none; appearance:none; font-family:'Plus Jakarta Sans',sans-serif; }
   .debt-summary-bar { flex-direction: column !important; gap: 8px !important; }
   .debt-summary-bar > div { min-width: unset !important; }
+  /* Fix gastos on mobile */
+  .gasto-row { flex-wrap: wrap; padding: 8px 12px; gap: 6px; }
+  .gasto-concepto { font-size: 12px; min-width: 60%; }
+  .cat-sel { font-size: 10px; padding: 1px 4px; }
+  .pay-btn { font-size: 9px; padding: 2px 8px; }
+  .gasto-importe { font-size: 12px; }
+  .gasto-del { width: 18px; height: 18px; font-size: 12px; }
+  .nomina-row { flex-wrap: wrap; gap: 8px; }
+  .nom-inp { width: 100px; font-size: 14px; padding: 4px 8px; }
+  .credito-row { flex-wrap: wrap; padding: 10px 12px; }
+  .pay-summary { flex-wrap: wrap; gap: 8px; padding: 8px 12px; }
+  .pay-chip { font-size: 11px; }
+  .sc-hdr { padding: 10px 12px; }
+  .sc-title { font-size: 10px; }
+  /* Month selector on mobile */
+  .cat-filter { gap: 4px; padding: 8px 12px; }
+  .cat-pill { font-size: 11px; padding: 3px 8px; }
+  .add-row { flex-wrap: wrap; padding: 8px 12px; }
+  .add-inp { font-size: 12px; }
+  /* Header buttons smaller on mobile */
+  .hdr button, .hdr a { font-size: 11px !important; padding: 4px 10px !important; }
 }
 @media (min-width: 769px) { .mobile-mes { display: none; } }
 
@@ -879,6 +903,12 @@ body {
       <!-- alertas removido -->
     </div>
 
+    <!-- FOOTER -->
+    <div style="text-align:center;padding:30px 20px 20px;color:var(--hint);font-size:11px;border-top:1px solid var(--border);margin-top:30px;">
+      <div style="font-weight:600;margin-bottom:4px;">Propiedad Familia Díaz González</div>
+      <div>Creado por Emmanuel Díaz</div>
+      <div style="margin-top:6px;font-size:10px;opacity:.6;">v5.0 — 2026</div>
+    </div>
   </div><!-- /content -->
 </div><!-- /app -->
 

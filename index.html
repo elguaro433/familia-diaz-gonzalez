@@ -287,6 +287,21 @@ body {
   border: 1.5px solid var(--coral); border-radius: 4px;
   padding: 2px 6px; background: var(--coral-dim); outline: none;
 }
+.gasto-note-btn {
+  width: 20px; height: 20px; border-radius: 50%; border: none;
+  background: transparent; color: var(--hint); cursor: pointer;
+  font-size: 13px; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; opacity: 0; transition: opacity .15s;
+}
+.gasto-note-btn.has-note { opacity: .7; color: var(--sky); }
+.gasto-row:hover .gasto-note-btn { opacity: 1; }
+.gasto-note-btn:hover { color: var(--sky); }
+.gasto-note-text { font-size: 11px; color: var(--hint); margin-left: 18px; margin-top: -4px; padding-bottom: 4px; }
+.gasto-note-input {
+  font-size: 12px; padding: 4px 8px; border: 1.5px solid var(--sky); border-radius: 6px;
+  background: var(--sky-dim); color: var(--text); outline: none; width: 200px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
 .gasto-del {
   width: 20px; height: 20px; border-radius: 50%; border: none;
   background: transparent; color: var(--hint); cursor: pointer;
@@ -553,10 +568,12 @@ body {
   .content { padding: 16px; }
   .two-col { grid-template-columns: 1fr; }
   .three-col { grid-template-columns: 1fr 1fr; }
-  .metrics { grid-template-columns: 1fr 1fr 1fr; }
+  .metrics { grid-template-columns: 1fr !important; }
   .ahorro-panel { flex-direction: column; }
   .mobile-mes { display: flex; gap: 8px; margin-bottom: 16px; }
   .mobile-mes select { flex:1; padding:9px 12px; border:1px solid var(--border); border-radius:var(--r-sm); background:var(--card); color:var(--text); font-size:14px; outline:none; appearance:none; font-family:'Plus Jakarta Sans',sans-serif; }
+  .debt-summary-bar { flex-direction: column !important; gap: 8px !important; }
+  .debt-summary-bar > div { min-width: unset !important; }
 }
 @media (min-width: 769px) { .mobile-mes { display: none; } }
 
@@ -623,6 +640,7 @@ body {
       <button onclick="cambiarMes(-1)" style="flex:0 0 56px;height:48px;border:none;background:linear-gradient(135deg,#0ea5e9,#06b6d4);color:#fff;font-size:20px;cursor:pointer;font-weight:700;transition:opacity .15s;">&#8592;</button>
       <select id="mes-sel-top" onchange="selMes(this.value)" style="flex:1;height:48px;padding:0 16px;border:none;background:linear-gradient(135deg,#1e293b,#334155);color:#fff;font-size:16px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;outline:none;appearance:none;cursor:pointer;text-align:center;letter-spacing:.5px;"></select>
       <button onclick="cambiarMes(1)" style="flex:0 0 56px;height:48px;border:none;background:linear-gradient(135deg,#06b6d4,#0ea5e9);color:#fff;font-size:20px;cursor:pointer;font-weight:700;transition:opacity .15s;">&#8594;</button>
+      <button onclick="crearNuevoMes()" style="flex:0 0 auto;height:48px;padding:0 14px;border:none;background:linear-gradient(135deg,#00d68f,#00b87a);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;letter-spacing:.3px;transition:opacity .15s;" title="Crear nuevo mes">+ Mes</button>
     </div>
     <!-- mobile mes hidden -->
     <div style="display:none;"><select id="mes-sel-m"></select></div>
@@ -679,6 +697,9 @@ body {
         </div>
         <div id="resumen-pay-status" style="padding:16px 18px;"></div>
       </div>
+
+      <!-- Debt summary card -->
+      <div id="resumen-debt-summary" class="sc" style="margin-bottom:16px;cursor:pointer;" onclick="showPage('finanzas',document.getElementById('nav-finanzas'))"></div>
 
       <!-- top gastos removido -->
     </div>
@@ -1276,6 +1297,7 @@ function renderMes() {
   renderPaySummary();
   renderProjection();
   renderIEChart();
+  renderDebtSummary();
 }
 
 // ── GASTO LIST ──
@@ -1308,6 +1330,10 @@ function renderGastosList() {
     // Fecha cobro label (improvement #8)
     const fc = isFijo ? getFechaCobro(con) : null;
     const fcHtml = fc ? `<span class="fecha-cobro">cobra dia ${fc}</span>` : '';
+    const notaKey = mes.id + '|' + origIdx;
+    const nota = GASTO_NOTAS[notaKey] || '';
+    const notaHtml = nota ? `<div class="gasto-note-text">${nota}</div>` : '';
+    const notaBtnClass = nota ? 'gasto-note-btn has-note' : 'gasto-note-btn';
     return `<div class="gasto-row ${paid ? 'is-pagado' : ''}" id="gr-${origIdx}">
       <span class="cat-dot" style="background:${catC.color}"></span>
       <span class="gasto-concepto" onclick="editCon(${origIdx})">${con}${fcHtml}</span>
@@ -1316,8 +1342,9 @@ function renderGastosList() {
       </select>
       <span class="gasto-importe" onclick="editImp(${origIdx})">${fmt(val)}</span>
       ${payBtn}
+      <button class="${notaBtnClass}" onclick="toggleNotaInput(${origIdx})" title="${nota ? 'Editar nota' : 'Agregar nota'}">&#128221;</button>
       <button class="gasto-del" onclick="delGasto(${origIdx})">x</button>
-    </div>`;
+    </div>${notaHtml}`;
   }).join('');
   renderPaySummary();
 }
@@ -1397,6 +1424,36 @@ function clearSearch() {
   const inp = document.getElementById('search-gastos');
   if (inp) inp.value = '';
   searchQuery = '';
+  renderGastosList();
+}
+
+// ── NOTAS POR GASTO ──
+const NOTAS_KEY = 'familiadiaz_notas';
+let GASTO_NOTAS = {};
+try { const sn = JSON.parse(localStorage.getItem(NOTAS_KEY)); if (sn) GASTO_NOTAS = sn; } catch(e) {}
+function saveNotas() { localStorage.setItem(NOTAS_KEY, JSON.stringify(GASTO_NOTAS)); }
+function getNotaKey(gastoIdx) { return MESES[mesIdx].id + '|' + gastoIdx; }
+function toggleNotaInput(gastoIdx) {
+  const existing = document.getElementById('nota-inp-' + gastoIdx);
+  if (existing) { existing.parentElement?.remove(); return; }
+  const row = document.getElementById('gr-' + gastoIdx);
+  if (!row) return;
+  const key = getNotaKey(gastoIdx);
+  const currentNote = GASTO_NOTAS[key] || '';
+  const noteDiv = document.createElement('div');
+  noteDiv.style.cssText = 'padding:2px 18px 6px 18px;display:flex;gap:6px;align-items:center;';
+  noteDiv.innerHTML = `<input class="gasto-note-input" id="nota-inp-${gastoIdx}" placeholder="Escribe una nota..." value="${currentNote.replace(/"/g,'&quot;')}" onkeydown="if(event.key==='Enter')saveNota(${gastoIdx})"><button class="add-btn" style="padding:4px 10px;font-size:11px;" onclick="saveNota(${gastoIdx})">OK</button>`;
+  row.insertAdjacentElement('afterend', noteDiv);
+  document.getElementById('nota-inp-' + gastoIdx)?.focus();
+}
+function saveNota(gastoIdx) {
+  const inp = document.getElementById('nota-inp-' + gastoIdx);
+  if (!inp) return;
+  const key = getNotaKey(gastoIdx);
+  const val = inp.value.trim();
+  if (val) GASTO_NOTAS[key] = val;
+  else delete GASTO_NOTAS[key];
+  saveNotas();
   renderGastosList();
 }
 
@@ -1735,6 +1792,7 @@ function saveSaldoCuenta(val) {
   localStorage.setItem('familiadiaz_saldocuenta', saldoCuenta);
   const el = document.getElementById('saldo-cuenta');
   if (el) el.textContent = fmt(Math.round(saldoCuenta));
+  renderDebtSummary();
 }
 
 function renderCreditos() {
@@ -1782,6 +1840,7 @@ function renderCreditos() {
       </div>
     </div>`;
   }).join('');
+  renderDebtSummary();
 }
 
 function editCredNombre(i) {
@@ -2148,6 +2207,57 @@ function exportPDF() {
   window.print();
 }
 
+// ── RESUMEN DEBT SUMMARY ──
+function renderDebtSummary() {
+  const el = document.getElementById('resumen-debt-summary');
+  if (!el) return;
+  const totalDeuda = CREDITOS.filter(c => !c.pagado).reduce((s, c) => s + c.pendiente, 0);
+  const totalCuotas = CREDITOS.filter(c => !c.pagado).reduce((s, c) => s + c.cuota, 0);
+  el.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-around;padding:16px 18px;gap:16px;flex-wrap:wrap;" class="debt-summary-bar">
+      <div style="text-align:center;min-width:120px;">
+        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--coral);margin-bottom:4px;">Deuda activa</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--coral);">${fmt(Math.round(totalDeuda))}</div>
+      </div>
+      <div style="width:1px;height:36px;background:var(--border);"></div>
+      <div style="text-align:center;min-width:120px;">
+        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--amber);margin-bottom:4px;">Cuotas mensuales</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--amber);">${fmt(Math.round(totalCuotas))}/mes</div>
+      </div>
+      <div style="width:1px;height:36px;background:var(--border);"></div>
+      <div style="text-align:center;min-width:120px;">
+        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--emerald);margin-bottom:4px;">Saldo en cuenta</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--emerald);">${fmt(Math.round(saldoCuenta))}</div>
+      </div>
+    </div>
+    <div style="text-align:center;padding:0 18px 10px;font-size:11px;color:var(--hint);">Toca para ver detalle en Finanzas &rarr;</div>
+  `;
+}
+
+// ── CREAR NUEVO MES ──
+function crearNuevoMes() {
+  const MESES_NOMBRES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const lastMes = MESES[MESES.length - 1];
+  const parts = lastMes.id.split(' ');
+  const mesNom = parts[0];
+  const anio = parseInt(parts[1]);
+  const mesIdxN = MESES_NOMBRES.indexOf(mesNom);
+  let nuevoMesIdx = mesIdxN + 1;
+  let nuevoAnio = anio;
+  if (nuevoMesIdx > 11) { nuevoMesIdx = 0; nuevoAnio++; }
+  const nuevoId = MESES_NOMBRES[nuevoMesIdx] + ' ' + nuevoAnio;
+  // Check if already exists
+  if (MESES.find(m => m.id === nuevoId)) { alert('El mes ' + nuevoId + ' ya existe'); return; }
+  // Copy gastos fijos from previous month
+  const gastosFijos = lastMes.gastos.filter(([,,cat]) => cat === 'fijos').map(g => [g[0], g[1], g[2]]);
+  MESES.push({ id: nuevoId, gastos: gastosFijos });
+  mesIdx = MESES.length - 1;
+  poblarSel();
+  ['mes-sel','mes-sel-m','mes-sel-top'].forEach(id => { const el = document.getElementById(id); if (el) el.value = mesIdx; });
+  renderMes();
+  autoSave();
+}
+
 // ── SHOW PAGE ──
 function showPage(name, btn) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -2196,6 +2306,7 @@ renderMes();
 renderAlertas();
 renderPaySummary();
 renderDebtCountdown();
+renderDebtSummary();
 updateThemeButton();
 
 // ── PWA SERVICE WORKER ──

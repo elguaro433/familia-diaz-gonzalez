@@ -792,19 +792,35 @@ body {
 
     <!-- NOMINAS -->
     <div id="page-nominas" class="page">
+      <div class="sc" style="margin-bottom:16px;">
+        <div class="sc-hdr">
+          <div class="sc-title">Editar nominas del mes actual</div>
+          <div class="chip chip-green" id="nom-edit-mes">Mar 2026</div>
+        </div>
+        <div style="padding:14px 18px;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+            <div style="flex:1;">
+              <div style="font-size:12px;color:var(--muted);margin-bottom:4px;" id="nom-edit-name-e">Emmanuel</div>
+              <input class="nom-inp" id="nom-edit-e" type="number" placeholder="0" style="width:100%;" oninput="saveNomEdit()">
+            </div>
+            <div style="flex:1;">
+              <div style="font-size:12px;color:var(--muted);margin-bottom:4px;" id="nom-edit-name-s">Elibel</div>
+              <input class="nom-inp" id="nom-edit-s" type="number" placeholder="0" style="width:100%;background:rgba(123,97,255,.12);color:var(--violet);" oninput="saveNomEdit()">
+            </div>
+          </div>
+          <div style="font-size:11px;color:var(--hint);">Edita las nominas del mes seleccionado arriba. Los cambios se guardan automaticamente.</div>
+        </div>
+      </div>
       <div class="two-col">
         <div class="sc">
-          <div class="sc-hdr"><div class="sc-title">Nominas Emmanuel &mdash; historial</div><div style="font-size:11px;color:var(--muted);">Cuenta conjunta AD38</div></div>
+          <div class="sc-hdr"><div class="sc-title">Historial Emmanuel</div><div style="font-size:11px;color:var(--muted);">Cuenta conjunta AD38</div></div>
           <div id="nom-hist-e"></div>
         </div>
         <div class="sc">
-          <div class="sc-hdr"><div class="sc-title">Nominas Elibel &mdash; historial</div></div>
+          <div class="sc-hdr"><div class="sc-title">Historial Elibel</div></div>
           <div id="nom-hist-s"></div>
         </div>
       </div>
-      <div class="sc" style="margin-top:16px;">
-      </div>
-      <!-- gráfico nóminas removido -->
     </div>
 
     <!-- HISTORIAL -->
@@ -1758,25 +1774,55 @@ function updateBudget(cat, val) {
 }
 
 // ── NOMINAS PAGE ──
+function saveNomEdit() {
+  const id = MESES[mesIdx].id;
+  const valE = parseFloat(document.getElementById('nom-edit-e')?.value) || 0;
+  const valS = parseFloat(document.getElementById('nom-edit-s')?.value) || 0;
+  ST[id+'_e'] = valE;
+  ST[id+'_s'] = valS;
+  renderMes();
+  if (typeof autoSave === 'function') autoSave();
+  if (typeof syncToCloud === 'function') syncToCloud();
+}
+
 function renderNominas() {
+  // Populate editor with current month data
+  const mes = MESES[mesIdx];
+  const id = mes.id;
+  const noms = getNominas(id);
+  const nomE = ST[id+'_e'] ?? noms.e;
+  const nomS = ST[id+'_s'] ?? noms.s;
+  const editE = document.getElementById('nom-edit-e');
+  const editS = document.getElementById('nom-edit-s');
+  const editMes = document.getElementById('nom-edit-mes');
+  if (editE) editE.value = nomE || '';
+  if (editS) editS.value = nomS || '';
+  if (editMes) editMes.textContent = id;
+  const nameE = document.getElementById('nom-edit-name-e');
+  const nameS = document.getElementById('nom-edit-name-s');
+  if (nameE) nameE.textContent = NOM_NAMES?.e || 'Emmanuel';
+  if (nameS) nameS.textContent = NOM_NAMES?.s || 'Elibel';
+
   const histE = document.getElementById('nom-hist-e');
   const histS = document.getElementById('nom-hist-s');
   if (!histE) return;
 
   const meses26 = MESES.filter(m => m.id.includes('2026')||m.id.includes('2025'));
-  histE.innerHTML = meses26.map(m => {
+  histE.innerHTML = meses26.map((m,i) => {
     const n = getNominas(m.id);
     const v = ST[m.id+'_e'] ?? n.e;
-    return `<div class="nom-hist-row">
+    const idx = MESES.indexOf(m);
+    return `<div class="nom-hist-row" style="cursor:pointer;" onclick="mesIdx=${idx};poblarSel();renderMes();renderNominas();" title="Clic para editar ${m.id}">
       <span class="nom-hist-mes">${m.id}</span>
       <span class="nom-hist-val" style="color:var(--emerald);">${v > 0 ? fmtDec(v) : '\u2014'}</span>
     </div>`;
   }).join('');
 
-  histS.innerHTML = meses26.map(m => {
+  histS.innerHTML = meses26.map((m,i) => {
     const n = getNominas(m.id);
     const v = ST[m.id+'_s'] ?? n.s;
-    return `<div class="nom-hist-row">
+    const idx = MESES.indexOf(m);
+    return `<div class="nom-hist-row" style="cursor:pointer;" onclick="mesIdx=${idx};poblarSel();renderMes();renderNominas();" title="Clic para editar ${m.id}">
       <span class="nom-hist-mes">${m.id}</span>
       <span class="nom-hist-val" style="color:var(--violet);">${v > 0 ? fmtDec(v) : '\u2014'}</span>
     </div>`;
@@ -1919,7 +1965,7 @@ function updTarjeta() {
 const CRED_KEY = 'familiadiaz_creditos';
 let CREDITOS = [
   { id: 'cotxe', nombre: 'Prestec cotxe', tasa: 6.22, vence: 'Feb 2030', ref: '250047', cuota: 335.47, pendiente: 13960.38, color: 'var(--coral)', pagado: false },
-  { id: '12k', nombre: 'Preconcedit consum 12.000', tasa: 9.53, vence: 'Abr 2028', ref: '266545', cuota: 553.22, pendiente: 12000, color: 'var(--pink)', pagado: false },
+  { id: '12k', nombre: 'Preconcedit consum 12.000', tasa: 9.54, vence: 'Abr 2028', ref: '266545', cuota: 553.22, pendiente: 12000, color: 'var(--pink)', pagado: false, cuotasTotales: 24 },
   { id: '3640', nombre: 'Preconcedit consum 3.640', tasa: 7.34, vence: 'Abr 2027', ref: '256635', cuota: 292.11, pendiente: 3639.51, color: 'var(--amber)', pagado: false }
 ];
 try { const saved = JSON.parse(localStorage.getItem(CRED_KEY)); if (saved && saved.length) CREDITOS = saved; } catch(e) {}
@@ -1970,7 +2016,7 @@ function renderCreditos() {
         </div>
       </div>`;
     }
-    const cuotasRest = c.cuota > 0 ? Math.ceil(c.pendiente / c.cuota) : 0;
+    const cuotasRest = c.cuotasTotales || (c.cuota > 0 ? Math.ceil(c.pendiente / c.cuota) : 0);
     const pctPagado = c.cuota > 0 ? Math.max(0, 100 - (c.pendiente / (c.cuota * cuotasRest + c.pendiente)) * 100) : 0;
     return `<div class="credito-row" id="cred-${i}">
       <div style="flex:1;min-width:0">

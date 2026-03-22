@@ -10,6 +10,8 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <title>Familia Díaz González — Control</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -626,6 +628,8 @@ body {
     <div class="hdr-logo">Familia <em>Diaz Gonzalez</em></div>
     <div class="hdr-sub" id="hdr-mes">Control financiero familiar</div>
     <div class="hdr-actions">
+      <span id="sync-status" style="font-size:10px;margin-right:8px;font-family:'JetBrains Mono',monospace;"></span>
+      <button onclick="syncFromCloud()" style="background:transparent;border:1px solid var(--border);border-radius:6px;color:rgba(255,255,255,.7);padding:2px 8px;font-size:11px;cursor:pointer;margin-right:6px;" title="Sincronizar">&#128260;</button>
       <button class="hdr-btn" onclick="exportPDF()" title="Exportar mes a PDF">&#128424; Exportar</button>
       <button class="hdr-btn" id="theme-toggle" onclick="toggleDarkMode()" title="Modo oscuro/claro">&#9789; Modo</button>
     </div>
@@ -913,6 +917,120 @@ body {
 </div><!-- /app -->
 
 <script>
+// ══ FIREBASE SYNC ══
+firebase.initializeApp({
+  apiKey: "AIzaSyCi0cdF5VqJjcsHibnLg6kvPGVN-f2b_DY",
+  authDomain: "familia-diaz-gonzalez.firebaseapp.com",
+  projectId: "familia-diaz-gonzalez",
+  storageBucket: "familia-diaz-gonzalez.firebasestorage.app",
+  messagingSenderId: "627582265304",
+  appId: "1:627582265304:web:3b5fae7e4b7919619734ad"
+});
+const db = firebase.firestore();
+const SYNC_DOC = 'familia-diaz-gonzalez';
+let syncEnabled = true;
+let lastSyncTime = 0;
+
+// Save all app data to Firestore
+function syncToCloud() {
+  if (!syncEnabled || !db) return;
+  const now = Date.now();
+  if (now - lastSyncTime < 3000) return; // Debounce 3 seconds
+  lastSyncTime = now;
+
+  const data = {
+    meses: JSON.stringify(MESES),
+    pagos: JSON.stringify(PAGOS),
+    creditos: JSON.stringify(CREDITOS),
+    nomNames: JSON.stringify(NOM_NAMES),
+    saldoCuenta: saldoCuenta,
+    tarjetaConsumo: tarjetaConsumo,
+    ninos: JSON.stringify(NINOS),
+    otrosIngresos: JSON.stringify(otrosIngresos),
+    notas: localStorage.getItem('familiadiaz_notas') || '{}',
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    device: navigator.userAgent.includes('iPhone') ? 'iPhone' : 'PC'
+  };
+
+  db.collection('appdata').doc(SYNC_DOC).set(data, { merge: true })
+    .then(() => { updateSyncStatus('synced'); })
+    .catch(err => { console.warn('Sync error:', err); updateSyncStatus('error'); });
+}
+
+// Load from Firestore
+function syncFromCloud() {
+  if (!db) return;
+  db.collection('appdata').doc(SYNC_DOC).get()
+    .then(doc => {
+      if (!doc.exists) {
+        // First time: upload current data
+        syncToCloud();
+        return;
+      }
+      const data = doc.data();
+      try {
+        if (data.meses) {
+          const cloudMeses = JSON.parse(data.meses);
+          MESES.length = 0;
+          cloudMeses.forEach(m => MESES.push(m));
+        }
+        if (data.pagos) PAGOS = JSON.parse(data.pagos);
+        if (data.creditos) CREDITOS = JSON.parse(data.creditos);
+        if (data.nomNames) NOM_NAMES = JSON.parse(data.nomNames);
+        if (data.saldoCuenta !== undefined) saldoCuenta = data.saldoCuenta;
+        if (data.tarjetaConsumo !== undefined) tarjetaConsumo = data.tarjetaConsumo;
+        if (data.ninos) {
+          const cloudNinos = JSON.parse(data.ninos);
+          NINOS.length = 0;
+          cloudNinos.forEach(n => NINOS.push(n));
+        }
+        if (data.otrosIngresos) otrosIngresos = JSON.parse(data.otrosIngresos);
+        if (data.notas) localStorage.setItem('familiadiaz_notas', data.notas);
+
+        // Save to localStorage too
+        savePagos();
+        saveCreditos();
+        localStorage.setItem(NOM_NAMES_KEY, JSON.stringify(NOM_NAMES));
+        localStorage.setItem('familiadiaz_saldocuenta', saldoCuenta);
+
+        // Re-render
+        poblarSel();
+        loadNomNames();
+        renderMes();
+        updateSyncStatus('synced');
+      } catch(e) { console.warn('Parse error:', e); }
+    })
+    .catch(err => { console.warn('Load error:', err); updateSyncStatus('error'); });
+}
+
+// Listen for real-time changes
+function listenForChanges() {
+  if (!db) return;
+  db.collection('appdata').doc(SYNC_DOC).onSnapshot(doc => {
+    if (!doc.exists) return;
+    const data = doc.data();
+    // Only update if change came from another device
+    if (data.device && data.device !== (navigator.userAgent.includes('iPhone') ? 'iPhone' : 'PC')) {
+      syncFromCloud();
+    }
+  });
+}
+
+function updateSyncStatus(status) {
+  const el = document.getElementById('sync-status');
+  if (!el) return;
+  if (status === 'synced') {
+    el.textContent = '☁️ Sincronizado';
+    el.style.color = 'var(--emerald)';
+  } else if (status === 'error') {
+    el.textContent = '⚠️ Sin conexión';
+    el.style.color = 'var(--amber)';
+  } else {
+    el.textContent = '🔄 Sincronizando...';
+    el.style.color = 'var(--sky)';
+  }
+}
+
 // ══ CATEGORIAS CONFIG ══
 const CATS = {
   fijos:       { label: 'Fijos',         color: '#38c7ff', bg: 'rgba(56,199,255,.12)',   icon: '🏠' },
@@ -1060,7 +1178,7 @@ const ALERTAS = [
 const PAY_KEY = 'familiadiaz_pagos';
 let PAGOS = {};
 try { PAGOS = JSON.parse(localStorage.getItem(PAY_KEY)) || {}; } catch(e) { PAGOS = {}; }
-function savePagos() { localStorage.setItem(PAY_KEY, JSON.stringify(PAGOS)); }
+function savePagos() { localStorage.setItem(PAY_KEY, JSON.stringify(PAGOS)); syncToCloud(); }
 function getPagoKey(mesId, idx) { return mesId + '|' + idx; }
 function isPagado(mesId, idx) { return !!PAGOS[getPagoKey(mesId, idx)]; }
 function togglePago(idx) {
@@ -1144,7 +1262,7 @@ function loadAllData() {
 }
 
 // Auto-save on changes
-function autoSave() { requestAnimationFrame(() => saveAllData()); }
+function autoSave() { requestAnimationFrame(() => saveAllData()); syncToCloud(); }
 
 function renderPaySummary() {
   const mes = MESES[mesIdx];
@@ -1805,7 +1923,7 @@ let CREDITOS = [
   { id: '3640', nombre: 'Preconcedit consum 3.640', tasa: 7.34, vence: 'Abr 2027', ref: '256635', cuota: 292.11, pendiente: 3639.51, color: 'var(--amber)', pagado: false }
 ];
 try { const saved = JSON.parse(localStorage.getItem(CRED_KEY)); if (saved && saved.length) CREDITOS = saved; } catch(e) {}
-function saveCreditos() { localStorage.setItem(CRED_KEY, JSON.stringify(CREDITOS)); }
+function saveCreditos() { localStorage.setItem(CRED_KEY, JSON.stringify(CREDITOS)); syncToCloud(); }
 
 let saldoCuenta = 5190.25;
 try { const sv = localStorage.getItem('familiadiaz_saldocuenta'); if (sv) saldoCuenta = parseFloat(sv); } catch(e) {}
@@ -1823,6 +1941,7 @@ function saveSaldoCuenta(val) {
   const el = document.getElementById('saldo-cuenta');
   if (el) el.textContent = fmt(Math.round(saldoCuenta));
   renderDebtSummary();
+  syncToCloud();
 }
 
 function renderCreditos() {
@@ -2326,6 +2445,7 @@ function saveNomName(who) {
   if (val) NOM_NAMES[who] = val;
   localStorage.setItem(NOM_NAMES_KEY, JSON.stringify(NOM_NAMES));
   loadNomNames();
+  syncToCloud();
 }
 
 // ── INIT ──
@@ -2338,6 +2458,10 @@ renderPaySummary();
 renderDebtCountdown();
 renderDebtSummary();
 updateThemeButton();
+
+// Load from cloud on startup, then listen for changes
+syncFromCloud();
+listenForChanges();
 
 // ── PWA SERVICE WORKER ──
 if ('serviceWorker' in navigator) {

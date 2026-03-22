@@ -1024,11 +1024,8 @@ function listenForChanges() {
   if (!db) return;
   db.collection('appdata').doc(SYNC_DOC).onSnapshot(doc => {
     if (!doc.exists) return;
-    const data = doc.data();
-    // Only update if change came from another device
-    if (data.device && data.device !== (navigator.userAgent.includes('iPhone') ? 'iPhone' : 'PC')) {
-      syncFromCloud();
-    }
+    // Siempre sincronizar — cualquier cambio se propaga a todos los dispositivos
+    syncFromCloud();
   });
 }
 

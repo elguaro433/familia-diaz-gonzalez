@@ -10,6 +10,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <title>Familia Díaz González — Control</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -628,9 +629,9 @@ body {
 
     <!-- RESUMEN -->
     <div id="page-resumen" class="page active">
-      <div class="metrics">
+      <div class="metrics" style="grid-template-columns:1fr 1fr;">
         <div class="metric m-green">
-          <div class="metric-lbl">Ingresos</div>
+          <div class="metric-lbl">Saldo a favor</div>
           <div class="metric-val green mono" id="m-ing">&mdash; &euro;</div>
           <div class="metric-sub" id="m-ing-sub">Anade nominas</div>
         </div>
@@ -638,11 +639,6 @@ body {
           <div class="metric-lbl">Gastos totales</div>
           <div class="metric-val red mono" id="m-gas">&mdash; &euro;</div>
           <div class="metric-sub" id="m-gas-sub">Este mes</div>
-        </div>
-        <div class="metric m-violet">
-          <div class="metric-lbl">Ahorro</div>
-          <div class="metric-val violet mono" id="m-aho">&mdash; &euro;</div>
-          <div class="metric-sub" id="m-aho-sub">Del mes</div>
         </div>
       </div>
 
@@ -731,11 +727,7 @@ body {
     <!-- CATEGORIAS -->
     <div id="page-categorias" class="page">
       <div class="three-col" id="cat-cards" style="margin-bottom:16px;"></div>
-      <!-- Budget editor (improvement #2) -->
-      <div class="sc" style="margin-bottom:16px;">
-        <div class="sc-hdr"><div class="sc-title">Presupuestos mensuales</div><div class="chip chip-sky">Editable</div></div>
-        <div id="budget-editor" style="padding:14px 18px;"></div>
-      </div>
+      <!-- presupuestos removido -->
       <div class="two-col">
         <div class="sc">
           <div class="sc-hdr"><div class="sc-title">Gastos fijos este mes</div><div class="sc-total" style="color:var(--sky)" id="cat-fijos-total">0 &euro;</div></div>
@@ -777,6 +769,15 @@ body {
           <div class="sc-hdr"><div class="sc-title">Mes mas caro por ano</div></div>
           <div id="top-mes-list"></div>
         </div>
+      </div>
+
+      <!-- Gráfica detallada por año -->
+      <div class="sc" style="margin-top:16px;">
+        <div class="sc-hdr">
+          <div class="sc-title">Detalle mensual por año</div>
+          <div style="display:flex;gap:6px;" id="year-btns"></div>
+        </div>
+        <div class="chart-wrap" style="height:300px;"><canvas id="chart-year-detail"></canvas></div>
       </div>
     </div>
 
@@ -890,11 +891,7 @@ body {
         </div>
       </div>
 
-      <!-- Alertas -->
-      <div class="sc" style="margin-top:16px;">
-        <div class="sc-hdr"><div class="sc-title">Proximos pagos</div><div class="sc-total" style="color:var(--amber)" id="alertas-total">0 &euro;</div></div>
-        <div id="alertas-list"></div>
-      </div>
+      <!-- alertas removido -->
     </div>
 
   </div><!-- /content -->
@@ -1684,23 +1681,52 @@ function renderHistorico() {
     </div>`;
   }).join('');
 
-  const m25 = MESES.filter(m=>m.id.includes('2025'));
-  const m26 = MESES.filter(m=>m.id.includes('2026'));
-  const ctx2 = document.getElementById('chart-trend')?.getContext('2d');
-  if (ctx2) {
-    if (window._ct) window._ct.destroy();
-    window._ct = new Chart(ctx2, {
-      type: 'line',
-      data: {
-        labels: m25.map(m=>m.id.split(' ')[0].slice(0,3)),
-        datasets: [
-          { label:'2025',data:m25.map(m=>Math.round(totalGastos(m))),borderColor:'#38c7ff',backgroundColor:'rgba(56,199,255,.08)',fill:true,pointRadius:4,tension:0.3 },
-          { label:'2026',data:m26.map(m=>Math.round(totalGastos(m))),borderColor:'#00e5a0',backgroundColor:'rgba(0,229,160,.08)',fill:true,pointRadius:4,tension:0.3,borderDash:[5,4] }
-        ]
-      },
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#6b7280',font:{family:'Plus Jakarta Sans',size:12},boxWidth:12}}},scales:{x:{grid:{display:false},ticks:{color:'#9ca3af',font:{family:'JetBrains Mono',size:10}}},y:{grid:{color:'rgba(0,0,0,.07)'},ticks:{color:'#9ca3af',font:{family:'JetBrains Mono',size:10},callback:v=>(v/1000).toFixed(1)+'k'}}}}
-    });
+  // Year detail chart
+  renderYearChart(2026);
+}
+
+let selectedYear = 2026;
+function renderYearChart(year) {
+  selectedYear = year;
+  const years = [2022,2023,2024,2025,2026];
+  const colors = {2022:'#00b4d8',2023:'#7b61ff',2024:'#ffaa00',2025:'#00d68f',2026:'#ff3d71'};
+  const btnEl = document.getElementById('year-btns');
+  if (btnEl) {
+    btnEl.innerHTML = years.map(y => {
+      const active = y === year;
+      return `<button onclick="renderYearChart(${y})" style="padding:4px 12px;border-radius:14px;border:1.5px solid ${active?colors[y]:'var(--border)'};background:${active?colors[y]+'22':'transparent'};color:${active?colors[y]:'var(--muted)'};font-size:12px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;">${y}</button>`;
+    }).join('');
   }
+  const ctx = document.getElementById('chart-year-detail')?.getContext('2d');
+  if (!ctx) return;
+  if (window._cyd) window._cyd.destroy();
+  const monthNames = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const ms = MESES.filter(m => parseInt(m.id.slice(-4)) === year);
+  const labels = ms.map(m => m.id.split(' ')[0].slice(0,3));
+  const data = ms.map(m => Math.round(totalGastos(m)));
+  const color = colors[year] || '#00b4d8';
+  window._cyd = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Gastos ' + year,
+        data: data,
+        backgroundColor: color + '66',
+        borderColor: color,
+        borderWidth: 2,
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono', size: 11 } } },
+        y: { grid: { color: 'rgba(0,0,0,.06)' }, ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono', size: 10 }, callback: v => (v/1000).toFixed(1)+'k' } }
+      }
+    }
+  });
 }
 
 // ── FINANZAS ──

@@ -1679,22 +1679,12 @@ function renderCategorias() {
       const v = cats[k] || 0;
       const pct = total > 0 ? (v/total)*100 : 0;
       const items = mes.gastos.filter(g=>g[2]===k).length;
-      // Budget progress (improvement #2)
-      const budget = PRESUPUESTOS[k] || 0;
-      const budgetPct = budget > 0 ? Math.min(100, (v/budget)*100) : 0;
-      const budgetColor = budgetPct < 75 ? 'var(--emerald)' : budgetPct < 90 ? 'var(--amber)' : 'var(--coral)';
-      const budgetHtml = budget > 0 ? `
-        <div class="budget-bar-wrap">
-          <div class="budget-bar-bg"><div class="budget-bar-fill" style="width:${budgetPct}%;background:${budgetColor};"></div></div>
-          <div class="budget-label">${fmt(Math.round(v))} de ${fmt(budget)}</div>
-        </div>` : '';
       return `<div class="cat-summary" style="border-color:${c.color}22;">
         <div class="cat-summary-icon">${c.icon}</div>
         <div class="cat-summary-name">${c.label}</div>
         <div class="cat-summary-amount" style="color:${c.color};">${fmt(v)}</div>
         <div class="cat-summary-count">${items} gastos \u00b7 ${pct.toFixed(0)}%</div>
         <div class="cat-bar" style="background:${c.bg};"><div style="height:100%;width:${pct}%;background:${c.color};border-radius:2px;transition:width .4s;"></div></div>
-        ${budgetHtml}
       </div>`;
     }).join('');
   }

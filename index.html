@@ -1,0 +1,2087 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1e293b">
+<meta name="description" content="Control financiero Familia Díaz González">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<title>Familia Díaz González — Control</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f6fb;
+  --surface: #ffffff;
+  --card: #ffffff;
+  --card2: #f8f9fc;
+  --border: rgba(0,0,0,.07);
+  --text: #1e293b;
+  --muted: #64748b;
+  --hint: #94a3b8;
+
+  --emerald: #00d68f;
+  --emerald-dim: rgba(0,214,143,.12);
+  --coral: #ff3d71;
+  --coral-dim: rgba(255,61,113,.1);
+  --violet: #7b61ff;
+  --violet-dim: rgba(123,97,255,.1);
+  --amber: #ffaa00;
+  --amber-dim: rgba(255,170,0,.12);
+  --sky: #00b4d8;
+  --sky-dim: rgba(0,180,216,.1);
+  --pink: #f72585;
+  --pink-dim: rgba(247,37,133,.1);
+
+  --r: 16px;
+  --r-sm: 10px;
+}
+
+/* ── DARK MODE ── */
+[data-theme="dark"] {
+  --bg: #0f172a;
+  --surface: #1e293b;
+  --card: #1e293b;
+  --card2: #334155;
+  --border: rgba(255,255,255,.08);
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --hint: #64748b;
+}
+[data-theme="dark"] .hdr { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); }
+[data-theme="dark"] .ahorro-panel { background: linear-gradient(135deg, #064e3b 0%, #0c4a6e 100%); border-color: rgba(16,185,129,.3); }
+[data-theme="dark"] .ahorro-panel .lbl { color: #6ee7b7; }
+[data-theme="dark"] .saldo-panel { background: linear-gradient(135deg, #1e1b4b 0%, #172554 100%); border-color: rgba(139,92,246,.3); }
+[data-theme="dark"] .saldo-lbl { color: #a78bfa; }
+[data-theme="dark"] .tarjeta-vis { background: linear-gradient(135deg, #0c4a6e, #172554); }
+[data-theme="dark"] .ahorro-bar { background: rgba(255,255,255,.06); }
+[data-theme="dark"] .cat-summary { background: var(--card2); }
+[data-theme="dark"] .nom-inp { background: rgba(16,185,129,.15); }
+[data-theme="dark"] .add-inp { background: var(--card2); color: var(--text); border-color: var(--border); }
+[data-theme="dark"] .mes-sel { background: var(--card); color: var(--text); border-color: var(--border); }
+[data-theme="dark"] .mes-arr { background: var(--card); color: var(--muted); border-color: var(--border); }
+[data-theme="dark"] .cat-pill { border-color: var(--border); color: var(--muted); }
+[data-theme="dark"] .pay-all-btn { background: var(--card); color: var(--muted); border-color: var(--border); }
+[data-theme="dark"] .cat-sel { background: var(--card2); color: var(--muted); border-color: var(--border); }
+[data-theme="dark"] .gasto-concepto:hover { background: rgba(56,199,255,.15); }
+[data-theme="dark"] .gasto-importe:hover { background: rgba(239,68,68,.15); }
+[data-theme="dark"] .debt-panel { background: linear-gradient(135deg, #1e1b4b 0%, #172554 100%); }
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.mono { font-family: 'JetBrains Mono', monospace; }
+
+/* ── LAYOUT ── */
+.app {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  grid-template-rows: 60px 1fr;
+  min-height: 100vh;
+}
+
+/* ── HEADER ── */
+.hdr {
+  grid-column: 1/-1;
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  border-bottom: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,.12);
+}
+.hdr-logo { font-size: 16px; font-weight: 700; letter-spacing: -.3px; color: #fff; }
+.hdr-logo em { color: var(--emerald); font-style: normal; }
+.hdr-sub { font-size: 12px; color: rgba(255,255,255,.6); }
+.hdr-actions { display: flex; align-items: center; gap: 8px; }
+.hdr-btn {
+  background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15);
+  color: rgba(255,255,255,.8); border-radius: 8px; padding: 6px 12px;
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  display: flex; align-items: center; gap: 5px; transition: all .15s;
+}
+.hdr-btn:hover { background: rgba(255,255,255,.18); color: #fff; }
+
+/* ── SIDEBAR ── */
+.side {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 20px 12px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px; font-weight: 500;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  cursor: pointer;
+  transition: all .15s;
+  text-align: left; width: 100%;
+}
+.nav-item:hover { background: var(--card2); color: var(--text); transform: translateX(2px); }
+.nav-item.active { background: linear-gradient(90deg, var(--emerald-dim), transparent); color: var(--emerald); border-left: 3px solid var(--emerald); font-weight: 700; }
+.nav-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+.side-mes {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.side-mes-label { font-size: 10px; color: var(--hint); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 8px; padding: 0 4px; }
+.mes-sel {
+  width: 100%; padding: 8px 12px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r-sm); color: var(--text);
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 500;
+  outline: none; appearance: none; cursor: pointer;
+}
+.mes-arrows { display: flex; gap: 6px; margin-top: 6px; }
+.mes-arr {
+  flex: 1; height: 32px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r-sm); color: var(--muted);
+  font-size: 14px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.mes-arr:hover { color: var(--text); border-color: rgba(255,255,255,.15); }
+
+/* ── CONTENT ── */
+.content { padding: 24px 28px; overflow-y: auto; }
+
+/* ── PAGES ── */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ── CHIPS / BADGES ── */
+.chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 600;
+}
+.chip-green { background: var(--emerald-dim); color: var(--emerald); }
+.chip-red { background: var(--coral-dim); color: var(--coral); }
+.chip-violet { background: var(--violet-dim); color: var(--violet); }
+.chip-amber { background: var(--amber-dim); color: var(--amber); }
+.chip-sky { background: var(--sky-dim); color: var(--sky); }
+.chip-pink { background: var(--pink-dim); color: var(--pink); }
+
+/* ── METRIC CARDS ── */
+.metrics { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 20px; }
+.metric {
+  background: var(--card); border-radius: var(--r);
+  border: 1px solid var(--border); padding: 18px 16px;
+  position: relative; overflow: hidden;
+}
+.metric::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  border-radius: var(--r) var(--r) 0 0;
+}
+.metric.m-green::before { background: linear-gradient(90deg, #00d68f, #00e6a0); }
+.metric.m-red::before { background: linear-gradient(90deg, #ff3d71, #ff6b8a); }
+.metric.m-violet::before { background: linear-gradient(90deg, #7b61ff, #9b85ff); }
+.metric.m-green { border-left: 3px solid var(--emerald); }
+.metric.m-red { border-left: 3px solid var(--coral); }
+.metric.m-violet { border-left: 3px solid var(--violet); }
+.metric-lbl { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); margin-bottom: 6px; }
+.metric-val { font-size: 22px; font-weight: 700; font-family: 'JetBrains Mono', monospace; letter-spacing: -.5px; }
+.metric-val.green { color: var(--emerald); }
+.metric-val.red { color: var(--coral); }
+.metric-val.violet { color: var(--violet); }
+.metric-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+/* ── AHORRO PANEL ── */
+.ahorro-panel {
+  background: linear-gradient(135deg, #e8faf3 0%, #e8f4fa 100%);
+  border: 1px solid rgba(0,184,122,.2);
+  border-radius: var(--r); padding: 20px 22px; margin-bottom: 20px;
+  display: flex; align-items: center; justify-content: space-between; gap: 20px;
+}
+.ahorro-left .lbl { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; color: var(--emerald); margin-bottom: 6px; opacity:.85; }
+.ahorro-val { font-size: 36px; font-weight: 700; font-family: 'JetBrains Mono', monospace; letter-spacing: -1px; }
+.ahorro-val.pos { color: var(--emerald); }
+.ahorro-val.neg { color: var(--coral); }
+.ahorro-val.na { color: var(--muted); font-size: 20px; font-weight: 500; }
+.ahorro-bar { height: 6px; background: rgba(255,255,255,.08); border-radius: 3px; margin-top: 10px; overflow: hidden; }
+.ahorro-fill { height: 100%; border-radius: 3px; background: var(--emerald); transition: width .5s ease; }
+.ahorro-right { text-align: right; min-width: 120px; }
+.ahorro-pct { font-size: 28px; font-weight: 700; font-family: 'JetBrains Mono', monospace; color: var(--emerald); }
+.ahorro-pct-lbl { font-size: 11px; color: var(--muted); }
+
+/* ── DOS COLUMNAS ── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+/* ── SECTION CARD ── */
+.sc {
+  background: var(--card); border-radius: var(--r);
+  border: 1px solid var(--border); overflow: hidden; margin-bottom: 16px;
+}
+.sc-hdr {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px 12px; border-bottom: 1px solid var(--border);
+}
+.sc-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); }
+.sc-total { font-size: 14px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+
+/* ── NOMINAS ── */
+.nomina-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 13px 18px; border-bottom: 1px solid var(--border);
+}
+.nomina-row:last-child { border-bottom: none; }
+.nom-who { font-size: 14px; font-weight: 600; }
+.nom-sub { font-size: 11px; color: var(--muted); }
+.nom-inp {
+  font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 600;
+  color: var(--emerald); background: var(--emerald-dim);
+  border: 1.5px solid transparent; border-radius: var(--r-sm);
+  padding: 6px 12px; width: 120px; text-align: right; outline: none;
+}
+.nom-inp:focus { border-color: var(--emerald); }
+
+/* ── GASTOS ROW — EDITABLE ── */
+.gasto-row {
+  display: flex; align-items: center;
+  padding: 10px 18px; border-bottom: 1px solid var(--border);
+  gap: 10px; transition: background .1s;
+}
+.gasto-row:last-child { border-bottom: none; }
+.gasto-row:hover { background: var(--card2); }
+.cat-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.gasto-concepto {
+  font-size: 13px; font-weight: 400; flex: 1; min-width: 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  cursor: text; border-radius: 4px; padding: 2px 4px;
+}
+.gasto-concepto:hover { background: rgba(56,199,255,.1); }
+.gasto-concepto-edit {
+  font-size: 13px; flex: 1; min-width: 0;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  border: 1.5px solid var(--sky); border-radius: 4px;
+  padding: 2px 8px; background: var(--sky-dim); color: var(--text); outline: none;
+}
+.gasto-importe {
+  font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600;
+  color: var(--coral); cursor: text; border-radius: 4px; padding: 2px 6px; white-space: nowrap;
+}
+.gasto-importe:hover { background: var(--coral-dim); }
+.gasto-importe-edit {
+  font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600;
+  color: var(--coral); width: 90px; text-align: right;
+  border: 1.5px solid var(--coral); border-radius: 4px;
+  padding: 2px 6px; background: var(--coral-dim); outline: none;
+}
+.gasto-del {
+  width: 20px; height: 20px; border-radius: 50%; border: none;
+  background: transparent; color: var(--hint); cursor: pointer;
+  font-size: 14px; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; opacity: 0; transition: opacity .15s;
+}
+.gasto-row:hover .gasto-del { opacity: 1; }
+.gasto-del:hover { background: var(--coral-dim); color: var(--coral); }
+.cat-sel {
+  font-size: 11px; padding: 2px 6px; border-radius: 6px;
+  border: 1px solid var(--border); background: var(--card2);
+  color: var(--muted); cursor: pointer; outline: none;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  flex-shrink: 0;
+}
+
+/* ── PAGADO / PENDIENTE ── */
+.pay-btn {
+  padding: 3px 10px; border-radius: 14px; border: 1.5px solid;
+  font-size: 10px; font-weight: 700; letter-spacing: .3px;
+  cursor: pointer; transition: all .2s; flex-shrink: 0;
+  font-family: 'Plus Jakarta Sans', sans-serif; text-transform: uppercase;
+}
+.pay-btn.pendiente {
+  background: var(--amber-dim); color: var(--amber); border-color: rgba(217,119,6,.3);
+}
+.pay-btn.pendiente:hover { background: rgba(217,119,6,.2); }
+.pay-btn.pagado {
+  background: var(--emerald-dim); color: var(--emerald); border-color: rgba(0,168,107,.3);
+}
+.pay-btn.pagado:hover { opacity: .8; }
+.gasto-row.is-pagado { opacity: .6; }
+.gasto-row.is-pagado .gasto-importe { text-decoration: line-through; }
+
+/* ── RESUMEN PAGOS ── */
+.pay-summary {
+  display: flex; gap: 12px; padding: 12px 18px; border-bottom: 1px solid var(--border);
+  background: var(--card2); flex-wrap: wrap; align-items: center;
+}
+.pay-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 12px; border-radius: 20px;
+  font-size: 12px; font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+}
+.pay-chip-green { background: var(--emerald-dim); color: var(--emerald); }
+.pay-chip-amber { background: var(--amber-dim); color: var(--amber); }
+.pay-all-btn {
+  margin-left: auto; padding: 5px 14px; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--card);
+  color: var(--muted); font-size: 11px; font-weight: 600;
+  cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.pay-all-btn:hover { color: var(--emerald); border-color: var(--emerald); }
+
+/* ── ADD ROW ── */
+.add-row {
+  display: flex; gap: 8px; padding: 10px 18px;
+  border-top: 1px solid var(--border); background: var(--card2);
+}
+.add-inp {
+  flex: 1; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px;
+  padding: 7px 12px; border: 1px solid var(--border); border-radius: var(--r-sm);
+  background: var(--bg); color: var(--text); outline: none;
+}
+.add-inp:focus { border-color: var(--emerald); }
+.add-btn {
+  background: var(--emerald); color: #000; border: none;
+  border-radius: var(--r-sm); padding: 7px 16px;
+  font-size: 13px; font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700; cursor: pointer;
+}
+.add-btn:hover { opacity: .85; }
+
+/* ── CATEGORY PILLS ── */
+.cat-filter { display: flex; gap: 6px; flex-wrap: wrap; padding: 12px 18px; border-bottom: 1px solid var(--border); }
+.cat-pill {
+  padding: 4px 12px; border-radius: 20px; border: 1px solid var(--border);
+  background: transparent; color: var(--muted); font-size: 12px; font-weight: 500;
+  cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; transition: all .15s;
+}
+.cat-pill:hover { border-color: rgba(255,255,255,.2); color: var(--text); }
+.cat-pill.active { border-color: transparent; }
+
+/* ── CATEGORY SUMMARY CARDS ── */
+.cat-summary {
+  background: var(--card2); border-radius: var(--r-sm); padding: 14px 16px;
+  border: 1px solid var(--border);
+}
+.cat-summary-icon { font-size: 22px; margin-bottom: 8px; }
+.cat-summary-name { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .4px; color: var(--muted); margin-bottom: 4px; }
+.cat-summary-amount { font-size: 18px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+.cat-summary-count { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.cat-bar { height: 3px; border-radius: 2px; margin-top: 10px; }
+
+/* ── ALERTAS ── */
+.alerta-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 18px; border-bottom: 1px solid var(--border);
+}
+.alerta-row:last-child { border-bottom: none; }
+.alerta-concepto { font-size: 14px; font-weight: 500; }
+.alerta-fecha { font-size: 11px; color: var(--muted); }
+.alerta-imp { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; color: var(--amber); }
+
+/* ── HISTORIAL CHARTS ── */
+.chart-wrap { padding: 20px; height: 240px; }
+
+/* ── FINANZAS ── */
+.credito-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px; border-bottom: 1px solid var(--border); gap: 12px;
+}
+.credito-row:last-child { border-bottom: none; }
+.cred-bar { height: 4px; background: rgba(255,255,255,.08); border-radius: 2px; margin-top: 8px; overflow: hidden; }
+.cred-fill { height: 100%; border-radius: 2px; background: var(--coral); transition: width .4s; }
+
+/* ── TARJETA VISUAL ── */
+.tarjeta-vis {
+  background: linear-gradient(135deg, #1e3a5f, #0d2d4a);
+  border: 1px solid rgba(2,132,199,.3);
+  border-radius: 14px; padding: 18px 20px; margin: 14px 18px;
+  position: relative; overflow: hidden;
+}
+.tarjeta-vis::after {
+  content: ''; position: absolute; top: -30px; right: -30px;
+  width: 120px; height: 120px; border-radius: 50%;
+  background: rgba(56,199,255,.06);
+}
+.tarjeta-num { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: rgba(255,255,255,.4); margin-bottom: 16px; }
+.tarjeta-vals { display: flex; justify-content: space-between; align-items: flex-end; }
+.t-lbl { font-size: 10px; color: rgba(255,255,255,.4); text-transform: uppercase; letter-spacing: .4px; margin-bottom: 3px; }
+.t-val { font-family: 'JetBrains Mono', monospace; font-size: 17px; font-weight: 700; }
+.t-val.consumed { color: var(--coral); }
+.t-val.avail { color: var(--sky); }
+.tarjeta-prog { height: 4px; background: rgba(255,255,255,.1); border-radius: 2px; margin-top: 14px; overflow: hidden; }
+.tarjeta-prog-fill { height: 100%; border-radius: 2px; background: var(--coral); }
+
+/* ── AHORRO NINOS ── */
+.nino-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px; border-bottom: 1px solid var(--border); gap: 12px;
+}
+.nino-row:last-child { border-bottom: none; }
+.nino-avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700; flex-shrink: 0;
+}
+.nino-saldo {
+  font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700;
+  color: var(--emerald); cursor: text;
+}
+.nino-edit {
+  font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 700;
+  color: var(--emerald); background: var(--emerald-dim);
+  border: 1.5px solid var(--emerald); border-radius: var(--r-sm);
+  padding: 4px 8px; width: 100px; text-align: right; outline: none;
+}
+
+/* ── OTROS INGRESOS ── */
+.otro-row {
+  display: flex; align-items: center; padding: 10px 18px;
+  border-bottom: 1px solid var(--border); gap: 8px;
+}
+.otro-row:last-child { border-bottom: none; }
+.otro-row:hover { background: var(--card2); }
+.otro-nom { font-size: 13px; flex: 1; min-width: 0; cursor: text; border-radius: 4px; padding: 2px 4px; }
+.otro-nom:hover { background: var(--sky-dim); }
+.otro-nom-edit { font-size: 13px; flex: 1; border: 1.5px solid var(--sky); border-radius: 4px; padding: 2px 8px; background: var(--sky-dim); color: var(--text); outline: none; font-family: 'Plus Jakarta Sans', sans-serif; }
+.otro-imp { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; color: var(--emerald); cursor: text; border-radius: 4px; padding: 2px 6px; white-space: nowrap; }
+.otro-imp:hover { background: var(--emerald-dim); }
+.otro-imp-edit { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; color: var(--emerald); width: 90px; text-align: right; border: 1.5px solid var(--emerald); border-radius: 4px; padding: 2px 6px; background: var(--emerald-dim); outline: none; }
+.otro-del { width: 20px; height: 20px; border-radius: 50%; border: none; background: transparent; color: var(--hint); cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; opacity: 0; transition: opacity .15s; }
+.otro-row:hover .otro-del { opacity: 1; }
+.otro-del:hover { background: var(--coral-dim); color: var(--coral); }
+
+/* ── SALDO TOTAL ── */
+.saldo-panel {
+  background: linear-gradient(135deg, #f3eeff, #eef6ff);
+  border: 1px solid rgba(124,58,237,.2);
+  border-radius: var(--r); padding: 22px 24px; margin-bottom: 20px;
+}
+.saldo-lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--violet); margin-bottom: 8px; opacity:.8; }
+.saldo-val { font-size: 34px; font-weight: 700; font-family: 'JetBrains Mono', monospace; color: var(--coral); letter-spacing: -1px; }
+.saldo-breakdown { display: flex; gap: 24px; flex-wrap: wrap; margin-top: 14px; }
+.saldo-item { font-size: 11px; color: var(--muted); }
+.saldo-item b { color: var(--text); font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+
+/* ── HINT ── */
+.hint { font-size: 11px; color: var(--hint); padding: 8px 18px; border-bottom: 1px solid var(--border); }
+
+/* ── NOMINA HISTORY ── */
+.nom-hist-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 9px 18px; border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.nom-hist-row:last-child { border-bottom: none; }
+.nom-hist-mes { color: var(--muted); font-weight: 500; }
+.nom-hist-vals { display: flex; gap: 16px; }
+.nom-hist-val { font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 13px; }
+
+/* ── SEARCH BAR (improvement #6) ── */
+.search-bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 18px; border-bottom: 1px solid var(--border);
+  background: var(--card2);
+}
+.search-inp {
+  flex: 1; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px;
+  padding: 7px 12px; border: 1px solid var(--border); border-radius: var(--r-sm);
+  background: var(--bg); color: var(--text); outline: none;
+}
+.search-inp:focus { border-color: var(--sky); }
+.search-clear {
+  background: transparent; border: 1px solid var(--border); border-radius: var(--r-sm);
+  color: var(--muted); padding: 6px 12px; font-size: 12px; cursor: pointer;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.search-clear:hover { color: var(--coral); border-color: var(--coral); }
+.search-results {
+  padding: 6px 18px; font-size: 11px; color: var(--hint);
+  border-bottom: 1px solid var(--border); display: none;
+}
+
+/* ── BUDGET PROGRESS BAR (improvement #2) ── */
+.budget-bar-wrap { margin-top: 8px; }
+.budget-bar-bg { height: 6px; background: rgba(0,0,0,.08); border-radius: 3px; overflow: hidden; }
+[data-theme="dark"] .budget-bar-bg { background: rgba(255,255,255,.08); }
+.budget-bar-fill { height: 100%; border-radius: 3px; transition: width .4s; }
+.budget-label { font-size: 10px; color: var(--muted); margin-top: 3px; font-family: 'JetBrains Mono', monospace; }
+.budget-edit-inp {
+  font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600;
+  width: 70px; text-align: right; border: 1.5px solid var(--sky); border-radius: 4px;
+  padding: 2px 6px; background: var(--sky-dim); color: var(--text); outline: none;
+}
+
+/* ── DEBT PANEL (improvement #3) ── */
+.debt-panel {
+  background: linear-gradient(135deg, #f3eeff 0%, #fef3e2 100%);
+  border: 1px solid rgba(139,92,246,.2);
+  border-radius: var(--r); padding: 20px 22px; margin-bottom: 16px;
+}
+[data-theme="dark"] .debt-panel { border-color: rgba(139,92,246,.3); }
+
+/* ── PROJECTION CARD (improvement #9) ── */
+.proj-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 18px 20px; margin-bottom: 20px;
+}
+
+/* ── FECHA COBRO LABEL (improvement #8) ── */
+.fecha-cobro {
+  font-size: 10px; color: var(--hint); font-style: italic; margin-left: 4px;
+}
+
+/* ── MOBILE ── */
+@media (max-width: 768px) {
+  .app { grid-template-columns: 1fr; grid-template-rows: 60px auto 1fr; }
+  .side { flex-direction: row; flex-wrap: wrap; min-height: unset; padding: 10px; border-right: none; border-bottom: 1px solid var(--border); }
+  .nav-item { width: auto; padding: 6px 12px; }
+  .side-mes { display: none; }
+  .content { padding: 16px; }
+  .two-col { grid-template-columns: 1fr; }
+  .three-col { grid-template-columns: 1fr 1fr; }
+  .metrics { grid-template-columns: 1fr 1fr 1fr; }
+  .ahorro-panel { flex-direction: column; }
+  .mobile-mes { display: flex; gap: 8px; margin-bottom: 16px; }
+  .mobile-mes select { flex:1; padding:9px 12px; border:1px solid var(--border); border-radius:var(--r-sm); background:var(--card); color:var(--text); font-size:14px; outline:none; appearance:none; font-family:'Plus Jakarta Sans',sans-serif; }
+}
+@media (min-width: 769px) { .mobile-mes { display: none; } }
+
+/* ── PRINT STYLES (improvement #4) ── */
+@media print {
+  .side, .hdr-actions, .mobile-mes, .add-row, .pay-btn, .gasto-del, .cat-sel,
+  .cat-filter, .pay-summary, .hint, .search-bar, .search-results, .pay-all-btn,
+  .mes-sel, .mes-arrows, .side-mes, .nav-item { display: none !important; }
+  .app { display: block !important; }
+  .hdr { position: relative !important; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .content { padding: 20px !important; }
+  .page { display: none !important; }
+  .page.active { display: block !important; }
+  .sc { break-inside: avoid; }
+  .gasto-row { padding: 6px 12px !important; }
+  body { font-size: 12px; }
+  .metric-val { font-size: 18px; }
+  .ahorro-val { font-size: 28px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="hdr-logo">Familia <em>Diaz Gonzalez</em></div>
+    <div class="hdr-sub" id="hdr-mes">Control financiero familiar</div>
+    <div class="hdr-actions">
+      <button class="hdr-btn" onclick="exportPDF()" title="Exportar mes a PDF">&#128424; Exportar</button>
+      <button class="hdr-btn" id="theme-toggle" onclick="toggleDarkMode()" title="Modo oscuro/claro">&#9789; Modo</button>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="side">
+    <button class="nav-item active" id="nav-resumen" onclick="showPage('resumen',this)">
+      <span class="nav-dot" style="background:var(--emerald)"></span>Resumen
+    </button>
+    <button class="nav-item" id="nav-gastos" onclick="showPage('gastos',this)">
+      <span class="nav-dot" style="background:var(--coral)"></span>Gastos
+    </button>
+    <button class="nav-item" id="nav-categorias" onclick="showPage('categorias',this)">
+      <span class="nav-dot" style="background:var(--violet)"></span>Categorias
+    </button>
+    <button class="nav-item" id="nav-nominas" onclick="showPage('nominas',this)">
+      <span class="nav-dot" style="background:var(--sky)"></span>Nominas
+    </button>
+    <button class="nav-item" id="nav-historico" onclick="showPage('historico',this)">
+      <span class="nav-dot" style="background:var(--amber)"></span>Historial
+    </button>
+    <button class="nav-item" id="nav-finanzas" onclick="showPage('finanzas',this)">
+      <span class="nav-dot" style="background:var(--pink)"></span>Finanzas
+    </button>
+
+    <div class="side-mes" style="display:none;">
+      <select class="mes-sel" id="mes-sel" onchange="selMes(this.value)"></select>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+    <!-- SELECTOR MES PRINCIPAL -->
+    <div style="display:flex;align-items:center;gap:0;margin-bottom:20px;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08);">
+      <button onclick="cambiarMes(-1)" style="flex:0 0 56px;height:48px;border:none;background:linear-gradient(135deg,#0ea5e9,#06b6d4);color:#fff;font-size:20px;cursor:pointer;font-weight:700;transition:opacity .15s;">&#8592;</button>
+      <select id="mes-sel-top" onchange="selMes(this.value)" style="flex:1;height:48px;padding:0 16px;border:none;background:linear-gradient(135deg,#1e293b,#334155);color:#fff;font-size:16px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;outline:none;appearance:none;cursor:pointer;text-align:center;letter-spacing:.5px;"></select>
+      <button onclick="cambiarMes(1)" style="flex:0 0 56px;height:48px;border:none;background:linear-gradient(135deg,#06b6d4,#0ea5e9);color:#fff;font-size:20px;cursor:pointer;font-weight:700;transition:opacity .15s;">&#8594;</button>
+    </div>
+    <!-- mobile mes hidden -->
+    <div style="display:none;"><select id="mes-sel-m"></select></div>
+
+    <!-- RESUMEN -->
+    <div id="page-resumen" class="page active">
+      <div class="metrics">
+        <div class="metric m-green">
+          <div class="metric-lbl">Ingresos</div>
+          <div class="metric-val green mono" id="m-ing">&mdash; &euro;</div>
+          <div class="metric-sub" id="m-ing-sub">Anade nominas</div>
+        </div>
+        <div class="metric m-red">
+          <div class="metric-lbl">Gastos totales</div>
+          <div class="metric-val red mono" id="m-gas">&mdash; &euro;</div>
+          <div class="metric-sub" id="m-gas-sub">Este mes</div>
+        </div>
+        <div class="metric m-violet">
+          <div class="metric-lbl">Ahorro</div>
+          <div class="metric-val violet mono" id="m-aho">&mdash; &euro;</div>
+          <div class="metric-sub" id="m-aho-sub">Del mes</div>
+        </div>
+      </div>
+
+      <!-- gráficos removidos por el usuario -->
+
+      <div class="two-col">
+        <!-- Nominas -->
+        <div class="sc">
+          <div class="sc-hdr">
+            <div class="sc-title">Nominas del mes</div>
+            <div class="sc-total" style="color:var(--emerald)" id="r-ing-total">0 &euro;</div>
+          </div>
+          <div class="nomina-row">
+            <div><div class="nom-who" id="nom-name-e" onclick="editNomName('e')" style="cursor:pointer;" title="Clic para editar nombre">Emmanuel</div><div class="nom-sub">Día 27-30 del mes</div></div>
+            <input class="nom-inp" id="nom-e" type="number" placeholder="0" oninput="recalc()">
+          </div>
+          <div class="nomina-row">
+            <div><div class="nom-who" id="nom-name-s" onclick="editNomName('s')" style="cursor:pointer;" title="Clic para editar nombre">Esposa (Elibel)</div><div class="nom-sub">Día 27-30 del mes</div></div>
+            <input class="nom-inp" id="nom-s" type="number" placeholder="0" oninput="recalc()" style="background:rgba(155,109,255,.12);color:var(--violet);">
+          </div>
+        </div>
+
+        <!-- Resumen gastos por tipo -->
+        <div class="sc">
+          <div class="sc-hdr">
+            <div class="sc-title">Gastos por tipo</div>
+            <div class="sc-total" style="color:var(--coral)" id="r-gas-total">0 &euro;</div>
+          </div>
+          <div id="resumen-cat-list"></div>
+        </div>
+      </div>
+
+      <!-- Estado de pagos del mes -->
+      <div class="sc" style="margin-bottom:16px;">
+        <div class="sc-hdr">
+          <div class="sc-title">Estado de pagos este mes</div>
+          <button class="nav-item" style="padding:4px 10px;font-size:12px;color:var(--muted);" onclick="showPage('gastos',document.getElementById('nav-gastos'))">Gestionar pagos &rarr;</button>
+        </div>
+        <div id="resumen-pay-status" style="padding:16px 18px;"></div>
+      </div>
+
+      <!-- top gastos removido -->
+    </div>
+
+    <!-- GASTOS -->
+    <div id="page-gastos" class="page">
+      <div class="sc">
+        <div class="sc-hdr">
+          <div class="sc-title">Todos los gastos</div>
+          <div class="sc-total" style="color:var(--coral)" id="g-total">0 &euro;</div>
+        </div>
+        <!-- Search bar (improvement #6) -->
+        <div class="search-bar">
+          <input class="search-inp" id="search-gastos" type="text" placeholder="Buscar gasto..." oninput="searchGastos()">
+          <button class="search-clear" onclick="clearSearch()">Limpiar</button>
+        </div>
+        <div class="search-results" id="search-results"></div>
+        <div class="cat-filter" id="gastos-filter">
+          <button class="cat-pill active" data-cat="todos" onclick="filtrarCat('todos',this)" style="background:rgba(255,255,255,.08);color:var(--text);">Todos</button>
+          <button class="cat-pill" data-cat="fijos" onclick="filtrarCat('fijos',this)" style="">Fijos</button>
+          <button class="cat-pill" data-cat="variable" onclick="filtrarCat('variable',this)">Variables</button>
+          <button class="cat-pill" data-cat="super" onclick="filtrarCat('super',this)">Supermercado</button>
+          <button class="cat-pill" data-cat="restaurante" onclick="filtrarCat('restaurante',this)">Restaurante</button>
+          <button class="cat-pill" data-cat="salud" onclick="filtrarCat('salud',this)">Salud</button>
+          <button class="cat-pill" data-cat="otros" onclick="filtrarCat('otros',this)">Otros</button>
+        </div>
+        <div class="pay-summary" id="pay-summary"></div>
+        <div class="hint">Toca el nombre o importe para editar &middot; Usa el boton para marcar pagado/pendiente</div>
+        <div id="gastos-list"></div>
+        <div class="add-row">
+          <input class="add-inp" id="add-con" placeholder="Concepto" type="text">
+          <input class="add-inp" id="add-imp" placeholder="&euro;" type="number" style="width:80px;flex:none;" onkeydown="if(event.key==='Enter')addGasto()">
+          <select class="cat-sel add-inp" id="add-cat" style="flex:none;width:110px;">
+            <option value="fijos">Fijo</option>
+            <option value="variable">Variable</option>
+            <option value="super">Supermercado</option>
+            <option value="restaurante">Restaurante</option>
+            <option value="salud">Salud</option>
+            <option value="otros">Otros</option>
+          </select>
+          <button class="add-btn" onclick="addGasto()">+ Anadir</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CATEGORIAS -->
+    <div id="page-categorias" class="page">
+      <div class="three-col" id="cat-cards" style="margin-bottom:16px;"></div>
+      <!-- Budget editor (improvement #2) -->
+      <div class="sc" style="margin-bottom:16px;">
+        <div class="sc-hdr"><div class="sc-title">Presupuestos mensuales</div><div class="chip chip-sky">Editable</div></div>
+        <div id="budget-editor" style="padding:14px 18px;"></div>
+      </div>
+      <div class="two-col">
+        <div class="sc">
+          <div class="sc-hdr"><div class="sc-title">Gastos fijos este mes</div><div class="sc-total" style="color:var(--sky)" id="cat-fijos-total">0 &euro;</div></div>
+          <div id="cat-fijos-list"></div>
+        </div>
+        <div class="sc">
+          <div class="sc-hdr"><div class="sc-title">Gastos variables este mes</div><div class="sc-total" style="color:var(--amber)" id="cat-var-total">0 &euro;</div></div>
+          <div id="cat-var-list"></div>
+        </div>
+      </div>
+      <!-- gráfico categorías removido -->
+    </div>
+
+    <!-- NOMINAS -->
+    <div id="page-nominas" class="page">
+      <div class="two-col">
+        <div class="sc">
+          <div class="sc-hdr"><div class="sc-title">Nominas Emmanuel &mdash; historial</div><div style="font-size:11px;color:var(--muted);">Cuenta conjunta AD38</div></div>
+          <div id="nom-hist-e"></div>
+        </div>
+        <div class="sc">
+          <div class="sc-hdr"><div class="sc-title">Nominas Elibel &mdash; historial</div></div>
+          <div id="nom-hist-s"></div>
+        </div>
+      </div>
+      <div class="sc" style="margin-top:16px;">
+      </div>
+      <!-- gráfico nóminas removido -->
+    </div>
+
+    <!-- HISTORIAL -->
+    <div id="page-historico" class="page">
+      <div class="two-col">
+        <div class="sc">
+          <div class="sc-hdr"><div class="sc-title">Gasto total por ano</div></div>
+          <div id="year-list"></div>
+        </div>
+        <div class="sc">
+          <div class="sc-hdr"><div class="sc-title">Mes mas caro por ano</div></div>
+          <div id="top-mes-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FINANZAS -->
+    <div id="page-finanzas" class="page">
+      <div class="saldo-panel">
+        <div class="saldo-lbl">Situacion financiera actual</div>
+        <div class="saldo-val" style="color:var(--coral)" id="saldo-val">17.067 &euro; en deuda</div>
+        <div class="saldo-breakdown">
+          <div class="saldo-item">Prestamo cotxe <b>13.697 &euro;</b></div>
+          <div class="saldo-item" style="text-decoration:line-through;opacity:.5">Preconcedit 12K <b>PAGADO 19/03/2026</b></div>
+          <div class="saldo-item">Preconcedit 3.6K <b>3.370 &euro;</b></div>
+          <div class="saldo-item">Tarjeta credito <b id="saldo-tarj">1.848 &euro;</b></div>
+          <div class="saldo-item">Cuota mensual total <b>627,58 &euro;</b></div>
+        </div>
+      </div>
+
+      <!-- Debt countdown (improvement #3) -->
+      <div class="debt-panel" id="debt-panel"></div>
+
+      <div class="two-col" style="margin-bottom:16px;">
+        <!-- Creditos -->
+        <div class="sc" style="grid-column:1/-1;">
+          <div class="sc-hdr">
+            <div class="sc-title">Creditos Morabanc</div>
+            <div class="chip chip-red">17.067 &euro; pendiente</div>
+          </div>
+          <div class="credito-row">
+            <div style="flex:1;min-width:0">
+              <div style="font-size:14px;font-weight:600;">Prestec cotxe</div>
+              <div style="font-size:11px;color:var(--muted);">6,22% &middot; Vence Feb 2030 &middot; ref: 250047</div>
+              <div class="cred-bar"><div class="cred-fill" style="width:35%"></div></div>
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--hint);margin-top:4px;"><span>13.697 &euro; pendiente</span><span>~41 cuotas restantes</span></div>
+            </div>
+            <div style="text-align:right;margin-left:16px;flex-shrink:0;">
+              <div style="font-size:10px;color:var(--muted);">cuota/mes</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--coral);">335,47 &euro;</div>
+            </div>
+          </div>
+          <div class="credito-row" style="opacity:.45;background:var(--emerald-dim);">
+            <div style="flex:1;min-width:0">
+              <div style="font-size:14px;font-weight:600;text-decoration:line-through;">Preconcedit consum 12.000 &euro;</div>
+              <div style="font-size:11px;color:var(--emerald);font-weight:600;">PAGADO el 19/03/2026 &mdash; Amortizacion anticipada total</div>
+              <div class="cred-bar"><div class="cred-fill" style="width:100%;background:var(--emerald)"></div></div>
+              <div style="font-size:11px;color:var(--emerald);margin-top:4px;font-weight:600;">Ahorro: 553,22 &euro;/mes liberados</div>
+            </div>
+            <div style="text-align:right;margin-left:16px;flex-shrink:0;">
+              <div style="font-size:10px;color:var(--emerald);">LIQUIDADO</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--emerald);">0 &euro;</div>
+            </div>
+          </div>
+          <div class="credito-row">
+            <div style="flex:1;min-width:0">
+              <div style="font-size:14px;font-weight:600;">Preconcedit consum 3.640 &euro;</div>
+              <div style="font-size:11px;color:var(--muted);">7,34% &middot; Vence Abr 2027 &middot; ref: 256635</div>
+              <div class="cred-bar"><div class="cred-fill" style="width:78%;background:var(--amber)"></div></div>
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--hint);margin-top:4px;"><span>3.370 &euro; pendiente</span><span>~12 cuotas restantes</span></div>
+            </div>
+            <div style="text-align:right;margin-left:16px;flex-shrink:0;">
+              <div style="font-size:10px;color:var(--muted);">cuota/mes</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--amber);">292,11 &euro;</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <!-- Tarjeta -->
+        <div class="sc">
+          <div class="sc-hdr"><div class="sc-title">Tarjeta de credito</div><div class="chip chip-sky">Limite 2.000 &euro;</div></div>
+          <div class="tarjeta-vis">
+            <div class="tarjeta-num">4506 0906 2037 7368 &middot; Elibel</div>
+            <div class="tarjeta-vals">
+              <div><div class="t-lbl">Consumido</div><div class="t-val consumed" id="t-consumed">1.848 &euro;</div></div>
+              <div style="text-align:right"><div class="t-lbl">Disponible</div><div class="t-val avail" id="t-avail">152 &euro;</div></div>
+            </div>
+            <div class="tarjeta-prog"><div class="tarjeta-prog-fill" id="t-bar" style="width:92%"></div></div>
+          </div>
+          <div style="padding:12px 18px;border-top:1px solid var(--border);">
+            <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Consumo actual marzo: ~1.026 &euro; registrado. Actualizar si hay mas compras:</div>
+            <input class="add-inp" id="t-inp" type="number" placeholder="Consumido &euro;" style="width:100%;" oninput="updTarjeta()">
+          </div>
+        </div>
+
+        <!-- Ahorro ninos -->
+        <div class="sc">
+          <div class="sc-hdr">
+            <div class="sc-title">Ahorro ninos</div>
+            <div class="chip chip-green" id="ninos-total-badge">900 &euro;</div>
+          </div>
+          <div id="ninos-list"></div>
+          <div style="padding:12px 18px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;">
+            <div style="font-size:12px;color:var(--muted);flex:1;">+<input class="add-inp" id="dep-inp" type="number" value="30" style="width:50px;display:inline;padding:3px 6px;"> &euro;/mes por nino</div>
+            <button class="add-btn" onclick="addMesAhorro()">+ Mes</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Otros ingresos -->
+      <div class="sc" style="margin-top:16px;">
+        <div class="sc-hdr">
+          <div class="sc-title">Otros ingresos</div>
+          <div class="chip chip-green" id="otros-total">0 &euro;</div>
+        </div>
+        <div class="hint" style="border-top:none;">Primas, pagas extra, ingresos esporadicos &mdash; toca para editar</div>
+        <div id="otros-list"></div>
+        <div class="add-row">
+          <input class="add-inp" id="otro-con" placeholder="Concepto" type="text">
+          <input class="add-inp" id="otro-imp" placeholder="&euro;" type="number" style="width:80px;flex:none;" onkeydown="if(event.key==='Enter')addOtro()">
+          <button class="add-btn" onclick="addOtro()">+ Anadir</button>
+        </div>
+      </div>
+
+      <!-- Alertas -->
+      <div class="sc" style="margin-top:16px;">
+        <div class="sc-hdr"><div class="sc-title">Proximos pagos</div><div class="sc-total" style="color:var(--amber)" id="alertas-total">0 &euro;</div></div>
+        <div id="alertas-list"></div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /app -->
+
+<script>
+// ══ CATEGORIAS CONFIG ══
+const CATS = {
+  fijos:       { label: 'Fijos',         color: '#38c7ff', bg: 'rgba(56,199,255,.12)',   icon: '🏠' },
+  variable:    { label: 'Variables',      color: '#ffb340', bg: 'rgba(255,179,64,.12)',   icon: '💳' },
+  super:       { label: 'Supermercado',   color: '#00e5a0', bg: 'rgba(0,229,160,.12)',    icon: '🛒' },
+  restaurante: { label: 'Restaurante',    color: '#ff6fb0', bg: 'rgba(255,111,176,.12)',  icon: '🍽️' },
+  salud:       { label: 'Salud',          color: '#ff5c6a', bg: 'rgba(255,92,106,.12)',   icon: '❤️' },
+  otros:       { label: 'Otros',          color: '#9b6dff', bg: 'rgba(155,109,255,.12)',  icon: '📦' },
+};
+
+// ══ NOMINAS REALES — Cuenta conjunta AD38 Emmanuel + Elibel ══
+// Elibel: NOMINA DOMICIL (su empleador paga por domiciliacion)
+// Emmanuel: TREBALLS PUBLIC / JC CONSTRUCCION (transferencia, no domiciliado)
+// IMPORTANTE: e = Emmanuel, s = Elibel (spouse)
+const NOMINAS_REAL = {
+  'Feb 2025': { e: 0, s: 2927.54 },
+  'Mar 2025': { e: 0, s: 2874.77 },
+  'Abr 2025': { e: 0, s: 2527.45 },
+  'May 2025': { e: 0, s: 2595.13 },
+  'Jun 2025': { e: 0, s: 2769.10 },
+  'Jul 2025': { e: 0, s: 2686.55 },
+  'Ago 2025': { e: 0, s: 3795.28 },
+  'Sep 2025': { e: 1171.55, s: 2999.67 },
+  'Oct 2025': { e: 4705.50, s: 3385.21 },
+  'Nov 2025': { e: 0, s: 3513.97 },
+  'Dic 2025': { e: 3400.86, s: 5518.59 },
+  'Ene 2026': { e: 3102.39, s: 6035.75 },
+  'Feb 2026': { e: 0, s: 3134.49 },
+  'Mar 2026': { e: 2675.70, s: 0 },
+};
+
+// ══ PRESUPUESTOS (improvement #2) ══
+const DEFAULT_BUDGETS = { fijos: 3000, variable: 500, super: 400, restaurante: 150, salud: 200, otros: 300 };
+let PRESUPUESTOS = Object.assign({}, DEFAULT_BUDGETS);
+
+// ══ FECHAS DE COBRO (improvement #8) ══
+const FECHAS_COBRO = {
+  'Piso': '1-3', 'FEDA': '3-5', 'Telecom Andorra': '7-10', 'Cantina': '1-5',
+  'Parking': '1-5', 'Netflix': '1', 'Prestec cotxe': '5', 'Preconcedit 3640': '1',
+  'Actividad APACEF': '5-7', 'Trastero': '3-5', 'Inlingua': '1-5', 'Microsoft': '7'
+};
+
+function getFechaCobro(concepto) {
+  for (const [key, fecha] of Object.entries(FECHAS_COBRO)) {
+    if (concepto.toLowerCase().includes(key.toLowerCase())) return fecha;
+  }
+  return null;
+}
+
+function getFechaCobroSort(concepto) {
+  const f = getFechaCobro(concepto);
+  if (!f) return 99;
+  return parseInt(f.split('-')[0]);
+}
+
+// ══ STORAGE ══
+const ST = {};
+
+function getNominas(id) {
+  if (ST[id]) return ST[id];
+  if (NOMINAS_REAL[id]) return NOMINAS_REAL[id];
+  return { e: 0, s: 0 };
+}
+
+// ══ DATOS MESES ══
+const MESES = [
+  {id:"Nov 2022",gastos:[["Credit Andorra 6/24",223.65,"fijos"],["Viamoda",44.60,"variable"],["Parking",71.50,"fijos"],["Trastero",31.50,"fijos"],["Arriendo Piso",811.50,"fijos"],["Viaje Shamir 5/10",110.14,"variable"],["Dacia 17/60",230.25,"fijos"],["Ahorro ninos",60,"otros"],["Seguro vida",14.68,"fijos"],["Cantina APACE",81.7,"fijos"],["CASS 2/12",243.50,"fijos"],["Telecom Andorra",99,"fijos"],["Pintada coche 2/3",133.34,"variable"],["FEDA",74.03,"fijos"],["Mercadona",380,"super"],["SAAS comedor",29.63,"fijos"]]},
+  {id:"Dic 2022",gastos:[["Credit Andorra 7/24",233.65,"fijos"],["Viamoda",34.44,"variable"],["Parking",71.50,"fijos"],["Trastero",31.50,"fijos"],["Arriendo Piso",811.50,"fijos"],["Dacia 18/60",230.25,"fijos"],["Seguro vida",14.68,"fijos"],["Cantina APACEF",162,"fijos"],["CASS 3/12",243.50,"fijos"],["Telecom Andorra",100.3,"fijos"],["FEDA",118.89,"fijos"],["Seguro Piso 6 meses",47.28,"fijos"]]},
+  {id:"Ene 2023",gastos:[["Credit Andorra 8/24",233.65,"fijos"],["Pyrenne iPhone 1/24",106.88,"fijos"],["Parking",71.50,"fijos"],["Trastero",31.50,"fijos"],["Arriendo Piso",811.50,"fijos"],["Dacia 18/60",230.25,"fijos"],["Robotica APACEF",49,"fijos"],["Seguro vida",14.68,"fijos"],["Cantina APACEF",162,"fijos"],["CASS 4/12",243.50,"fijos"],["Telecom Andorra",104.75,"fijos"],["FEDA",231.07,"fijos"],["Netflix",14.27,"fijos"],["Hospital comedor",23.04,"salud"]]},
+  {id:"Feb 2023",gastos:[["Credit Andorra 9/24",233.65,"fijos"],["iPhone 14 2/24",62.43,"fijos"],["Dacia 19/60",230.25,"fijos"],["Arriendo",843.50,"fijos"],["Trastero",35.76,"fijos"],["Parking",81.44,"fijos"],["Robotica + Ludoteca",85.3,"fijos"],["Cantina",162,"fijos"],["Telecom Andorra",99,"fijos"],["My Pyri",271.77,"variable"],["Andorra 2000",88.91,"super"],["Viamoda",61.37,"variable"],["Credit vida",89.28,"salud"],["FEDA",186.03,"fijos"],["Netflix",13,"fijos"],["Poliza Moto",148,"fijos"],["Colegio Enfermeria",47.03,"fijos"],["Poliza Dacia 1/4",140.72,"fijos"],["Comida hospital",19.75,"salud"]]},
+  {id:"Mar 2023",gastos:[["Foc i lloc 2023",53.82,"variable"],["Credit Andorra 10/24",233.65,"fijos"],["Pyrennes HP 8/20",78.18,"fijos"],["Pyrennes iPhone 3/24",62.43,"fijos"],["Pyrenne Dacia 20/60",230.25,"fijos"],["Arriendo Piso",827.5,"fijos"],["Parking",76.4,"fijos"],["Trastero",33.6,"fijos"],["Cantina",170,"fijos"],["Telecom Andorra",104,"fijos"],["Credit vida",89.28,"salud"],["Poliza Dacia 2/4",140.72,"fijos"],["Netflix",13,"fijos"],["Robotica + Ludoteca",80.20,"fijos"],["Viamoda",84,"variable"],["FEDA",113.4,"fijos"],["Andorra 2000 Emmanuel",212.61,"super"],["Andorra 2000 Elisel",90.27,"super"]]},
+  {id:"Abr 2023",gastos:[["Credit Andorra 11/24",233.6,"fijos"],["Pyrennes HP 9/20",78.18,"fijos"],["Pyrennes iPhone 4/24",62.43,"fijos"],["Pyrenne Dacia 21/60",230.25,"fijos"],["Pyrenne Moto 2/24",111.98,"fijos"],["Arriendo Piso",827.5,"fijos"],["Parking",76.4,"fijos"],["Trastero",33.6,"fijos"],["Cantina",170,"fijos"],["Telecom Andorra",99,"fijos"],["Credit vida",89.28,"salud"],["Netflix",13,"fijos"],["CASS 5/12",243.5,"fijos"],["Viamoda",83.52,"variable"],["FEDA",79.12,"fijos"],["Gastos fijos extra",68.66,"fijos"],["My Pyri Emmanuel",217.23,"variable"],["Hospital comida",13.89,"salud"]]},
+  {id:"May 2023",gastos:[["Credit Andorra 12/24",233.6,"fijos"],["Pyrennes HP 10/20",78.18,"fijos"],["Pyrennes iPhone 5/24",62.43,"fijos"],["Pyrenne Dacia 22/60",230.25,"fijos"],["Pyrenne Moto 3/24",111.98,"fijos"],["Arriendo Piso",827.5,"fijos"],["Parking",76.4,"fijos"],["Trastero",33.6,"fijos"],["Cantina APACEF",170,"fijos"],["Credit vida salud",89.28,"salud"],["Netflix",13,"fijos"],["CASS 5/12",243.5,"fijos"],["Gastos fijos extra",45.08,"fijos"],["Andorra 2000 Elisel",57,"super"],["My Pyri Emmanuel",353.30,"variable"],["Telecom Andorra",89,"fijos"],["FEDA",63.21,"fijos"],["Gym",62.70,"salud"]]},
+  {id:"Jun 2023",gastos:[["Credit Andorra 13/24",223.65,"fijos"],["Pyrennes HP 11/20",78.18,"fijos"],["Pyrennes iPhone 6/24",62.43,"fijos"],["Pyrenne Dacia 23/60",230.25,"fijos"],["Pyrenne Moto 4/24",111.98,"fijos"],["Arriendo Piso",827.5,"fijos"],["Parking",76.4,"fijos"],["Trastero",33.6,"fijos"],["Cantina APACEF",170,"fijos"],["Credit vida salud",89.28,"salud"],["Netflix",13,"fijos"],["Robotica APACEF",50,"fijos"],["Telecom Andorra",89,"fijos"],["My Pyri Emmanuel",168.93,"variable"],["FEDA",69.69,"fijos"],["Gym",62.70,"salud"],["Poliza Piso",47.28,"fijos"]]},
+  {id:"Jul 2023",gastos:[["Pyrennes TV 1/6",56.25,"fijos"],["Credit Andorra 14/24",227.82,"fijos"],["Pyrennes HP 12/20",78.18,"fijos"],["Pyrennes iPhone 14 7/24",62.43,"fijos"],["Pyrenne Dacia 24/60",230.25,"fijos"],["Pyrenne Moto 5/24",111.98,"fijos"],["Gym Eli",62.70,"salud"],["Arriendo Piso",827.5,"fijos"],["Parking coche",76.4,"fijos"],["Trastero",33.6,"fijos"],["Netflix",13,"fijos"],["Telecom Andorra",89.26,"fijos"],["FEDA",57.82,"fijos"],["Hospital comida Eli",32.41,"salud"],["My Pyri Emmanuel",170.87,"variable"],["Cuota JCB My Pyri",519,"variable"],["Credit salud",89.28,"salud"]]},
+  {id:"Ago 2023",gastos:[["Credit Andorra 15/24",227.82,"fijos"],["Pyrenne JBL Lenovo 1/3",165.85,"variable"],["Pyrenne TV 2/6",44.35,"fijos"],["Pyrenne HP 13/20",78.18,"fijos"],["Pyrenne iPhone 14 8/24",62.43,"fijos"],["Pyrenne Dacia 25/60",230.25,"fijos"],["Pyrenne Moto 6/24",111.98,"fijos"],["Gym Eli",62.70,"salud"],["Arriendo Piso",827.5,"fijos"],["Parking coche",76.4,"fijos"],["Trastero",33.6,"fijos"],["Credit salud",89.28,"salud"],["My Pyri Emmanuel",469.89,"variable"],["My Pyri Elisel",407.17,"variable"],["Viamoda",54.92,"variable"],["FEDA",75.72,"fijos"],["Netflix",13,"fijos"],["Andorra 2000 Emmanuel",72.54,"super"],["Gastos fijos extra",23,"fijos"],["LogoPeda",396,"salud"],["Telecom Andorra",158.69,"fijos"]]},
+  {id:"Sep 2023",gastos:[["Peaje viaje Suiza",157,"variable"],["Pyrenne JBL Lenovo 2/3",156.44,"variable"],["Credit Andorra 16/24",227.82,"fijos"],["Pyrenne TV 3/6",44.35,"fijos"],["Pyrenne HP 14/20",78.18,"fijos"],["Pyrenne iPhone 14 9/24",62.43,"fijos"],["Pyrenne Dacia 26/60",230.25,"fijos"],["Moto 7/24",111.98,"fijos"],["Gym Elisel",62.70,"salud"],["Arriendo Piso",827.5,"fijos"],["Parking",76.4,"fijos"],["Trastero",33.6,"fijos"],["Credit salud",89.28,"salud"],["Netflix",13,"fijos"],["Telecom Andorra",89,"fijos"],["FEDA",107.71,"fijos"],["My Pyri Emmanuel",499.98,"variable"],["Cantina APACEF",170,"fijos"],["Gastos fijos extra",12.10,"fijos"]]},
+  {id:"Oct 2023",gastos:[["Gastos fijos extra",14.14,"fijos"],["Microsoft",7,"fijos"],["Pyrenne JBL Lenovo 3/3",756.43,"variable"],["My Pyri Emmanuel",421.41,"variable"],["Cuota socio anual APACEF",30.8,"fijos"],["Credit Andorra 17/24",227.82,"fijos"],["Pyrenne HP 15/20",78.18,"fijos"],["Pyrenne iPhone 14 10/24",62.43,"fijos"],["Dacia 27/60",230.25,"fijos"],["Moto 8/24",111.98,"fijos"],["Gym Elisel",62.70,"salud"],["Arriendo Piso",827.5,"fijos"],["Parking",76.4,"fijos"],["Trastero",33.6,"fijos"],["Credit salud",89.28,"salud"],["Netflix",13,"fijos"],["Telecom Andorra",89.75,"fijos"],["FEDA",73.75,"fijos"],["Cantina APACEF",170,"fijos"],["My Pyri Elisel",133.44,"variable"],["Cargolendo 1/3",148.48,"variable"]]},
+  {id:"Nov 2023",gastos:[["Microsoft 11 noviembre",7,"fijos"],["Pyrenne GoPro 3/6",54.12,"variable"],["Pyrenne TV 5/6",44.35,"fijos"],["Pyrenne HP 16/20",78.18,"fijos"],["Pyrenne Dacia 28/60",230.25,"fijos"],["Moto 9/24",111.98,"fijos"],["Gym",62.70,"salud"],["Arriendo Piso",827.5,"fijos"],["Parking",76.4,"fijos"],["Trastero",33.6,"fijos"],["Credit salud",89.28,"salud"],["Netflix",13,"fijos"],["Telecom Andorra",73.55,"fijos"],["FEDA",88,"fijos"],["Cargolendo 2/3",148,"variable"],["Cantina APACEF",170,"fijos"],["My Pyri Emmanuel",463.61,"variable"],["Gastos fijos extra",16.05,"fijos"],["Andorra 2000 Emmanuel",150,"super"]]},
+  {id:"Dic 2023",gastos:[["Microsoft",7,"fijos"],["Pyrenne HP 17/20",78.18,"fijos"],["Pyrenne iPhone 14 12/24",62.43,"fijos"],["Pyrenne Dacia 29/60",230.25,"fijos"],["Moto 10/24",111.98,"fijos"],["Gym",62.70,"salud"],["Arriendo Piso",827.5,"fijos"],["Parking",76.4,"fijos"],["Trastero",33.6,"fijos"],["Credit salud",89.28,"salud"],["Netflix",8,"fijos"],["Telecom Andorra",73,"fijos"],["FEDA",145.06,"fijos"],["Cargolendo 3/3",148,"variable"],["My Pyri Emmanuel",459.55,"variable"],["My Pyri Elisel",163.89,"variable"],["APACEF cantina",170,"fijos"],["Disney anual",109.9,"fijos"],["Andorra 2000 Elisel",143.3,"super"],["Neumatico 1/6",115.29,"variable"]]},
+  {id:"Ene 2024",gastos:[["Microsoft",7,"fijos"],["Poliza moto anual",95.54,"fijos"],["Neumatico 2/6",115.29,"variable"],["HP 18/20",78.18,"fijos"],["iPhone 14 13/24",62.43,"fijos"],["Dacia 30/60",230.25,"fijos"],["Moto 11/24",111.98,"fijos"],["Credit Andorra 20/24",227.82,"fijos"],["Gym",62.70,"salud"],["Piso",827.5,"fijos"],["Parking",76.4,"fijos"],["Trastero",33.6,"fijos"],["Credit salud complementario",64.24,"salud"],["My Piri Elisel",215.78,"variable"],["Netflix",8,"fijos"],["FEDA",185.81,"fijos"],["APACEF cantina",266,"fijos"],["Telecom Andorra",74.92,"fijos"],["Gastos fijos extra",31.80,"fijos"],["My Piri Emmanuel",496.76,"variable"],["Andorra 2000 Elisel",132.05,"super"]]},
+  {id:"Feb 2024",gastos:[["HP Pyrennes 19/20",78.18,"fijos"],["Neumatico 3/6",115.29,"variable"],["Viaje suegra 2/3",288.04,"variable"],["iPhone 14/24",62.43,"fijos"],["Dacia 31/60",230.25,"fijos"],["Moto 12/24",111.98,"fijos"],["Credit Andorra 21/24",227.82,"fijos"],["Piso",865.04,"fijos"],["Trastero",35.11,"fijos"],["Parking",79.92,"fijos"],["Gym",69,"salud"],["Credit salud complementario",64.24,"salud"],["FEDA",188.20,"fijos"],["APACEF cantina",177.8,"fijos"],["Netflix",8,"fijos"],["My Piri Emmanuel",254.9,"variable"],["Hotel + coche Madrid",420,"variable"],["My Piri Elisel",454,"variable"],["Becier 1/3",96.47,"fijos"]]},
+  {id:"Mar 2024",gastos:[["Congelador 2/6",64,"variable"],["HP Pyrennes 20/20",78.23,"fijos"],["Neumatico 4/6",115.24,"variable"],["Viaje suegra 3/3",288.03,"variable"],["iPhone 14 15/24",62.43,"fijos"],["Dacia 32/60",230.25,"fijos"],["Moto 13/24",111.98,"fijos"],["Credit Andorra 22/24",227.82,"fijos"],["Gym",67.9,"salud"],["Piso",865.04,"fijos"],["Parking",79.92,"fijos"],["Trastero",35.11,"fijos"],["Credit salud complementario",64.24,"salud"],["Netflix",8,"fijos"],["FEDA",139.19,"fijos"],["Poliza piso",38.29,"fijos"],["Becier 2/3",96.47,"fijos"],["Poliza coche Dacia 1/3",719,"fijos"],["My Piri Emmanuel",491.38,"variable"],["My Piri Elisel",364.92,"variable"]]},
+  {id:"Abr 2024",gastos:[["Congelador 3/6",64,"variable"],["Neumatico 5/6",115.29,"variable"],["Becier 3/6",96.47,"fijos"],["Gym",67.9,"salud"],["Dacia 33/60",230.25,"fijos"],["Moto 14/24",111.98,"fijos"],["iPhone 16/24",62.43,"fijos"],["Credit salud complementario",62.43,"salud"],["Piso",865.04,"fijos"],["Trastero",35.11,"fijos"],["APACEF",223.5,"fijos"],["FEDA",161.99,"fijos"],["Andorra 2000 Emmanuel",429.60,"super"],["My Piri Emmanuel",429.60,"variable"],["My Piri Elisel",139.97,"variable"]]},
+  {id:"May 2024",gastos:[["Neumatico",115.84,"variable"],["Credit Andorra 24/24",227.82,"fijos"],["Dacia 34/60",230.25,"fijos"],["Moto 15/24",111.98,"fijos"],["iPhone 17/24",62.43,"fijos"],["Piso",865.04,"fijos"],["Trastero",35.11,"fijos"],["Via Moda",79,"variable"],["Parking",35.17,"fijos"],["APACEF",223.5,"fijos"],["FEDA",81.25,"fijos"],["Andorra 2000 Emmanuel",496.71,"super"],["My Piri Emmanuel",496.71,"variable"],["Microsoft",7,"fijos"],["Credit salud complementario",64.29,"salud"],["Descubierto banco",201.2,"otros"]]},
+  {id:"Jun 2024",gastos:[["Gym",67.9,"salud"],["Dacia 35/60",230.25,"fijos"],["Moto 16/24",111.98,"fijos"],["iPhone 18/24",62.43,"fijos"],["Telecom Andorra",72.74,"fijos"],["Credit salud complementario",64.24,"salud"],["Piso",865.04,"fijos"],["Trastero",35.11,"fijos"],["Parking",101.5,"fijos"],["FEDA",49.08,"fijos"],["Nevera 1/6",71.37,"variable"],["Dacia impuesto anual",130,"fijos"],["APACEF cantina",223.5,"fijos"],["My Piri Emmanuel",497.08,"variable"],["Nevera extra",420,"variable"],["Impuesto anual",174.56,"otros"],["Foc i lloc",87.39,"restaurante"]]},
+  {id:"Jul 2024",gastos:[["Congelador 6/6",64,"variable"],["Gym",67.9,"salud"],["Dacia 36/60",230.25,"fijos"],["Moto 17/24",111.98,"fijos"],["iPhone 19/24",62.43,"fijos"],["Telecom Andorra",84.71,"fijos"],["Credit salud complementario",64.24,"salud"],["Piso",865.04,"fijos"],["Trastero",35.11,"fijos"],["Parking",101.5,"fijos"],["FEDA",86.28,"fijos"],["Viamoda",50.50,"variable"],["My Piri Emmanuel",490.07,"variable"],["My Piri Elisel",491.72,"variable"],["Nevera 2/6",71.37,"variable"],["Boleto viaje 1/3",382.74,"variable"],["Lavadora y televisor suegra",275,"variable"],["SAAS 1/12",208,"fijos"],["Artal gasolinera",91.19,"variable"]]},
+  {id:"Ago 2024",gastos:[["Gym",67.9,"salud"],["Dacia 37/60",230.25,"fijos"],["Moto 18/24",111.98,"fijos"],["iPhone 20/24",62.43,"fijos"],["Telecom Andorra",73,"fijos"],["Credit salud complementario",64.24,"salud"],["Piso",865.04,"fijos"],["Trastero",35.11,"fijos"],["Parking",101.5,"fijos"],["FEDA",126.8,"fijos"],["Nevera 3/6",71.37,"variable"],["Boleto viaje 2/3",373.33,"variable"],["SAAS 2/12",208,"fijos"],["TV 1/3",117.05,"variable"],["My Piri Emmanuel",442.83,"variable"],["Andorra 2000 Elisel",132.89,"super"],["Artal",90.93,"variable"],["Multiseguro",113,"fijos"]]},
+  {id:"Sep 2024",gastos:[["Gym",67.9,"salud"],["Cumpleano Emiliano",250,"variable"],["APACEF",185,"fijos"],["Boleto viaje 3/3",373.34,"variable"],["Dacia 38/60",230.25,"fijos"],["Moto 19/24",111.98,"fijos"],["iPhone 21/24",62.43,"fijos"],["TV 2/3",107.64,"variable"],["Nevera 4/6",71.37,"variable"],["SAAS 3/12",208,"fijos"],["Telecom Andorra",86.53,"fijos"],["FEDA",121.26,"fijos"],["Viamoda",62.26,"variable"],["Foc i lloc",105,"restaurante"],["Credit salud complementario",64.24,"salud"],["Piso",865.04,"fijos"],["Parking",101.5,"fijos"],["Trastero",35.11,"fijos"],["My Piri Emmanuel",492.40,"variable"],["My Piri Elisel",268.10,"variable"],["Artal",80.40,"variable"],["Gastos fijos extra",37.66,"fijos"]]},
+  {id:"Oct 2024",gastos:[["Cuota APACEF anual",30.8,"fijos"],["APACEF",250.9,"fijos"],["Gym",67.9,"salud"],["Dacia 39/60",230.25,"fijos"],["Moto 20/24",111.98,"fijos"],["iPhone 21/24",62.43,"fijos"],["TV 3/3",107.65,"variable"],["Nevera 5/6",71.37,"variable"],["SAAS 4/12",208,"fijos"],["Telecom Andorra",73,"fijos"],["FEDA",98.18,"fijos"],["Tarjeta credito Morabanc",400,"variable"],["Piso",865.04,"fijos"],["Trastero",35.11,"fijos"],["Parking",101.5,"fijos"],["Andorra 2000 Elisel",127.08,"super"],["Andorra 2000 Emmanuel",149.18,"super"],["My Piri Emmanuel",480.52,"variable"],["My Piri Elisel",241.48,"variable"],["Artal",117,"variable"],["Credit salud complementario",64.24,"salud"],["Fundacio Meritxell",42,"salud"]]},
+  {id:"Nov 2024",gastos:[["Pyrennes iPhone 14 23/24",62.56,"fijos"],["APACEF cantina",185,"fijos"],["Gym",67.9,"salud"],["Dacia 40/60",230.25,"fijos"],["Moto 21/24",111.98,"fijos"],["Nevera 6/6",71.37,"variable"],["SAAS 5/12",208,"fijos"],["Telecom Andorra",75,"fijos"],["FEDA",115.92,"fijos"],["Tarjeta credito Morabanc",778,"variable"],["Piso",865,"fijos"],["Trastero",35,"fijos"],["Parking",101.5,"fijos"],["Microsoft",7,"fijos"],["Credit complementario salud",64.24,"salud"],["Andorra 2000 Emmanuel",99,"super"],["Netflix",8,"fijos"],["Artal",88.12,"variable"],["Universidad",400,"fijos"]]},
+  {id:"Dic 2024",gastos:[["Pyrennes iPhone 14 24/24",62.56,"fijos"],["Disney anual",99.90,"fijos"],["APACEF cantina",185,"fijos"],["Gym",67.9,"salud"],["Dacia 41/60",230,"fijos"],["Moto 22/24",111.98,"fijos"],["SAAS 6/12",208,"fijos"],["Telecom Andorra",75.54,"fijos"],["FEDA",140.92,"fijos"],["Tarjeta credito Morabanc",280.45,"variable"],["Piso",865,"fijos"],["Trastero",35,"fijos"],["Parking",101.5,"fijos"],["Credit salud complementario",64.24,"salud"],["Andorra 2000 Elisel",138.27,"super"],["Andorra 2000 Emmanuel",146.71,"super"],["Netflix",13,"fijos"],["Microsoft",7,"fijos"],["Suegra",100,"otros"],["APACEF actividad",65,"fijos"],["Artal",232.34,"variable"]]},
+  {id:"Ene 2025",gastos:[["Microsoft mensual",7,"fijos"],["Morabanc 9/24",292,"fijos"],["Cantina",790,"fijos"],["Actividad APACEF",92,"fijos"],["Universidad",266,"fijos"],["Dacia 11/60",337,"fijos"],["Piso",887,"fijos"],["Trastero",127,"fijos"],["Telecom Andorra",100,"fijos"],["FEDA",200,"fijos"],["Parking",85,"fijos"],["Netflix",14,"fijos"],["Inlingua",146,"fijos"],["Basas EYE",48,"salud"],["Crem Salud",105,"salud"],["Artal",270,"variable"],["Colegio Enfermeria",49,"fijos"],["Gastos fijos extra",91,"fijos"]]},
+  {id:"Feb 2025",gastos:[["Moto Pyrennes 24/24",111.94,"fijos"],["APACEF",250,"fijos"],["Dacia 43/60",230,"fijos"],["SAAS 8/12",208,"fijos"],["Piso",887.23,"fijos"],["Trastero",35.98,"fijos"],["FEDA",203.60,"fijos"],["Telecom Andorra",120.21,"fijos"],["Netflix",13,"fijos"],["Andorra 2000 Emmanuel",140.22,"super"],["Andorra 2000 Elisel",133.59,"super"],["HP 1/3",147,"fijos"],["iPhone 16 1/12",172,"fijos"],["Parking Caldea",85.65,"fijos"],["Artal",156.77,"variable"],["Gastos fijos extra",15.56,"fijos"],["WISE transferencia",300.0,"otros"],["Farmacia Galeno",11.55,"salud"],["Luar Perruquers",14.5,"variable"],["Hyper Riu Runer",322.65,"super"],["Gastronomia En",19.6,"restaurante"],["ELOI FERNANDEZ",65.52,"salud"],["SAAS Pediatria",8.46,"salud"],["Rapidand",209.11,"variable"],["Bar Kedy (acumulado)",25.0,"restaurante"],["Temu.com",47.87,"variable"],["MR.Bricolage (Pyreness)",9.65,"variable"]]},
+  {id:"Mar 2025",gastos:[["Universidad Carlemany 1/12",266.7,"fijos"],["SAAS 9/12",208,"fijos"],["HP 2/3",137.6,"fijos"],["iPhone 2/12",128,"fijos"],["APACEF",300.8,"fijos"],["Dacia 1/60",337.17,"fijos"],["Piso",887,"fijos"],["Trastero",36,"fijos"],["FEDA",144,"fijos"],["Telecom Andorra",100,"fijos"],["Netflix",13,"fijos"],["Parking Caldea",85,"fijos"],["Tarjeta credito",574,"variable"],["CIMAD tratamiento",338.28,"salud"],["MC Donalds",53.75,"restaurante"],["Restaurant La C",76.5,"restaurante"],["Forn Cal Pascue",18.34,"restaurante"],["Caprabo supermercado",27.54,"super"],["Hiper Andorra 2",13.75,"super"],["Temu.com",130.46,"variable"],["VIA MODA 41",17.9,"variable"],["M.I.Govern d'An",32.16,"otros"],["SAAS-CVM-3A Pla",33.85,"salud"],["Reserva coche Malta",83.0,"variable"],["Transferwise",47.09,"variable"]]},
+  {id:"Abr 2025",gastos:[["SAAS 10/12",208,"fijos"],["Universidad Carlemany 2/12",266.7,"fijos"],["HP 3/3",137.6,"fijos"],["iPhone 3/12",128,"fijos"],["APACEF",300,"fijos"],["Dacia 2/60",337.17,"fijos"],["Piso",887,"fijos"],["Trastero",36,"fijos"],["FEDA",175,"fijos"],["Telecom Andorra",106,"fijos"],["Netflix",13.99,"fijos"],["Parking Caldea",85,"fijos"],["Becier 1/6",117,"fijos"],["Rent coche Malta",194.5,"variable"],["Artal",50,"variable"],["Viaje Malta Holiday Inn",352.27,"variable"],["Viaje Malta alquiler coche",700.0,"variable"],["Viaje Malta gastos",100.0,"variable"],["MR.Bricolage",129.95,"variable"],["Stokand (material)",178.0,"variable"],["Decathlon",266.9,"variable"],["Cafeteria Resta",42.9,"restaurante"],["MC Donalds",33.35,"restaurante"],["Hiper Andorra 2 (compras)",37.01,"super"],["Caprabo/CCAE (compras)",56.82,"super"],["Farmacia de Lor",63.16,"salud"],["Consult.Radiolo",25.48,"salud"],["Centre Hospital",69.49,"salud"],["Ryanair",45.54,"variable"],["Pasaporte venezolano",265.0,"otros"],["Foto Imatge",44.0,"variable"],["Esports Jorma",36.0,"variable"],["Grauvell",15.0,"variable"],["Motocard",18.73,"variable"],["Cinemes Carlemany",31.5,"variable"],["Tramits.ad (documentos)",53.29,"otros"],["Bar Kedy (acumulado)",35.0,"restaurante"]]},
+  {id:"May 2025",gastos:[["Morabanc 1/24",292,"fijos"],["SAAS 11/12",208,"fijos"],["Universidad 3/12",266,"fijos"],["APACEF",250,"fijos"],["Dacia 3/60",337.17,"fijos"],["Piso",887,"fijos"],["Tarjeta credito",826,"variable"],["FEDA",85,"fijos"],["Telecom",100,"fijos"],["Parking",85,"fijos"],["Becier 2/6",116,"fijos"],["Netflix",13,"fijos"],["Andorra 2000 Emmanuel",139.89,"super"],["Artal",90.68,"variable"],["Alimentacio.And",220.59,"super"],["Uber Eats",48.9,"restaurante"],["SFX Live Music (concierto)",60.0,"variable"],["Holiday Inn 2",72.0,"variable"],["Primark Plaza C",59.0,"variable"],["Farmacia Gran",10.01,"salud"],["MC Donalds",17.4,"restaurante"],["CCAE-Caprabo",15.78,"super"],["Hiper Andorra 2",1.83,"super"],["Popeye Village",55.0,"variable"],["Bar Restaurant",4.6,"restaurante"],["Aluenda",42.03,"super"],["MR.Bricolage",14.85,"variable"],["Estacion La Mat",43.96,"variable"],["Wise",342.95,"variable"],["Bar Kedy",18.4,"restaurante"]]},
+  {id:"Jun 2025",gastos:[["Morabanc 2/24",292,"fijos"],["SAAS 12/12",208,"fijos"],["Universidad 4/12",266,"fijos"],["APACEF",250,"fijos"],["Dacia 4/60",337.17,"fijos"],["Piso",887,"fijos"],["FEDA",102,"fijos"],["Telecom",100,"fijos"],["Parking",85,"fijos"],["Becier 3/6",116,"fijos"],["Netflix",13,"fijos"],["Andorra 2000 Emmanuel",129,"super"],["Andorra 2000 Elisel",148.56,"super"],["Artal",294.02,"variable"],["Qatar Air vuelo Corea",2471.36,"variable"],["Airbnb Malta",293.73,"variable"],["Farmacia Galeno",102.7,"salud"],["Hiper Andorra 2",7.38,"super"],["CCAE-Caprabo",26.6,"super"],["Andorra 2000",154.54,"super"],["Hyper Riu Runer",11.77,"super"],["MC Donalds",8.9,"restaurante"],["Hotel Terranova",7.1,"restaurante"],["Wise (transferencia)",100.0,"otros"],["Gaudia joiers",40.0,"variable"],["Petards Piropra",84.0,"variable"]]},
+  {id:"Jul 2025",gastos:[["Gastos fijos extra",47,"fijos"],["Colegio Enfermeria",49.29,"fijos"],["Morabanc 3/24",292,"fijos"],["Universidad 5/12",266,"fijos"],["Tarjeta credito",1000,"variable"],["Dacia 5/60",337,"fijos"],["Piso",887,"fijos"],["Trastero",127,"fijos"],["FEDA",137,"fijos"],["Telecom Andorra",100,"fijos"],["Parking",85,"fijos"],["Becier 4/6",116,"fijos"],["Netflix",13,"fijos"],["Artal",232,"variable"],["Impuesto esposa",120,"otros"],["Compra CHF Suiza",271.27,"variable"],["Leclerc Villemur",61.99,"super"],["Petro Belmont (gasolina Suiza)",66.22,"variable"],["Farmacia Galeno",40.57,"salud"],["Establiments PY",11.41,"variable"],["Mimmo Pizzeria",5.2,"restaurante"],["Museu Nacional",7.5,"variable"],["Novatel Andbu",33.0,"variable"],["Camping La Pine",63.76,"variable"],["Mercadona Nou P",24.04,"super"],["Decathlon Vila",11.99,"variable"],["Bar Kedy",18.3,"restaurante"],["Fil D'Or",46.0,"variable"],["Wise",450.0,"otros"],["Diverland (ninos)",21.0,"variable"]]},
+  {id:"Ago 2025",gastos:[["Artal viaje Suiza",169,"variable"],["Morabanc 4/24",292,"fijos"],["Universidad 6/12",266,"fijos"],["Piso",887,"fijos"],["Dacia 6/60",337,"fijos"],["Trastero",127,"fijos"],["FEDA",137,"fijos"],["Telecom Andorra",100,"fijos"],["Parking",85,"fijos"],["Becier 5/6",116,"fijos"],["Netflix",13,"fijos"],["TDC tarjeta credito",900,"variable"],["Creand salud",96.58,"salud"],["Andorra 2000 (TC)",345.79,"super"],["Farmacia Galeno III (TC)",39.21,"salud"],["La Tempesta Perfecta (TC)",44.3,"restaurante"],["Mycorner (TC)",39.95,"variable"],["Bonarea-Xurrina (TC)",18.23,"super"],["Sant Eloi (TC)",5.67,"variable"],["Leclerc Villemur Suiza",61.99,"super"],["Petro Belmont Suiza",66.22,"variable"],["WISE",140.0,"otros"],["Novatel Andbu",33.0,"variable"],["Rapidand",89.93,"variable"],["Establiments PY",11.41,"variable"],["CCA3-Caprabo IL",18.42,"super"],["Centre Hospital",34.75,"salud"],["Mercadona",24.04,"super"],["Bon Area Sant J",3.3,"super"],["Supermercat Por",1.1,"super"],["MC Donalds",18.4,"restaurante"],["Emision transf. ahorro ninos",240.0,"otros"]]},
+  {id:"Sep 2025",gastos:[["Morabanc 5/24",292,"fijos"],["Cantina",190,"fijos"],["Universidad",266,"fijos"],["Dacia 7/60",337,"fijos"],["Piso",887,"fijos"],["Trastero",127,"fijos"],["FEDA",880,"fijos"],["Telecom Andorra",102,"fijos"],["Parking",85,"fijos"],["Netflix",13,"fijos"],["Peaje Suiza",150,"variable"],["Creand salud",96,"salud"],["Inlingua mes 1",146,"fijos"],["Artal",319,"variable"],["SAAS comedor",39.50,"fijos"],["CLINICA DENTAL",38.49,"salud"],["RAPIDAND",135.47,"variable"],["Barberia",50,"variable"],["Andorra 2000 (TC)",62.21,"super"],["Caprabo (TC)",5.26,"super"],["Hiper Andorra 2 (TC)",13.05,"super"],["Aldi La Seu (TC)",16.68,"super"],["Clinica Dental (TC)",379.5,"salud"],["Farmacia Galeno III (TC)",13.27,"salud"],["Netflix TC",13.99,"fijos"],["Temu.com (TC)",20.91,"variable"],["Bonarea-Xurrina (TC)",2.89,"super"],["Snack Bar (TC)",1.2,"restaurante"]]},
+  {id:"Oct 2025",gastos:[["Morabanc 6/24",292,"fijos"],["Cantina",190,"fijos"],["Actividad APACEF",92,"fijos"],["Universidad",266,"fijos"],["Dacia 8/60",337,"fijos"],["Piso",887,"fijos"],["Trastero",127,"fijos"],["FEDA",96.31,"fijos"],["Telecom Andorra",100,"fijos"],["Parking",85,"fijos"],["Netflix",13,"fijos"],["Creand salud",96,"salud"],["Inlingua Emmanuel",146,"fijos"],["Artal",420,"variable"],["APACEF actividad",31,"fijos"],["Lottelia Seoul",22.71,"variable"],["Qatar Air",6.80,"variable"],["Andorra 2000 (TC)",384.8,"super"],["Caprabo (TC)",6.32,"super"],["Hiper Andorra 2 (TC)",4.85,"super"],["Aldi La Seu (TC)",17.64,"super"],["Farmacia Galeno (TC)",50.51,"salud"],["Centre Hospitalari (TC)",27.16,"salud"],["Saas Clinica (TC)",10.15,"salud"],["Universidad TC",266.67,"fijos"],["Airbnb (TC)",231.89,"variable"],["Holiday Inn (TC)",121.5,"variable"],["MC Donalds (TC)",34.6,"restaurante"],["Outlet Industrial JV (TC)",41.12,"variable"],["Decathlon (TC)",0,"variable"],["Quiosc Toni (TC)",29.0,"variable"],["Holafly (TC)",17.96,"variable"],["Viaje Corea (TC)",401.64,"variable"],["Gasolina/peajes (TC)",49.59,"variable"],["Aparcamiento (TC)",10.0,"variable"],["Lefties (TC)",19.98,"variable"]]},
+  {id:"Nov 2025",gastos:[["Morabanc 7/24",292,"fijos"],["Cantina",190,"fijos"],["Actividad APACEF",92,"fijos"],["Universidad",266,"fijos"],["Dacia 9/60",337,"fijos"],["Piso",887,"fijos"],["Trastero",127,"fijos"],["FEDA",77.33,"fijos"],["Telecom Andorra",100,"fijos"],["Parking",85,"fijos"],["Netflix",13,"fijos"],["Creand salud",96,"salud"],["Inlingua Emmanuel",146,"fijos"],["Artal",87.55,"variable"],["Envio Venezuela",250,"otros"],["Toner Negro HP",120,"otros"],["RAPIDAND",117.07,"variable"],["Zara",53.72,"variable"],["Bershka",20.14,"variable"],["Andorra 2000 (TC)",177.78,"super"],["Caprabo (TC)",16.87,"super"],["Universidad TC",266.67,"fijos"],["Netflix TC",13.99,"fijos"],["Decathlon Espana (TC)",104.96,"variable"],["Primark Barcelona (TC)",134.65,"variable"],["Establi.Pyrenees (TC)",357.51,"variable"],["MR. Bricolage (TC)",32.83,"variable"],["VIA MODA 4 (TC)",42.0,"variable"],["Farmacia Torrent/Pirineus (TC)",71.69,"salud"],["Saas Clinica (TC)",10.15,"salud"],["Temu.com (TC)",7.74,"variable"],["MC Donalds (TC)",42.9,"restaurante"],["Granja Roc Arnau (TC)",3.0,"restaurante"],["Santas Copas (TC)",15.0,"restaurante"],["Ruta Desl Sabord (TC)",14.2,"restaurante"],["Aparcamiento (TC)",20.0,"variable"],["Gasolina (TC)",9.84,"variable"]]},
+  {id:"Dic 2025",gastos:[["Morabanc 8/24",292,"fijos"],["Cantina",790,"fijos"],["Universidad",266,"fijos"],["Dacia 10/60",337,"fijos"],["Basque",337.75,"fijos"],["Piso",887,"fijos"],["Trastero",127,"fijos"],["FEDA",193,"fijos"],["Telecom Andorra",100,"fijos"],["Netflix",13,"fijos"],["Creand salud",96,"salud"],["Inlingua Emmanuel",146,"fijos"],["Envio Venezuela",800,"otros"],["Artal",247,"variable"],["Esqui ninos",250,"variable"],["Moto poliza",95,"fijos"],["Piso poliza",76,"fijos"],["Moto mantenimiento",142,"variable"],["Supermercats",268.30,"super"],["Lefties",212.24,"variable"],["Barberia",61.50,"variable"],["Farmacia",24.22,"salud"],["Andorra 2000 (TC)",240.97,"super"],["Caprabo (TC)",16.79,"super"],["Migros Suiza (TC)",208.46,"super"],["Chene Bourger (TC)",99.18,"restaurante"],["Farmacia Galeno III (TC)",39.21,"salud"],["Centro Hospitalari (TC)",16.97,"salud"],["Universidad TC",266.67,"fijos"],["Netflix TC",13.99,"fijos"],["Granja Roc Arnau (TC)",55.0,"restaurante"],["MC Donald's Suiza (TC)",49.4,"restaurante"],["Amazon (TC)",48.2,"variable"],["Becier Gas (TC)",32.4,"variable"],["Station Avia (TC)",65.79,"variable"],["Paypal Hotmart (TC)",20.79,"variable"],["H&M / ITX Retail Suiza (TC)",71.65,"variable"],["Fred Oh (TC)",31.9,"variable"],["TPG Transports Suiza (TC)",25.88,"variable"],["CCA El Centre (TC)",9.99,"super"]]},
+  {id:"Ene 2026",gastos:[["Microsoft mensual",7,"fijos"],["Morabanc 10/24",292,"fijos"],["Cantina",790,"fijos"],["Actividad APACEF",92,"fijos"],["Universidad",266,"fijos"],["Dacia 11/60",337,"fijos"],["Piso",887,"fijos"],["Trastero",127,"fijos"],["Telecom Andorra",100,"fijos"],["FEDA",198.06,"fijos"],["Parking",85,"fijos"],["Netflix",14,"fijos"],["Inlingua",146,"fijos"],["Basas EYE",48,"salud"],["Crem Salud",105,"salud"],["Artal",270,"variable"],["Colegio Enfermeria",49,"fijos"],["Gastos fijos extra",91,"fijos"],["ARTAL SA (domiciliado)",269.63,"variable"],["CLINICA DENTAL",168.09,"salud"],["WISE",200,"variable"],["Caprabo",88.50,"super"],["Andorra 2000 (TC)",123.46,"super"],["Hiper Andorra 2 (TC)",64.95,"super"],["Caprabo/Proxi (TC)",23.3,"super"],["Supermercats Proxi 4 (TC)",15.02,"super"],["Saltoki (TC)",45.05,"super"],["Total MKT FR (TC)",48.03,"super"],["Migros Suiza (TC)",151.21,"super"],["Clinica Dental (TC)",206.58,"salud"],["Farmacia Galeno (TC)",36.54,"salud"],["Saas Clinica (TC)",10.15,"salud"],["Centro Hospitalari (TC)",16.97,"salud"],["Universidad TC",266.67,"fijos"],["Netflix TC",13.99,"fijos"],["Break Pizza (TC)",58.0,"restaurante"],["Bar Rest Raco d'Aixovall (TC)",1.4,"restaurante"],["Petro Belmont Suiza (TC)",63.81,"variable"],["VTP / UCPA VITAM (TC)",112.5,"variable"],["Passway CA (TC)",139.8,"variable"],["IHG Points (TC)",76.88,"variable"],["Rentaki-2 (TC)",44.0,"variable"],["Temu.com (TC)",32.11,"variable"],["Gasolina/peajes (TC)",26.07,"variable"],["Artal (TC)",11.96,"variable"],["Aparcamiento (TC)",21.2,"variable"],["Andorra Telecom TPV (TC)",10.0,"fijos"]]},
+  {id:"Feb 2026",gastos:[["Microsoft mensual",7,"fijos"],["Poliza Dacia anual",674,"fijos"],["Morabanc 10/24",292,"fijos"],["Cantina",140,"fijos"],["Actividad APACEF",92,"fijos"],["Universidad",266,"fijos"],["Dacia 12/60",337,"fijos"],["Piso",865,"fijos"],["Trastero",127,"fijos"],["Telecom Andorra",100,"fijos"],["FEDA",213,"fijos"],["Parking",88,"fijos"],["Netflix",14,"fijos"],["Inlingua",146,"fijos"],["Basas EDE",62,"salud"],["Crem Salud",105,"salud"],["Pintura piso mano obra",182,"variable"],["Peaje Via-T Suiza",750,"variable"],["Artal",400,"variable"],["Lavadora",178,"variable"],["4Health anual",35,"salud"],["BECIER ASSEGURA",673.75,"fijos"],["Andorra 2000",93.87,"super"],["Caprabo",14.01,"super"],["Decathlon",25.47,"variable"],["MC Donalds",8.90,"restaurante"],["Farmacia Galeno",21.51,"salud"],["Barberia",50,"variable"],["Andorra 2000 (TC)",203.82,"super"],["Hiper Andorra 2 (TC)",27.08,"super"],["Caprabo (TC)",21.69,"super"],["CCA El Centre (TC)",13.08,"super"],["El Rei del Pollastre (TC)",33.88,"restaurante"],["Restaurante Mi Tierra (TC)",87.0,"restaurante"],["MC Donald's (TC)",8.8,"restaurante"],["Holiday Inn St. Cugat (TC)",13.9,"restaurante"],["Clinica Verge Meritxell (TC)",16.97,"salud"],["Residencia Marticella (TC)",58.45,"salud"],["Farmacia Galeno III (TC)",33.65,"salud"],["Universidad TC",266.63,"fijos"],["Netflix TC",13.99,"fijos"],["Claude.ai / Anthropic (TC)",113.29,"variable"],["Gainzalgo.com (TC)",177.26,"variable"],["Shein (TC)",55.22,"variable"],["Temu.com (TC)",67.77,"variable"],["VIA MODA 4 (TC)",16.15,"variable"],["Google Play / Workspace (TC)",30.21,"variable"],["360Extrem (TC)",24.5,"variable"],["Pythonanywhere (TC)",8.52,"variable"],["Artal / gasolina (TC)",18.58,"variable"],["Ski Home 2017 (TC)",23.25,"variable"],["Aparcamiento (TC)",10.0,"variable"],["ONCE (TC)",23.0,"otros"]]},
+  {id:"Mar 2026",gastos:[["Microsoft",7,"fijos"],["Morabanc 11/24",292,"fijos"],["Morabanc Dacia 13/60",337,"fijos"],["Cantina",190,"fijos"],["Actividad APACEF",92,"fijos"],["Piso",910,"fijos"],["Trastero",127,"fijos"],["Telecom Andorra",100,"fijos"],["FEDA",193.93,"fijos"],["Parking",88,"fijos"],["Netflix",14,"fijos"],["Inlingua",146,"fijos"],["Basas salud",62,"salud"],["Crem Salud",105,"salud"],["Lavadora",90,"variable"],["Artal gasolinera",77,"variable"],["Mercadona La Seu",98.72,"super"],["WISE",52.60,"variable"],["RAPIDAND",135.47,"variable"],["Barberia Espai",50,"variable"],["Casa Berge",12.90,"restaurante"],["Bershka",30.14,"variable"],["Taxi",8.80,"variable"],["APACEF actividad",46,"fijos"],["Andorra Telecom domicil",100,"fijos"],["Cafeteria L'Altra (varias)",9.30,"restaurante"],["Pago pasaje avion",316.70,"variable"],["Pasajes viaje Venezuela",3765.00,"otros"],["Andorra 2000",84.54,"super"],["Hiper Andorra 2",63.29,"super"],["Aldi La Seu",49.94,"super"],["Caprabo (varias)",32.27,"super"],["Farmacia Galeno III (TC)",134.48,"salud"],["Aldara Martinez",11.93,"salud"],["Clinica Dental",28.01,"salud"],["Centre Hospitalari",45.90,"salud"],["Karting El Pla (TC)",202.5,"variable"],["Netflix TC",13.99,"fijos"],["Artal S.A. (TC+gasolina)",50.62,"variable"],["Uber (TC)",25.9,"restaurante"],["Amazon (TC)",15.0,"variable"],["Gasolina La Margineda+Becier",24.60,"variable"],["Primor",14.99,"variable"],["Grauvell",15.0,"variable"],["Tecteltic 01 (TC)",220.0,"otros"],["Congreso Navarra",87.50,"otros"]]},
+  {id:"Abr 2026",gastos:[["Microsoft",7,"fijos"],["Morabanc 12/24",292,"fijos"],["Morabanc Dacia 14/60",337,"fijos"],["Cantina",190,"fijos"],["Actividad APACEF",92,"fijos"],["Piso",910,"fijos"],["Trastero",127,"fijos"],["Telecom Andorra",100,"fijos"],["FEDA",150,"fijos"],["Parking",88,"fijos"],["Netflix",14,"fijos"],["Inlingua",146,"fijos"],["Basas salud",62,"salud"],["Crem Salud",105,"salud"]]},
+  {id:"May 2026",gastos:[["Microsoft",7,"fijos"],["Preconcedit 3640",292,"fijos"],["Prestec cotxe",335,"fijos"],["Cantina",190,"fijos"],["Actividad APACEF",92,"fijos"],["Piso",910,"fijos"],["Trastero",127,"fijos"],["Telecom Andorra",100,"fijos"],["FEDA",150,"fijos"],["Parking",88,"fijos"],["Netflix",14,"fijos"],["Inlingua",146,"fijos"],["Basas salud",62,"salud"],["Crem Salud",105,"salud"]]},
+  {id:"Jun 2026",gastos:[["Microsoft",7,"fijos"],["Preconcedit 3640",292,"fijos"],["Prestec cotxe",335,"fijos"],["Cantina",190,"fijos"],["Actividad APACEF",92,"fijos"],["Piso",910,"fijos"],["Trastero",127,"fijos"],["Telecom Andorra",100,"fijos"],["FEDA",150,"fijos"],["Parking",88,"fijos"],["Netflix",14,"fijos"],["Inlingua",146,"fijos"],["Basas salud",62,"salud"],["Crem Salud",105,"salud"]]},
+  {id:"Jul 2026",gastos:[["Microsoft",7,"fijos"],["Preconcedit 3640",292,"fijos"],["Prestec cotxe",335,"fijos"],["Cantina",190,"fijos"],["Actividad APACEF",92,"fijos"],["Piso",910,"fijos"],["Trastero",127,"fijos"],["Telecom Andorra",100,"fijos"],["FEDA",150,"fijos"],["Parking",88,"fijos"],["Netflix",14,"fijos"],["Inlingua",146,"fijos"],["Basas salud",62,"salud"],["Crem Salud",105,"salud"]]},
+  {id:"Ago 2026",gastos:[["Microsoft",7,"fijos"],["Preconcedit 3640",292,"fijos"],["Prestec cotxe",335,"fijos"],["Piso",910,"fijos"],["Trastero",127,"fijos"],["Telecom Andorra",100,"fijos"],["FEDA",150,"fijos"],["Parking",88,"fijos"],["Netflix",14,"fijos"],["Inlingua",146,"fijos"],["Basas salud",62,"salud"],["Crem Salud",105,"salud"]]},
+  {id:"Sep 2026",gastos:[["Microsoft",7,"fijos"],["Preconcedit 3640",292,"fijos"],["Prestec cotxe",335,"fijos"],["Cantina",190,"fijos"],["Actividad APACEF",92,"fijos"],["Piso",910,"fijos"],["Trastero",127,"fijos"],["Telecom Andorra",100,"fijos"],["FEDA",150,"fijos"],["Parking",88,"fijos"],["Netflix",14,"fijos"],["Inlingua",146,"fijos"],["Basas salud",62,"salud"],["Crem Salud",105,"salud"]]},
+  {id:"Oct 2026",gastos:[["Microsoft",7,"fijos"],["Preconcedit 3640",292,"fijos"],["Prestec cotxe",335,"fijos"],["Cantina",190,"fijos"],["Actividad APACEF",92,"fijos"],["Piso",910,"fijos"],["Trastero",127,"fijos"],["Telecom Andorra",100,"fijos"],["FEDA",150,"fijos"],["Parking",88,"fijos"],["Netflix",14,"fijos"],["Inlingua",146,"fijos"],["Basas salud",62,"salud"],["Crem Salud",105,"salud"]]},
+  {id:"Nov 2026",gastos:[["Microsoft",7,"fijos"],["Preconcedit 3640",292,"fijos"],["Prestec cotxe",335,"fijos"],["Cantina",190,"fijos"],["Actividad APACEF",92,"fijos"],["Piso",910,"fijos"],["Trastero",127,"fijos"],["Telecom Andorra",100,"fijos"],["FEDA",150,"fijos"],["Parking",88,"fijos"],["Netflix",14,"fijos"],["Inlingua",146,"fijos"],["Basas salud",62,"salud"],["Crem Salud",105,"salud"]]},
+  {id:"Dic 2026",gastos:[["Microsoft",7,"fijos"],["Preconcedit 3640",292,"fijos"],["Prestec cotxe",335,"fijos"],["Cantina",790,"fijos"],["Actividad APACEF",92,"fijos"],["Piso",910,"fijos"],["Trastero",127,"fijos"],["Telecom Andorra",100,"fijos"],["FEDA",150,"fijos"],["Parking",88,"fijos"],["Netflix",14,"fijos"],["Inlingua",146,"fijos"],["Basas salud",62,"salud"],["Crem Salud",105,"salud"]]}
+];
+
+// Mes inicial = Mar 2026 (mes actual)
+let mesIdx = MESES.findIndex(m => m.id === 'Mar 2026');
+if (mesIdx < 0) mesIdx = MESES.length - 1;
+let catFilter = 'todos';
+let otrosIngresos = [];
+let tarjetaConsumo = 1847.51;
+let searchQuery = '';
+
+const NINOS = [
+  { nombre: "Emiliano", ini: "EJ", color: "#0284c7", bg: "rgba(2,132,199,.12)", saldo: 450 },
+  { nombre: "Emmanuel", ini: "EA", color: "#00b87a", bg: "rgba(0,184,122,.12)", saldo: 450 }
+];
+
+const ALERTAS = [
+  {concepto:"Morabanc cuota prestamo",importe:292,fecha:"1 mayo 2026"},
+  {concepto:"Morabanc Dacia",importe:337,fecha:"1 mayo 2026"},
+  {concepto:"Piso",importe:910,fecha:"1 mayo 2026"},
+  {concepto:"Telecom Andorra",importe:100,fecha:"1 mayo 2026"},
+  {concepto:"Universidad",importe:266,fecha:"1 mayo 2026"},
+  {concepto:"Netflix",importe:14,fecha:"1 mayo 2026"},
+  {concepto:"Inlingua",importe:146,fecha:"1 mayo 2026"},
+  {concepto:"Crem Salud",importe:105,fecha:"1 mayo 2026"},
+  {concepto:"Microsoft mensual",importe:7,fecha:"11 junio 2026"}
+];
+
+// ══ PAGO STATUS — persistido en localStorage ══
+const PAY_KEY = 'familiadiaz_pagos';
+let PAGOS = {};
+try { PAGOS = JSON.parse(localStorage.getItem(PAY_KEY)) || {}; } catch(e) { PAGOS = {}; }
+function savePagos() { localStorage.setItem(PAY_KEY, JSON.stringify(PAGOS)); }
+function getPagoKey(mesId, idx) { return mesId + '|' + idx; }
+function isPagado(mesId, idx) { return !!PAGOS[getPagoKey(mesId, idx)]; }
+function togglePago(idx) {
+  const mesId = MESES[mesIdx].id;
+  const key = getPagoKey(mesId, idx);
+  if (PAGOS[key]) delete PAGOS[key]; else PAGOS[key] = Date.now();
+  savePagos();
+  renderGastosList();
+  renderPaySummary();
+}
+function marcarTodosPagados() {
+  const mes = MESES[mesIdx];
+  const fijoIdxs = mes.gastos.map(([,,c],i) => c === 'fijos' ? i : -1).filter(i => i >= 0);
+  const allPaid = fijoIdxs.every(i => isPagado(mes.id, i));
+  fijoIdxs.forEach(i => {
+    const key = getPagoKey(mes.id, i);
+    if (allPaid) delete PAGOS[key]; else PAGOS[key] = Date.now();
+  });
+  savePagos();
+  renderGastosList();
+  renderPaySummary();
+}
+
+// ══ PERSISTENCE — localStorage for all data (improvement #1) ══
+const DATA_KEY = 'familiadiaz_data';
+
+function saveAllData() {
+  const data = {
+    gastos: {},
+    nominas: {},
+    tarjetaConsumo: tarjetaConsumo,
+    ninos: NINOS.map(n => ({ nombre: n.nombre, saldo: n.saldo })),
+    otrosIngresos: otrosIngresos,
+    presupuestos: PRESUPUESTOS,
+    darkMode: document.body.getAttribute('data-theme') === 'dark'
+  };
+  // Save gasto overrides per month
+  MESES.forEach(m => {
+    data.gastos[m.id] = m.gastos;
+  });
+  // Save nomina overrides
+  Object.keys(ST).forEach(k => {
+    data.nominas[k] = ST[k];
+  });
+  localStorage.setItem(DATA_KEY, JSON.stringify(data));
+}
+
+function loadAllData() {
+  try {
+    const raw = localStorage.getItem(DATA_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    // Restore gastos
+    if (data.gastos) {
+      MESES.forEach(m => {
+        if (data.gastos[m.id]) m.gastos = data.gastos[m.id];
+      });
+    }
+    // Restore nomina overrides
+    if (data.nominas) {
+      Object.keys(data.nominas).forEach(k => { ST[k] = data.nominas[k]; });
+    }
+    // Restore tarjeta
+    if (data.tarjetaConsumo !== undefined) tarjetaConsumo = data.tarjetaConsumo;
+    // Restore ninos
+    if (data.ninos) {
+      data.ninos.forEach((n, i) => {
+        if (NINOS[i]) NINOS[i].saldo = n.saldo;
+      });
+    }
+    // Restore otros ingresos
+    if (data.otrosIngresos) otrosIngresos = data.otrosIngresos;
+    // Restore budgets
+    if (data.presupuestos) PRESUPUESTOS = Object.assign({}, DEFAULT_BUDGETS, data.presupuestos);
+    // Restore dark mode
+    if (data.darkMode) {
+      document.body.setAttribute('data-theme', 'dark');
+      updateThemeButton();
+    }
+  } catch(e) { console.warn('Error loading saved data:', e); }
+}
+
+// Auto-save on changes
+function autoSave() { requestAnimationFrame(() => saveAllData()); }
+
+function renderPaySummary() {
+  const mes = MESES[mesIdx];
+  let pagados = 0, pendientes = 0, totalPag = 0, totalPend = 0;
+  const pendList = [];
+  const fijos = mes.gastos.filter(([,,c]) => c === 'fijos');
+  mes.gastos.forEach(([con,v,cat],i) => {
+    if (cat !== 'fijos') return;
+    if (isPagado(mes.id, i)) { pagados++; totalPag += (v||0); }
+    else { pendientes++; totalPend += (v||0); pendList.push([con, v]); }
+  });
+  const totalFijos = fijos.length;
+  const allPaid = pendientes === 0 && pagados > 0;
+  const pct = totalFijos > 0 ? (pagados / totalFijos * 100) : 0;
+
+  // Gastos page summary
+  const el = document.getElementById('pay-summary');
+  if (el) {
+    el.innerHTML = `
+      <span class="pay-chip pay-chip-green">\u2713 ${pagados} pagados \u00b7 ${fmt(totalPag)}</span>
+      <span class="pay-chip pay-chip-amber">\u23f3 ${pendientes} pendientes \u00b7 ${fmt(totalPend)}</span>
+      <button class="pay-all-btn" onclick="marcarTodosPagados()">${allPaid ? '\u21a9 Desmarcar todos' : '\u2713 Marcar todos pagados'}</button>
+    `;
+  }
+
+  // Resumen page status
+  const rEl = document.getElementById('resumen-pay-status');
+  if (rEl) {
+    const barColor = pct === 100 ? 'var(--emerald)' : pct > 50 ? 'var(--sky)' : 'var(--amber)';
+    let html = `
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:12px;">
+        <div style="flex:1;">
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px;">
+            <span style="color:var(--muted);">${pagados} de ${totalFijos} gastos fijos pagados</span>
+            <span style="font-weight:700;color:${barColor};">${pct.toFixed(0)}%</span>
+          </div>
+          <div style="height:8px;background:rgba(0,0,0,.06);border-radius:4px;overflow:hidden;">
+            <div style="height:100%;width:${pct}%;background:${barColor};border-radius:4px;transition:width .4s;"></div>
+          </div>
+        </div>
+        <div style="text-align:right;min-width:100px;">
+          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;">Falta por pagar</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:${pendientes > 0 ? 'var(--amber)' : 'var(--emerald)'};">${pendientes > 0 ? fmt(totalPend) : 'Todo pagado'}</div>
+        </div>
+      </div>`;
+    if (pendList.length > 0 && pendList.length <= 8) {
+      html += '<div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Pendientes por cobrar:</div>';
+      // Sort by fecha cobro (improvement #8)
+      html += pendList.sort(([a],[b]) => getFechaCobroSort(a) - getFechaCobroSort(b)).slice(0,5).map(([c,v]) => {
+        const fc = getFechaCobro(c);
+        const fcLabel = fc ? ` <span style="font-size:10px;color:var(--hint);font-style:italic;">(dia ${fc})</span>` : '';
+        return `<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:12px;border-bottom:1px solid var(--border);">
+          <span style="color:var(--amber);">\u23f3 ${c}${fcLabel}</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-weight:600;">${fmt(v)}</span>
+        </div>`;
+      }).join('');
+      if (pendList.length > 5) html += `<div style="font-size:11px;color:var(--hint);padding:4px 0;">+ ${pendList.length-5} mas...</div>`;
+    }
+    rEl.innerHTML = html;
+  }
+}
+
+// ── UTILS ──
+function fmt(n) {
+  if (!n && n !== 0) return '\u2014';
+  return n.toLocaleString('es-ES',{minimumFractionDigits:0,maximumFractionDigits:0}) + ' \u20ac';
+}
+function fmtDec(n) {
+  return n.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' \u20ac';
+}
+
+function totalGastos(mes) {
+  return mes.gastos.reduce((s,[,v]) => s+(v||0), 0);
+}
+
+function gastosBycat(mes) {
+  const res = {};
+  for (const k of Object.keys(CATS)) res[k] = 0;
+  mes.gastos.forEach(([,v,c]) => { if (res[c] !== undefined) res[c] += (v||0); });
+  return res;
+}
+
+// ── SELECTORES ──
+function poblarSel() {
+  ['mes-sel','mes-sel-m','mes-sel-top'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.innerHTML = '';
+    MESES.forEach((m,i) => {
+      const o = document.createElement('option');
+      o.value = i; o.textContent = m.id;
+      if (i === mesIdx) o.selected = true;
+      el.appendChild(o);
+    });
+  });
+}
+
+function selMes(v) {
+  mesIdx = parseInt(v);
+  ['mes-sel','mes-sel-m','mes-sel-top'].forEach(id => { const el = document.getElementById(id); if (el) el.value = mesIdx; });
+  renderMes();
+}
+
+function cambiarMes(d) {
+  mesIdx = Math.max(0, Math.min(MESES.length-1, mesIdx+d));
+  ['mes-sel','mes-sel-m','mes-sel-top'].forEach(id => { const el = document.getElementById(id); if (el) el.value = mesIdx; });
+  renderMes();
+}
+
+// ── RENDER MES ──
+function renderMes() {
+  const mes = MESES[mesIdx];
+  const id = mes.id;
+  document.getElementById('hdr-mes').textContent = id;
+
+  const noms = getNominas(id);
+  const nomE = ST[id+'_e'] ?? noms.e;
+  const nomS = ST[id+'_s'] ?? noms.s;
+  const ing = nomE + nomS;
+  const gas = totalGastos(mes);
+  const aho = ing - gas;
+  const pct = ing > 0 ? Math.max(0, Math.min(100, (aho/ing)*100)) : 0;
+
+  document.getElementById('nom-e').value = nomE || '';
+  document.getElementById('nom-s').value = nomS || '';
+
+  document.getElementById('m-ing').textContent = ing > 0 ? fmt(ing) : '\u2014 \u20ac';
+  document.getElementById('m-gas').textContent = fmt(gas);
+  document.getElementById('m-aho').textContent = ing > 0 ? fmt(aho) : '\u2014 \u20ac';
+  document.getElementById('m-ing-sub').textContent = ing > 0 ? 'Nominas del mes' : 'Anade nominas';
+  document.getElementById('m-gas-sub').textContent = mes.gastos.length + ' gastos';
+  document.getElementById('r-ing-total').textContent = fmt(ing);
+  document.getElementById('r-gas-total').textContent = fmt(gas);
+  document.getElementById('g-total').textContent = fmt(gas);
+
+  const aEl = document.getElementById('aho-main');
+  if (aEl) {
+    if (ing > 0) {
+      aEl.textContent = fmt(aho);
+      aEl.className = 'ahorro-val ' + (aho >= 0 ? 'pos' : 'neg');
+      const apct = document.getElementById('aho-pct'); if (apct) apct.textContent = pct.toFixed(0) + '%';
+    } else {
+      aEl.textContent = 'Introduce las nominas';
+      aEl.className = 'ahorro-val na';
+      const apct = document.getElementById('aho-pct'); if (apct) apct.textContent = '\u2014%';
+    }
+  }
+  const aFill = document.getElementById('aho-fill');
+  if (aFill) { aFill.style.width = pct + '%'; aFill.style.background = aho >= 0 ? 'var(--emerald)' : 'var(--coral)'; }
+
+  // resumen cat
+  const cats = gastosBycat(mes);
+  const rcList = document.getElementById('resumen-cat-list');
+  if (rcList) {
+    rcList.innerHTML = Object.entries(cats).filter(([,v])=>v>0).sort(([,a],[,b])=>b-a).map(([k,v]) => {
+      const c = CATS[k];
+      return `<div style="display:flex;align-items:center;padding:9px 18px;border-bottom:1px solid var(--border);gap:10px;">
+        <span style="font-size:16px;">${c.icon}</span>
+        <span style="flex:1;font-size:13px;font-weight:500;">${c.label}</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:${c.color};">${fmt(v)}</span>
+      </div>`;
+    }).join('');
+  }
+
+  // top gastos
+  const sorted = [...mes.gastos].sort(([,a],[,b])=>b-a);
+  const tEl = document.getElementById('top-gastos');
+  if (tEl) {
+    tEl.innerHTML = sorted.slice(0,8).map(([c,v,cat]) => {
+      const catC = CATS[cat]||CATS.otros;
+      return `<div style="display:flex;align-items:center;padding:9px 18px;border-bottom:1px solid var(--border);gap:10px;">
+        <span class="cat-dot" style="background:${catC.color}"></span>
+        <span style="flex:1;font-size:13px;">${c}</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:${catC.color};">${fmt(v)}</span>
+      </div>`;
+    }).join('');
+  }
+
+  renderGastosList();
+  renderPaySummary();
+  renderProjection();
+  renderIEChart();
+}
+
+// ── GASTO LIST ──
+function renderGastosList() {
+  const mes = MESES[mesIdx];
+  const list = document.getElementById('gastos-list');
+  if (!list) return;
+  let filtered = catFilter === 'todos' ? mes.gastos : mes.gastos.filter(([,,c])=>c===catFilter);
+  // Apply search filter (improvement #6)
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    filtered = filtered.filter(([con]) => con.toLowerCase().includes(q));
+    const srEl = document.getElementById('search-results');
+    if (srEl) {
+      srEl.style.display = 'block';
+      srEl.textContent = `${filtered.length} resultado${filtered.length !== 1 ? 's' : ''} para "${searchQuery}"`;
+    }
+  } else {
+    const srEl = document.getElementById('search-results');
+    if (srEl) srEl.style.display = 'none';
+  }
+  list.innerHTML = filtered.map(([con,val,cat]) => {
+    const catC = CATS[cat]||CATS.otros;
+    const origIdx = mes.gastos.findIndex(g=>g[0]===con&&g[1]===val&&g[2]===cat);
+    const isFijo = cat === 'fijos';
+    const paid = isFijo && isPagado(mes.id, origIdx);
+    const payClass = paid ? 'pagado' : 'pendiente';
+    const payLabel = paid ? '\u2713 Pagado' : '\u23f3 Pendiente';
+    const payBtn = isFijo ? `<button class="pay-btn ${payClass}" onclick="togglePago(${origIdx})">${payLabel}</button>` : '';
+    // Fecha cobro label (improvement #8)
+    const fc = isFijo ? getFechaCobro(con) : null;
+    const fcHtml = fc ? `<span class="fecha-cobro">cobra dia ${fc}</span>` : '';
+    return `<div class="gasto-row ${paid ? 'is-pagado' : ''}" id="gr-${origIdx}">
+      <span class="cat-dot" style="background:${catC.color}"></span>
+      <span class="gasto-concepto" onclick="editCon(${origIdx})">${con}${fcHtml}</span>
+      <select class="cat-sel" onchange="cambiaCat(${origIdx},this.value)">
+        ${Object.entries(CATS).map(([k,c])=>`<option value="${k}"${k===cat?' selected':''}>${c.label}</option>`).join('')}
+      </select>
+      <span class="gasto-importe" onclick="editImp(${origIdx})">${fmt(val)}</span>
+      ${payBtn}
+      <button class="gasto-del" onclick="delGasto(${origIdx})">x</button>
+    </div>`;
+  }).join('');
+  renderPaySummary();
+}
+
+function editCon(i) {
+  const row = document.getElementById('gr-'+i);
+  if (!row) return;
+  const el = row.querySelector('.gasto-concepto');
+  const val = MESES[mesIdx].gastos[i][0];
+  el.outerHTML = `<input class="gasto-concepto-edit" id="cedit-${i}" value="${val}" onblur="saveCon(${i})" onkeydown="if(event.key==='Enter'||event.key==='Tab')saveCon(${i})">`;
+  document.getElementById('cedit-'+i)?.focus();
+}
+function saveCon(i) {
+  const inp = document.getElementById('cedit-'+i);
+  if (!inp) return;
+  MESES[mesIdx].gastos[i][0] = inp.value.trim() || MESES[mesIdx].gastos[i][0];
+  renderGastosList(); updTotales(); autoSave();
+}
+function editImp(i) {
+  const row = document.getElementById('gr-'+i);
+  if (!row) return;
+  const el = row.querySelector('.gasto-importe');
+  el.outerHTML = `<input class="gasto-importe-edit" id="iedit-${i}" type="number" value="${MESES[mesIdx].gastos[i][1]}" onblur="saveImp(${i})" onkeydown="if(event.key==='Enter'||event.key==='Tab')saveImp(${i})">`;
+  document.getElementById('iedit-'+i)?.focus();
+}
+function saveImp(i) {
+  const inp = document.getElementById('iedit-'+i);
+  if (!inp) return;
+  MESES[mesIdx].gastos[i][1] = parseFloat(inp.value) || MESES[mesIdx].gastos[i][1];
+  renderGastosList(); updTotales(); autoSave();
+}
+function cambiaCat(i, val) {
+  MESES[mesIdx].gastos[i][2] = val;
+  updTotales(); autoSave();
+}
+function delGasto(i) {
+  MESES[mesIdx].gastos.splice(i,1);
+  renderGastosList(); updTotales(); autoSave();
+}
+function addGasto() {
+  const c = document.getElementById('add-con').value.trim();
+  const v = parseFloat(document.getElementById('add-imp').value) || 0;
+  const cat = document.getElementById('add-cat').value;
+  if (!c || !v) return;
+  MESES[mesIdx].gastos.push([c, v, cat]);
+  document.getElementById('add-con').value = '';
+  document.getElementById('add-imp').value = '';
+  renderGastosList(); updTotales(); autoSave();
+}
+
+function filtrarCat(cat, btn) {
+  catFilter = cat;
+  document.querySelectorAll('.cat-pill').forEach(p => {
+    p.classList.remove('active');
+    p.style.background = '';
+    p.style.color = '';
+    p.style.borderColor = '';
+  });
+  btn.classList.add('active');
+  if (cat !== 'todos' && CATS[cat]) {
+    btn.style.background = CATS[cat].bg;
+    btn.style.color = CATS[cat].color;
+    btn.style.borderColor = CATS[cat].color;
+  } else {
+    btn.style.background = 'rgba(255,255,255,.08)';
+    btn.style.color = 'var(--text)';
+  }
+  renderGastosList();
+}
+
+// ── SEARCH (improvement #6) ──
+function searchGastos() {
+  searchQuery = document.getElementById('search-gastos')?.value?.trim() || '';
+  renderGastosList();
+}
+function clearSearch() {
+  const inp = document.getElementById('search-gastos');
+  if (inp) inp.value = '';
+  searchQuery = '';
+  renderGastosList();
+}
+
+function updTotales() {
+  const mes = MESES[mesIdx];
+  const gas = totalGastos(mes);
+  const id = mes.id;
+  const nomE = ST[id+'_e'] ?? (NOMINAS_REAL[id]?.e || 0);
+  const nomS = ST[id+'_s'] ?? (NOMINAS_REAL[id]?.s || 0);
+  const ing = nomE + nomS;
+  const aho = ing - gas;
+
+  document.getElementById('m-gas').textContent = fmt(gas);
+  document.getElementById('r-gas-total').textContent = fmt(gas);
+  document.getElementById('g-total').textContent = fmt(gas);
+  document.getElementById('m-aho').textContent = ing > 0 ? fmt(aho) : '\u2014 \u20ac';
+  const aEl2 = document.getElementById('aho-main');
+  if (aEl2 && ing > 0) {
+    aEl2.textContent = fmt(aho);
+    aEl2.className = 'ahorro-val ' + (aho >= 0 ? 'pos' : 'neg');
+    const pct = Math.max(0, Math.min(100, (aho/ing)*100));
+    const af = document.getElementById('aho-fill'); if (af) af.style.width = pct + '%';
+    const ap = document.getElementById('aho-pct'); if (ap) ap.textContent = pct.toFixed(0) + '%';
+  }
+
+  // refresh top / resumen cat
+  const sorted = [...mes.gastos].sort(([,a],[,b])=>b-a);
+  const tEl = document.getElementById('top-gastos');
+  if (tEl) {
+    tEl.innerHTML = sorted.slice(0,8).map(([c,v,cat]) => {
+      const catC = CATS[cat]||CATS.otros;
+      return `<div style="display:flex;align-items:center;padding:9px 18px;border-bottom:1px solid var(--border);gap:10px;"><span class="cat-dot" style="background:${catC.color}"></span><span style="flex:1;font-size:13px;">${c}</span><span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:${catC.color};">${fmt(v)}</span></div>`;
+    }).join('');
+  }
+  const cats = gastosBycat(mes);
+  const rcList = document.getElementById('resumen-cat-list');
+  if (rcList) {
+    rcList.innerHTML = Object.entries(cats).filter(([,v])=>v>0).sort(([,a],[,b])=>b-a).map(([k,v]) => {
+      const c = CATS[k];
+      return `<div style="display:flex;align-items:center;padding:9px 18px;border-bottom:1px solid var(--border);gap:10px;"><span style="font-size:16px;">${c.icon}</span><span style="flex:1;font-size:13px;font-weight:500;">${c.label}</span><span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:${c.color};">${fmt(v)}</span></div>`;
+    }).join('');
+  }
+}
+
+function recalc() {
+  const id = MESES[mesIdx].id;
+  ST[id+'_e'] = parseFloat(document.getElementById('nom-e').value) || 0;
+  ST[id+'_s'] = parseFloat(document.getElementById('nom-s').value) || 0;
+  renderMes();
+  autoSave();
+}
+
+// ── CATEGORIAS PAGE ──
+function renderCategorias() {
+  const mes = MESES[mesIdx];
+  const cats = gastosBycat(mes);
+  const total = totalGastos(mes);
+
+  const cardsEl = document.getElementById('cat-cards');
+  if (cardsEl) {
+    cardsEl.innerHTML = Object.entries(CATS).map(([k,c]) => {
+      const v = cats[k] || 0;
+      const pct = total > 0 ? (v/total)*100 : 0;
+      const items = mes.gastos.filter(g=>g[2]===k).length;
+      // Budget progress (improvement #2)
+      const budget = PRESUPUESTOS[k] || 0;
+      const budgetPct = budget > 0 ? Math.min(100, (v/budget)*100) : 0;
+      const budgetColor = budgetPct < 75 ? 'var(--emerald)' : budgetPct < 90 ? 'var(--amber)' : 'var(--coral)';
+      const budgetHtml = budget > 0 ? `
+        <div class="budget-bar-wrap">
+          <div class="budget-bar-bg"><div class="budget-bar-fill" style="width:${budgetPct}%;background:${budgetColor};"></div></div>
+          <div class="budget-label">${fmt(Math.round(v))} de ${fmt(budget)}</div>
+        </div>` : '';
+      return `<div class="cat-summary" style="border-color:${c.color}22;">
+        <div class="cat-summary-icon">${c.icon}</div>
+        <div class="cat-summary-name">${c.label}</div>
+        <div class="cat-summary-amount" style="color:${c.color};">${fmt(v)}</div>
+        <div class="cat-summary-count">${items} gastos \u00b7 ${pct.toFixed(0)}%</div>
+        <div class="cat-bar" style="background:${c.bg};"><div style="height:100%;width:${pct}%;background:${c.color};border-radius:2px;transition:width .4s;"></div></div>
+        ${budgetHtml}
+      </div>`;
+    }).join('');
+  }
+
+  // Budget editor (improvement #2)
+  const budgetEl = document.getElementById('budget-editor');
+  if (budgetEl) {
+    budgetEl.innerHTML = `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">` +
+      Object.entries(CATS).map(([k,c]) => {
+        return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;">
+          <span style="font-size:14px;">${c.icon}</span>
+          <span style="font-size:12px;flex:1;color:var(--muted);font-weight:500;">${c.label}</span>
+          <input class="budget-edit-inp" type="number" value="${PRESUPUESTOS[k]||0}" onchange="updateBudget('${k}',this.value)">
+          <span style="font-size:11px;color:var(--hint);">\u20ac</span>
+        </div>`;
+      }).join('') + `</div>`;
+  }
+
+  // Fijos vs variables
+  const fijosEl = document.getElementById('cat-fijos-list');
+  const varEl = document.getElementById('cat-var-list');
+  const fijosTot = document.getElementById('cat-fijos-total');
+  const varTot = document.getElementById('cat-var-total');
+
+  if (fijosEl) {
+    const fijos = mes.gastos.filter(g=>g[2]==='fijos');
+    const tf = fijos.reduce((s,[,v])=>s+v,0);
+    if (fijosTot) fijosTot.textContent = fmt(tf);
+    fijosEl.innerHTML = fijos.sort(([,a],[,b])=>b-a).map(([c,v]) =>
+      `<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 18px;border-bottom:1px solid var(--border);font-size:13px;">
+        <span style="flex:1;">${c}</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--sky);">${fmt(v)}</span>
+      </div>`
+    ).join('');
+  }
+
+  if (varEl) {
+    const vars = mes.gastos.filter(g=>g[2]!=='fijos');
+    const tv = vars.reduce((s,[,v])=>s+v,0);
+    if (varTot) varTot.textContent = fmt(tv);
+    varEl.innerHTML = vars.sort(([,a],[,b])=>b-a).map(([c,v,cat]) => {
+      const cc = CATS[cat]||CATS.otros;
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 18px;border-bottom:1px solid var(--border);font-size:13px;gap:8px;">
+        <span class="cat-dot" style="background:${cc.color};flex-shrink:0;"></span>
+        <span style="flex:1;">${c}</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-weight:600;color:${cc.color};">${fmt(v)}</span>
+      </div>`;
+    }).join('');
+  }
+
+  // Doughnut
+  const ctx = document.getElementById('chart-cat')?.getContext('2d');
+  if (ctx) {
+    if (window._ccat) window._ccat.destroy();
+    const entries = Object.entries(cats).filter(([,v])=>v>0);
+    window._ccat = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: entries.map(([k])=>CATS[k].label),
+        datasets: [{ data: entries.map(([,v])=>Math.round(v)), backgroundColor: entries.map(([k])=>CATS[k].color), borderWidth: 0, hoverOffset: 8 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false, cutout: '65%',
+        plugins: { legend: { position: 'right', labels: { color: '#6b7280', font: { family: 'Plus Jakarta Sans', size: 12 }, boxWidth: 12 } } }
+      }
+    });
+  }
+}
+
+function updateBudget(cat, val) {
+  PRESUPUESTOS[cat] = parseFloat(val) || 0;
+  autoSave();
+  renderCategorias();
+}
+
+// ── NOMINAS PAGE ──
+function renderNominas() {
+  const histE = document.getElementById('nom-hist-e');
+  const histS = document.getElementById('nom-hist-s');
+  if (!histE) return;
+
+  const meses26 = MESES.filter(m => m.id.includes('2026')||m.id.includes('2025'));
+  histE.innerHTML = meses26.map(m => {
+    const n = getNominas(m.id);
+    const v = ST[m.id+'_e'] ?? n.e;
+    return `<div class="nom-hist-row">
+      <span class="nom-hist-mes">${m.id}</span>
+      <span class="nom-hist-val" style="color:var(--emerald);">${v > 0 ? fmtDec(v) : '\u2014'}</span>
+    </div>`;
+  }).join('');
+
+  histS.innerHTML = meses26.map(m => {
+    const n = getNominas(m.id);
+    const v = ST[m.id+'_s'] ?? n.s;
+    return `<div class="nom-hist-row">
+      <span class="nom-hist-mes">${m.id}</span>
+      <span class="nom-hist-val" style="color:var(--violet);">${v > 0 ? fmtDec(v) : '\u2014'}</span>
+    </div>`;
+  }).join('');
+
+  const ctx = document.getElementById('chart-nom')?.getContext('2d');
+  if (ctx) {
+    if (window._cnom) window._cnom.destroy();
+    const labls = meses26.map(m=>m.id);
+    const valsE = meses26.map(m=>{ const n=getNominas(m.id); return ST[m.id+'_e']??n.e; });
+    const valsS = meses26.map(m=>{ const n=getNominas(m.id); return ST[m.id+'_s']??n.s; });
+    window._cnom = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labls,
+        datasets: [
+          { label: 'Emmanuel', data: valsE, backgroundColor: 'rgba(0,229,160,.6)', borderRadius: 4 },
+          { label: 'Elibel', data: valsS, backgroundColor: 'rgba(155,109,255,.6)', borderRadius: 4 }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { labels: { color: '#6b7280', font: { family: 'Plus Jakarta Sans', size: 12 }, boxWidth: 12 } } },
+        scales: {
+          x: { stacked: true, grid: { display: false }, ticks: { color: '#6b7280', font: { family: 'JetBrains Mono', size: 10 } } },
+          y: { stacked: true, grid: { color: 'rgba(0,0,0,.07)' }, ticks: { color: '#6b7280', font: { family: 'JetBrains Mono', size: 10 }, callback: v => (v/1000).toFixed(1)+'k' } }
+        }
+      }
+    });
+  }
+}
+
+// ── HISTORIAL ──
+function renderHistorico() {
+  const years = [2022,2023,2024,2025,2026];
+  const yearTotals = {};
+  years.forEach(y => yearTotals[y] = 0);
+  MESES.forEach(m => {
+    const y = parseInt(m.id.slice(-4));
+    if (yearTotals[y] !== undefined) yearTotals[y] += totalGastos(m);
+  });
+
+  const yEl = document.getElementById('year-list');
+  if (yEl) yEl.innerHTML = years.map(y => {
+    const t = yearTotals[y];
+    const cnt = MESES.filter(m=>parseInt(m.id.slice(-4))===y).length;
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--border);font-size:13px;">
+      <div><div style="font-weight:600;">${y}</div><div style="font-size:11px;color:var(--muted);">${cnt} meses \u00b7 ${fmt(Math.round(t/cnt))}/mes</div></div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;">${fmt(t)}</div>
+    </div>`;
+  }).join('');
+
+  const ctx1 = document.getElementById('chart-anual')?.getContext('2d');
+  if (ctx1) {
+    if (window._ca) window._ca.destroy();
+    window._ca = new Chart(ctx1, {
+      type: 'bar',
+      data: { labels: years.map(String), datasets: [{ data: years.map(y=>Math.round(yearTotals[y])), backgroundColor: ['rgba(56,199,255,.5)','rgba(155,109,255,.5)','rgba(255,179,64,.5)','rgba(0,229,160,.5)','rgba(255,92,106,.5)'], borderRadius: 8 }] },
+      options: { responsive:true,maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{grid:{display:false},ticks:{color:'#9ca3af',font:{family:'JetBrains Mono',size:11}}},y:{grid:{color:'rgba(0,0,0,.07)'},ticks:{color:'#9ca3af',font:{family:'JetBrains Mono',size:10},callback:v=>(v/1000).toFixed(0)+'k'}}}}
+    });
+  }
+
+  const tmEl = document.getElementById('top-mes-list');
+  if (tmEl) tmEl.innerHTML = years.map(y => {
+    const ms = MESES.filter(m=>parseInt(m.id.slice(-4))===y);
+    if (!ms.length) return '';
+    const max = ms.reduce((b,m)=>totalGastos(m)>totalGastos(b)?m:b,ms[0]);
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--border);">
+      <div><div style="font-size:14px;font-weight:600;">${y}</div><div style="font-size:11px;color:var(--muted);">Mes mas caro</div></div>
+      <div style="text-align:right;"><div style="font-size:13px;font-weight:600;">${max.id}</div><div style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--coral);">${fmt(totalGastos(max))}</div></div>
+    </div>`;
+  }).join('');
+
+  const m25 = MESES.filter(m=>m.id.includes('2025'));
+  const m26 = MESES.filter(m=>m.id.includes('2026'));
+  const ctx2 = document.getElementById('chart-trend')?.getContext('2d');
+  if (ctx2) {
+    if (window._ct) window._ct.destroy();
+    window._ct = new Chart(ctx2, {
+      type: 'line',
+      data: {
+        labels: m25.map(m=>m.id.split(' ')[0].slice(0,3)),
+        datasets: [
+          { label:'2025',data:m25.map(m=>Math.round(totalGastos(m))),borderColor:'#38c7ff',backgroundColor:'rgba(56,199,255,.08)',fill:true,pointRadius:4,tension:0.3 },
+          { label:'2026',data:m26.map(m=>Math.round(totalGastos(m))),borderColor:'#00e5a0',backgroundColor:'rgba(0,229,160,.08)',fill:true,pointRadius:4,tension:0.3,borderDash:[5,4] }
+        ]
+      },
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#6b7280',font:{family:'Plus Jakarta Sans',size:12},boxWidth:12}}},scales:{x:{grid:{display:false},ticks:{color:'#9ca3af',font:{family:'JetBrains Mono',size:10}}},y:{grid:{color:'rgba(0,0,0,.07)'},ticks:{color:'#9ca3af',font:{family:'JetBrains Mono',size:10},callback:v=>(v/1000).toFixed(1)+'k'}}}}
+    });
+  }
+}
+
+// ── FINANZAS ──
+function updTarjeta() {
+  const v = parseFloat(document.getElementById('t-inp')?.value) || tarjetaConsumo;
+  tarjetaConsumo = v;
+  const disp = Math.max(0, 2000 - v);
+  const pct = Math.min(100, (v/2000)*100);
+  const tC = document.getElementById('t-consumed');
+  const tA = document.getElementById('t-avail');
+  const tB = document.getElementById('t-bar');
+  const sT = document.getElementById('saldo-tarj');
+  if (tC) tC.textContent = fmt(v);
+  if (tA) tA.textContent = fmt(disp);
+  if (tB) tB.style.width = pct + '%';
+  if (sT) sT.textContent = fmt(v);
+  autoSave();
+}
+
+function renderNinos() {
+  const dep = parseFloat(document.getElementById('dep-inp')?.value) || 30;
+  const total = NINOS.reduce((s,n)=>s+n.saldo,0);
+  const badge = document.getElementById('ninos-total-badge');
+  if (badge) badge.textContent = fmt(total);
+  const list = document.getElementById('ninos-list');
+  if (!list) return;
+  list.innerHTML = NINOS.map((n,i) => {
+    const obj = 3000;
+    const pct = Math.min(100, (n.saldo/obj)*100);
+    return `<div class="nino-row">
+      <div class="nino-avatar" style="background:${n.bg};color:${n.color};">${n.ini}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:14px;font-weight:600;">${n.nombre}</div>
+        <div style="font-size:11px;color:var(--muted);">+${dep} \u20ac / mes \u00b7 objetivo 3.000 \u20ac</div>
+        <div style="height:4px;background:rgba(255,255,255,.08);border-radius:2px;margin:8px 0 4px;overflow:hidden;"><div style="height:100%;width:${pct.toFixed(1)}%;background:${n.color};border-radius:2px;transition:width .4s;"></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--hint);"><span>${pct.toFixed(0)}%</span><span>faltan ${fmt(Math.max(0,obj-n.saldo))}</span></div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;">
+        <div class="nino-saldo" id="ns-${i}" onclick="editNino(${i})">${fmt(n.saldo)}</div>
+        <div style="font-size:11px;color:var(--hint);">toca para editar</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function editNino(i) {
+  const el = document.getElementById('ns-'+i);
+  if (!el) return;
+  el.outerHTML = `<input class="nino-edit" id="ni-${i}" type="number" value="${NINOS[i].saldo}" onblur="saveNino(${i})" onkeydown="if(event.key==='Enter')saveNino(${i})">`;
+  document.getElementById('ni-'+i)?.focus();
+}
+function saveNino(i) {
+  const inp = document.getElementById('ni-'+i);
+  if (!inp) return;
+  NINOS[i].saldo = parseFloat(inp.value) || NINOS[i].saldo;
+  renderNinos(); autoSave();
+}
+function addMesAhorro() {
+  const dep = parseFloat(document.getElementById('dep-inp')?.value) || 30;
+  NINOS.forEach(n => n.saldo += dep);
+  renderNinos(); autoSave();
+}
+
+function renderOtros() {
+  const total = otrosIngresos.reduce((s,o)=>s+(o.importe||0),0);
+  const badge = document.getElementById('otros-total');
+  if (badge) badge.textContent = fmt(total);
+  const list = document.getElementById('otros-list');
+  if (!list) return;
+  if (!otrosIngresos.length) {
+    list.innerHTML = '<div style="padding:14px 18px;font-size:13px;color:var(--hint);">Sin otros ingresos \u2014 anade primas, pagas extra, etc.</div>';
+    return;
+  }
+  list.innerHTML = otrosIngresos.map((o,i) =>
+    `<div class="otro-row" id="or-${i}">
+      <span class="otro-nom" onclick="editOtroN(${i})">${o.nombre}</span>
+      <span class="otro-imp" onclick="editOtroI(${i})">${fmt(o.importe)}</span>
+      <button class="otro-del" onclick="delOtro(${i})">x</button>
+    </div>`
+  ).join('');
+}
+
+function editOtroN(i) {
+  const el = document.getElementById('or-'+i)?.querySelector('.otro-nom');
+  if (!el) return;
+  el.outerHTML = `<input class="otro-nom-edit" id="one-${i}" value="${otrosIngresos[i].nombre}" onblur="saveOtroN(${i})" onkeydown="if(event.key==='Enter')saveOtroN(${i})">`;
+  document.getElementById('one-'+i)?.focus();
+}
+function saveOtroN(i) { const inp = document.getElementById('one-'+i); if (!inp) return; otrosIngresos[i].nombre = inp.value.trim()||otrosIngresos[i].nombre; renderOtros(); autoSave(); }
+function editOtroI(i) {
+  const el = document.getElementById('or-'+i)?.querySelector('.otro-imp');
+  if (!el) return;
+  el.outerHTML = `<input class="otro-imp-edit" id="oie-${i}" type="number" value="${otrosIngresos[i].importe}" onblur="saveOtroI(${i})" onkeydown="if(event.key==='Enter')saveOtroI(${i})">`;
+  document.getElementById('oie-'+i)?.focus();
+}
+function saveOtroI(i) { const inp = document.getElementById('oie-'+i); if (!inp) return; otrosIngresos[i].importe = parseFloat(inp.value)||otrosIngresos[i].importe; renderOtros(); autoSave(); }
+function delOtro(i) { otrosIngresos.splice(i,1); renderOtros(); autoSave(); }
+function addOtro() {
+  const n = document.getElementById('otro-con').value.trim();
+  const v = parseFloat(document.getElementById('otro-imp').value)||0;
+  if (!n||!v) return;
+  otrosIngresos.push({nombre:n,importe:v});
+  document.getElementById('otro-con').value='';
+  document.getElementById('otro-imp').value='';
+  renderOtros(); autoSave();
+}
+
+function renderAlertas() {
+  const total = ALERTAS.reduce((s,a)=>s+a.importe,0);
+  const el = document.getElementById('alertas-total');
+  if (el) el.textContent = fmt(total);
+  const list = document.getElementById('alertas-list');
+  if (!list) return;
+  list.innerHTML = ALERTAS.map(a =>
+    `<div class="alerta-row">
+      <div><div class="alerta-concepto">${a.concepto}</div><div class="alerta-fecha">${a.fecha}</div></div>
+      <div class="alerta-imp">${fmt(a.importe)}</div>
+    </div>`
+  ).join('');
+}
+
+// ── DEBT COUNTDOWN (improvement #3) ──
+function renderDebtCountdown() {
+  const el = document.getElementById('debt-panel');
+  if (!el) return;
+  const now = new Date();
+  const nowMonth = now.getFullYear() * 12 + now.getMonth();
+
+  // Preconcedit 3640: 292.11/month, 7.34%, ends Apr 2027
+  const pre3640End = new Date(2027, 3); // Apr 2027
+  const pre3640EndMonth = pre3640End.getFullYear() * 12 + pre3640End.getMonth();
+  const pre3640Remaining = Math.max(0, pre3640EndMonth - nowMonth);
+
+  // Prestec cotxe: 335.47/month, 6.22%, ends Feb 2030
+  const cotxeEnd = new Date(2030, 1); // Feb 2030
+  const cotxeEndMonth = cotxeEnd.getFullYear() * 12 + cotxeEnd.getMonth();
+  const cotxeRemaining = Math.max(0, cotxeEndMonth - nowMonth);
+
+  // Free date = Feb 2030
+  const freeDate = 'Feb 2030';
+
+  // Simulation: 50 extra/month
+  const extra = 50;
+  // Preconcedit 3640: saldo 3370, rate 7.34%, cuota 292.11
+  const pre3640Saldo = 3370;
+  const pre3640Rate = 0.0734 / 12;
+  const pre3640Cuota = 292.11;
+  const pre3640MonthsNormal = pre3640Remaining;
+  // With extra payment
+  let saldo = pre3640Saldo;
+  let months = 0;
+  let interestSaved = 0;
+  const newCuota = pre3640Cuota + extra;
+  while (saldo > 0 && months < 60) {
+    const interest = saldo * pre3640Rate;
+    saldo = saldo + interest - newCuota;
+    months++;
+  }
+  const monthsSaved3640 = Math.max(0, pre3640MonthsNormal - months);
+
+  // Cotxe: saldo 13697, rate 6.22%, cuota 335.47
+  const cotxeSaldo = 13697;
+  const cotxeRate = 0.0622 / 12;
+  const cotxeCuota = 335.47;
+  let saldo2 = cotxeSaldo;
+  let months2 = 0;
+  const newCuota2 = cotxeCuota + extra;
+  let intNormal = 0, intExtra = 0;
+  let saldoN = cotxeSaldo;
+  for (let i = 0; i < cotxeRemaining && saldoN > 0; i++) {
+    intNormal += saldoN * cotxeRate;
+    saldoN = saldoN + saldoN * cotxeRate - cotxeCuota;
+  }
+  while (saldo2 > 0 && months2 < 120) {
+    const interest = saldo2 * cotxeRate;
+    intExtra += interest;
+    saldo2 = saldo2 + interest - newCuota2;
+    months2++;
+  }
+  const monthsSavedCotxe = Math.max(0, cotxeRemaining - months2);
+  const totalSaved = Math.round(intNormal - intExtra);
+  const totalMonthsSaved = monthsSaved3640 + monthsSavedCotxe;
+
+  el.innerHTML = `
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--violet);margin-bottom:12px;">Cuenta atras deuda</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px;">
+      <div style="text-align:center;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;color:var(--amber);">${pre3640Remaining}</div>
+        <div style="font-size:11px;color:var(--muted);">meses Preconcedit 3640</div>
+        <div style="font-size:10px;color:var(--hint);">Abr 2027</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;color:var(--coral);">${cotxeRemaining}</div>
+        <div style="font-size:11px;color:var(--muted);">meses Prestec cotxe</div>
+        <div style="font-size:10px;color:var(--hint);">Feb 2030</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;color:var(--emerald);">${freeDate}</div>
+        <div style="font-size:11px;color:var(--muted);">Deuda libre en</div>
+        <div style="font-size:10px;color:var(--emerald);">\u2728 Libre de deuda</div>
+      </div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px 16px;">
+      <div style="font-size:12px;font-weight:600;color:var(--sky);margin-bottom:6px;">Simulacion: +${extra} \u20ac extra/mes</div>
+      <div style="font-size:12px;color:var(--muted);">Terminarias ~${totalMonthsSaved} meses antes y ahorrarias ~${fmt(totalSaved)} en intereses</div>
+    </div>
+  `;
+}
+
+// ── INCOME VS EXPENSE CHART (improvement #7) ──
+function renderIEChart() {
+  const ctx = document.getElementById('chart-ie')?.getContext('2d');
+  if (!ctx) return;
+  if (window._cie) window._cie.destroy();
+
+  // Get last 6 months with income data
+  const allMonths = MESES.filter(m => {
+    const n = getNominas(m.id);
+    const e = ST[m.id+'_e'] ?? n.e;
+    const s = ST[m.id+'_s'] ?? n.s;
+    return (e + s) > 0;
+  });
+  const last6 = allMonths.slice(-6);
+  if (last6.length < 2) {
+    document.getElementById('chart-ie-wrap').style.display = 'none';
+    return;
+  }
+  document.getElementById('chart-ie-wrap').style.display = '';
+
+  const labels = last6.map(m => m.id);
+  const ingresos = last6.map(m => {
+    const n = getNominas(m.id);
+    return Math.round((ST[m.id+'_e'] ?? n.e) + (ST[m.id+'_s'] ?? n.s));
+  });
+  const gastos = last6.map(m => Math.round(totalGastos(m)));
+  const ahorro = ingresos.map((v, i) => v - gastos[i]);
+
+  window._cie = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Ingresos', data: ingresos, backgroundColor: 'rgba(16,185,129,.6)', borderRadius: 4, order: 2 },
+        { label: 'Gastos', data: gastos, backgroundColor: 'rgba(239,68,68,.6)', borderRadius: 4, order: 3 },
+        { label: 'Ahorro', data: ahorro, type: 'line', borderColor: '#8b5cf6', backgroundColor: 'rgba(139,92,246,.1)', fill: true, tension: 0.3, pointRadius: 4, order: 1 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { labels: { color: '#6b7280', font: { family: 'Plus Jakarta Sans', size: 12 }, boxWidth: 12 } } },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: '#6b7280', font: { family: 'JetBrains Mono', size: 10 } } },
+        y: { grid: { color: 'rgba(0,0,0,.07)' }, ticks: { color: '#6b7280', font: { family: 'JetBrains Mono', size: 10 }, callback: v => (v/1000).toFixed(1)+'k' } }
+      }
+    }
+  });
+}
+
+// ── ANNUAL SAVINGS PROJECTION (improvement #9) ──
+function renderProjection() {
+  const projEl = document.getElementById('proj-card');
+  if (!projEl) return;
+
+  // Find months with income data
+  const withIncome = MESES.filter(m => {
+    const n = getNominas(m.id);
+    const e = ST[m.id+'_e'] ?? n.e;
+    const s = ST[m.id+'_s'] ?? n.s;
+    return (e + s) > 0 && m.id.includes('2026');
+  });
+
+  if (withIncome.length < 2) {
+    projEl.style.display = 'none';
+    return;
+  }
+
+  // Use last 3 months (or fewer)
+  const recent = withIncome.slice(-3);
+  let totalRate = 0;
+  let totalSavings = 0;
+  recent.forEach(m => {
+    const n = getNominas(m.id);
+    const ing = (ST[m.id+'_e'] ?? n.e) + (ST[m.id+'_s'] ?? n.s);
+    const gas = totalGastos(m);
+    const aho = ing - gas;
+    totalRate += ing > 0 ? (aho / ing) : 0;
+    totalSavings += aho;
+  });
+  const avgRate = totalRate / recent.length;
+  const avgSavings = totalSavings / recent.length;
+  const annualProj = Math.round(avgSavings * 12);
+  const rateStr = (avgRate * 100).toFixed(1);
+
+  projEl.style.display = '';
+  projEl.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--sky);margin-bottom:4px;">Proyeccion ahorro 2026</div>
+        <div style="font-size:12px;color:var(--muted);">Basado en media de ultimos ${recent.length} meses (tasa ${rateStr}%)</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:${annualProj >= 0 ? 'var(--emerald)' : 'var(--coral)'};">${fmt(annualProj)}</div>
+        <div style="font-size:11px;color:var(--muted);">estimado anual</div>
+      </div>
+    </div>
+  `;
+}
+
+// ── DARK MODE (improvement #5) ──
+function toggleDarkMode() {
+  const isDark = document.body.getAttribute('data-theme') === 'dark';
+  document.body.setAttribute('data-theme', isDark ? '' : 'dark');
+  updateThemeButton();
+  autoSave();
+}
+function updateThemeButton() {
+  const btn = document.getElementById('theme-toggle');
+  if (!btn) return;
+  const isDark = document.body.getAttribute('data-theme') === 'dark';
+  btn.innerHTML = isDark ? '\u2600 Claro' : '\u9789 Modo';
+}
+
+// ── EXPORT PDF (improvement #4) ──
+function exportPDF() {
+  window.print();
+}
+
+// ── SHOW PAGE ──
+function showPage(name, btn) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (name==='categorias') renderCategorias();
+  if (name==='nominas') renderNominas();
+  if (name==='historico') renderHistorico();
+  if (name==='finanzas') { renderNinos(); renderOtros(); renderAlertas(); renderDebtCountdown(); }
+  renderMes();
+}
+
+// ── NOMBRES EDITABLES NÓMINAS ──
+const NOM_NAMES_KEY = 'familiadiaz_nomnames';
+let NOM_NAMES = { e: 'Emmanuel', s: 'Esposa (Elibel)' };
+try { const saved = JSON.parse(localStorage.getItem(NOM_NAMES_KEY)); if (saved) NOM_NAMES = saved; } catch(e) {}
+function loadNomNames() {
+  const elE = document.getElementById('nom-name-e');
+  const elS = document.getElementById('nom-name-s');
+  if (elE) elE.textContent = NOM_NAMES.e;
+  if (elS) elS.textContent = NOM_NAMES.s;
+}
+function editNomName(who) {
+  const el = document.getElementById('nom-name-' + who);
+  if (!el) return;
+  const current = NOM_NAMES[who];
+  el.innerHTML = `<input style="font-size:14px;font-weight:600;border:1.5px solid var(--emerald);border-radius:6px;padding:2px 8px;outline:none;width:160px;font-family:'Plus Jakarta Sans',sans-serif;background:var(--emerald-dim);color:var(--text);" id="nname-${who}" value="${current}" onblur="saveNomName('${who}')" onkeydown="if(event.key==='Enter')saveNomName('${who}')">`;
+  document.getElementById('nname-' + who)?.focus();
+  document.getElementById('nname-' + who)?.select();
+}
+function saveNomName(who) {
+  const inp = document.getElementById('nname-' + who);
+  if (!inp) return;
+  const val = inp.value.trim();
+  if (val) NOM_NAMES[who] = val;
+  localStorage.setItem(NOM_NAMES_KEY, JSON.stringify(NOM_NAMES));
+  loadNomNames();
+}
+
+// ── INIT ──
+loadAllData();
+poblarSel();
+loadNomNames();
+renderMes();
+renderAlertas();
+renderPaySummary();
+renderDebtCountdown();
+updateThemeButton();
+
+// ── PWA SERVICE WORKER ──
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>

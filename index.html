@@ -783,15 +783,15 @@ body {
 
     <!-- FINANZAS -->
     <div id="page-finanzas" class="page">
-      <div class="saldo-panel">
-        <div class="saldo-lbl">Situacion financiera actual</div>
-        <div class="saldo-val" style="color:var(--coral)" id="saldo-val">17.067 &euro; en deuda</div>
-        <div class="saldo-breakdown">
-          <div class="saldo-item">Prestamo cotxe <b>13.697 &euro;</b></div>
-          <div class="saldo-item" style="text-decoration:line-through;opacity:.5">Preconcedit 12K <b>PAGADO 19/03/2026</b></div>
-          <div class="saldo-item">Preconcedit 3.6K <b>3.370 &euro;</b></div>
-          <div class="saldo-item">Tarjeta credito <b id="saldo-tarj">1.848 &euro;</b></div>
-          <div class="saldo-item">Cuota mensual total <b>627,58 &euro;</b></div>
+      <!-- Saldo disponible -->
+      <div style="background:linear-gradient(135deg,#e8faf3 0%,#e8f4fa 100%);border:1px solid rgba(0,214,143,.2);border-radius:var(--r);padding:18px 22px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--emerald);opacity:.85;">Saldo disponible en cuenta</div>
+          <div style="font-size:30px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--emerald);cursor:pointer;" id="saldo-cuenta" onclick="editSaldoCuenta()" title="Clic para actualizar">5.190 &euro;</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:10px;color:var(--muted);">Deuda total</div>
+          <div style="font-size:22px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--coral);" id="saldo-val">0 &euro;</div>
         </div>
       </div>
 
@@ -799,48 +799,12 @@ body {
       <div class="debt-panel" id="debt-panel"></div>
 
       <div class="two-col" style="margin-bottom:16px;">
-        <!-- Creditos -->
         <div class="sc" style="grid-column:1/-1;">
           <div class="sc-hdr">
-            <div class="sc-title">Creditos Morabanc</div>
-            <div class="chip chip-red">17.067 &euro; pendiente</div>
+            <div class="sc-title">Creditos</div>
+            <div class="chip chip-red" id="creditos-total-badge">0 &euro; pendiente</div>
           </div>
-          <div class="credito-row">
-            <div style="flex:1;min-width:0">
-              <div style="font-size:14px;font-weight:600;">Prestec cotxe</div>
-              <div style="font-size:11px;color:var(--muted);">6,22% &middot; Vence Feb 2030 &middot; ref: 250047</div>
-              <div class="cred-bar"><div class="cred-fill" style="width:35%"></div></div>
-              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--hint);margin-top:4px;"><span>13.697 &euro; pendiente</span><span>~41 cuotas restantes</span></div>
-            </div>
-            <div style="text-align:right;margin-left:16px;flex-shrink:0;">
-              <div style="font-size:10px;color:var(--muted);">cuota/mes</div>
-              <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--coral);">335,47 &euro;</div>
-            </div>
-          </div>
-          <div class="credito-row" style="opacity:.45;background:var(--emerald-dim);">
-            <div style="flex:1;min-width:0">
-              <div style="font-size:14px;font-weight:600;text-decoration:line-through;">Preconcedit consum 12.000 &euro;</div>
-              <div style="font-size:11px;color:var(--emerald);font-weight:600;">PAGADO el 19/03/2026 &mdash; Amortizacion anticipada total</div>
-              <div class="cred-bar"><div class="cred-fill" style="width:100%;background:var(--emerald)"></div></div>
-              <div style="font-size:11px;color:var(--emerald);margin-top:4px;font-weight:600;">Ahorro: 553,22 &euro;/mes liberados</div>
-            </div>
-            <div style="text-align:right;margin-left:16px;flex-shrink:0;">
-              <div style="font-size:10px;color:var(--emerald);">LIQUIDADO</div>
-              <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--emerald);">0 &euro;</div>
-            </div>
-          </div>
-          <div class="credito-row">
-            <div style="flex:1;min-width:0">
-              <div style="font-size:14px;font-weight:600;">Preconcedit consum 3.640 &euro;</div>
-              <div style="font-size:11px;color:var(--muted);">7,34% &middot; Vence Abr 2027 &middot; ref: 256635</div>
-              <div class="cred-bar"><div class="cred-fill" style="width:78%;background:var(--amber)"></div></div>
-              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--hint);margin-top:4px;"><span>3.370 &euro; pendiente</span><span>~12 cuotas restantes</span></div>
-            </div>
-            <div style="text-align:right;margin-left:16px;flex-shrink:0;">
-              <div style="font-size:10px;color:var(--muted);">cuota/mes</div>
-              <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--amber);">292,11 &euro;</div>
-            </div>
-          </div>
+          <div id="creditos-list"></div>
         </div>
       </div>
 
@@ -1746,6 +1710,124 @@ function updTarjeta() {
   autoSave();
 }
 
+// ── CREDITOS DINÁMICOS ──
+const CRED_KEY = 'familiadiaz_creditos';
+let CREDITOS = [
+  { id: 'cotxe', nombre: 'Prestec cotxe', tasa: 6.22, vence: 'Feb 2030', ref: '250047', cuota: 335.47, pendiente: 13960.38, color: 'var(--coral)', pagado: false },
+  { id: '12k', nombre: 'Preconcedit consum 12.000', tasa: 9.54, vence: 'Abr 2028', ref: '266545', cuota: 553.22, pendiente: 0, color: 'var(--emerald)', pagado: true, fechaPago: '19/03/2026' },
+  { id: '3640', nombre: 'Preconcedit consum 3.640', tasa: 7.34, vence: 'Abr 2027', ref: '256635', cuota: 292.11, pendiente: 3639.51, color: 'var(--amber)', pagado: false }
+];
+try { const saved = JSON.parse(localStorage.getItem(CRED_KEY)); if (saved && saved.length) CREDITOS = saved; } catch(e) {}
+function saveCreditos() { localStorage.setItem(CRED_KEY, JSON.stringify(CREDITOS)); }
+
+let saldoCuenta = 5190.25;
+try { const sv = localStorage.getItem('familiadiaz_saldocuenta'); if (sv) saldoCuenta = parseFloat(sv); } catch(e) {}
+
+function editSaldoCuenta() {
+  const el = document.getElementById('saldo-cuenta');
+  if (!el) return;
+  el.innerHTML = `<input type="number" style="font-size:24px;font-weight:700;border:2px solid var(--emerald);border-radius:8px;padding:4px 10px;width:180px;outline:none;background:white;color:var(--emerald);font-family:'JetBrains Mono',monospace;" value="${saldoCuenta}" onblur="saveSaldoCuenta(this.value)" onkeydown="if(event.key==='Enter')saveSaldoCuenta(this.value)">`;
+  el.querySelector('input')?.focus();
+}
+function saveSaldoCuenta(val) {
+  const v = parseFloat(val);
+  if (!isNaN(v)) saldoCuenta = v;
+  localStorage.setItem('familiadiaz_saldocuenta', saldoCuenta);
+  const el = document.getElementById('saldo-cuenta');
+  if (el) el.textContent = fmt(Math.round(saldoCuenta));
+}
+
+function renderCreditos() {
+  const list = document.getElementById('creditos-list');
+  if (!list) return;
+  const totalPend = CREDITOS.filter(c=>!c.pagado).reduce((s,c)=>s+c.pendiente,0);
+  const totalCuota = CREDITOS.filter(c=>!c.pagado).reduce((s,c)=>s+c.cuota,0);
+  const badge = document.getElementById('creditos-total-badge');
+  if (badge) badge.textContent = fmt(totalPend) + ' pendiente';
+
+  // Update saldo panel
+  const saldoVal = document.getElementById('saldo-val');
+  if (saldoVal) saldoVal.textContent = fmt(totalPend) + ' en deuda';
+
+  list.innerHTML = CREDITOS.map((c,i) => {
+    if (c.pagado) {
+      return `<div class="credito-row" style="opacity:.45;background:var(--emerald-dim);">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:14px;font-weight:600;text-decoration:line-through;">${c.nombre}</div>
+          <div style="font-size:11px;color:var(--emerald);font-weight:600;">PAGADO${c.fechaPago?' el '+c.fechaPago:''} — Liquidado</div>
+          <div class="cred-bar"><div class="cred-fill" style="width:100%;background:var(--emerald)"></div></div>
+        </div>
+        <div style="text-align:right;margin-left:16px;flex-shrink:0;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--emerald);">0 €</div>
+          <button onclick="eliminarCredito(${i})" style="margin-top:6px;padding:3px 10px;border-radius:8px;border:1px solid var(--coral);background:transparent;color:var(--coral);font-size:10px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;">Eliminar</button>
+        </div>
+      </div>`;
+    }
+    const cuotasRest = c.cuota > 0 ? Math.ceil(c.pendiente / c.cuota) : 0;
+    const pctPagado = c.cuota > 0 ? Math.max(0, 100 - (c.pendiente / (c.cuota * cuotasRest + c.pendiente)) * 100) : 0;
+    return `<div class="credito-row" id="cred-${i}">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:14px;font-weight:600;cursor:pointer;" onclick="editCredNombre(${i})" title="Clic para editar">${c.nombre}</div>
+        <div style="font-size:11px;color:var(--muted);">${c.tasa}% · Vence ${c.vence} · ref: ${c.ref}</div>
+        <div class="cred-bar"><div class="cred-fill" style="width:${Math.min(100,100-cuotasRest*2)}%;background:${c.color}"></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--hint);margin-top:4px;">
+          <span style="cursor:pointer;text-decoration:underline dotted;" onclick="editCredPendiente(${i})" title="Clic para editar saldo">${fmt(c.pendiente)} pendiente</span>
+          <span>~${cuotasRest} cuotas restantes</span>
+        </div>
+      </div>
+      <div style="text-align:right;margin-left:16px;flex-shrink:0;">
+        <div style="font-size:10px;color:var(--muted);">cuota/mes</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:${c.color};">${fmtDec(c.cuota)}</div>
+        <button onclick="liquidarCredito(${i})" style="margin-top:6px;padding:3px 10px;border-radius:8px;border:1px solid var(--emerald);background:transparent;color:var(--emerald);font-size:10px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;">Liquidar</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function editCredNombre(i) {
+  const el = document.querySelector(`#cred-${i} div[onclick*="editCredNombre"]`);
+  if (!el) return;
+  const cur = CREDITOS[i].nombre;
+  el.outerHTML = `<input style="font-size:14px;font-weight:600;border:1.5px solid var(--sky);border-radius:6px;padding:2px 8px;width:90%;outline:none;background:var(--sky-dim);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;" value="${cur}" onblur="saveCredNombre(${i},this.value)" onkeydown="if(event.key==='Enter')saveCredNombre(${i},this.value)">`;
+  document.querySelector(`#cred-${i} input`)?.focus();
+}
+function saveCredNombre(i, val) {
+  if (val.trim()) CREDITOS[i].nombre = val.trim();
+  saveCreditos(); renderCreditos();
+}
+
+function editCredPendiente(i) {
+  const el = document.querySelector(`#cred-${i} span[onclick*="editCredPendiente"]`);
+  if (!el) return;
+  el.outerHTML = `<input type="number" style="font-size:11px;border:1.5px solid var(--amber);border-radius:4px;padding:2px 6px;width:100px;outline:none;background:var(--amber-dim);color:var(--text);font-family:'JetBrains Mono',monospace;" value="${CREDITOS[i].pendiente}" onblur="saveCredPendiente(${i},this.value)" onkeydown="if(event.key==='Enter')saveCredPendiente(${i},this.value)">`;
+  document.querySelector(`#cred-${i} input[type=number]`)?.focus();
+}
+function saveCredPendiente(i, val) {
+  const v = parseFloat(val);
+  if (!isNaN(v) && v >= 0) CREDITOS[i].pendiente = v;
+  if (CREDITOS[i].pendiente <= 0) { CREDITOS[i].pendiente = 0; CREDITOS[i].pagado = true; }
+  saveCreditos(); renderCreditos();
+}
+
+function liquidarCredito(i) {
+  if (!confirm('¿Liquidar "' + CREDITOS[i].nombre + '"? Se marcará como pagado.')) return;
+  CREDITOS[i].pagado = true;
+  CREDITOS[i].pendiente = 0;
+  CREDITOS[i].fechaPago = new Date().toLocaleDateString('es-ES');
+  // Remove cuota from future months
+  const cuotaName = CREDITOS[i].nombre;
+  MESES.forEach(m => {
+    m.gastos = m.gastos.filter(([con]) => !con.toLowerCase().includes(cuotaName.toLowerCase().slice(0,10)));
+  });
+  saveCreditos(); renderCreditos(); autoSave();
+}
+
+function eliminarCredito(i) {
+  if (!confirm('¿Eliminar "' + CREDITOS[i].nombre + '" del listado?')) return;
+  CREDITOS.splice(i, 1);
+  saveCreditos(); renderCreditos();
+}
+
 function renderNinos() {
   const dep = parseFloat(document.getElementById('dep-inp')?.value) || 30;
   const total = NINOS.reduce((s,n)=>s+n.saldo,0);
@@ -2063,7 +2145,7 @@ function showPage(name, btn) {
   if (name==='categorias') renderCategorias();
   if (name==='nominas') renderNominas();
   if (name==='historico') renderHistorico();
-  if (name==='finanzas') { renderNinos(); renderOtros(); renderAlertas(); renderDebtCountdown(); }
+  if (name==='finanzas') { renderCreditos(); renderNinos(); renderOtros(); renderDebtCountdown(); }
   renderMes();
 }
 

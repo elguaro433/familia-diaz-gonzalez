@@ -1220,14 +1220,14 @@ function renderMes() {
   document.getElementById('nom-e').value = nomE || '';
   document.getElementById('nom-s').value = nomS || '';
 
-  document.getElementById('m-ing').textContent = ing > 0 ? fmt(ing) : '\u2014 \u20ac';
-  document.getElementById('m-gas').textContent = fmt(gas);
-  document.getElementById('m-aho').textContent = ing > 0 ? fmt(aho) : '\u2014 \u20ac';
-  document.getElementById('m-ing-sub').textContent = ing > 0 ? 'Nominas del mes' : 'Anade nominas';
-  document.getElementById('m-gas-sub').textContent = mes.gastos.length + ' gastos';
-  document.getElementById('r-ing-total').textContent = fmt(ing);
-  document.getElementById('r-gas-total').textContent = fmt(gas);
-  document.getElementById('g-total').textContent = fmt(gas);
+  const elIng = document.getElementById('m-ing'); if (elIng) elIng.textContent = ing > 0 ? fmt(ing) : '\u2014 \u20ac';
+  const elGas = document.getElementById('m-gas'); if (elGas) elGas.textContent = fmt(gas);
+  const elAho = document.getElementById('m-aho'); if (elAho) elAho.textContent = ing > 0 ? fmt(aho) : '\u2014 \u20ac';
+  const elIngSub = document.getElementById('m-ing-sub'); if (elIngSub) elIngSub.textContent = ing > 0 ? 'Nominas del mes' : 'Anade nominas';
+  const elGasSub = document.getElementById('m-gas-sub'); if (elGasSub) elGasSub.textContent = mes.gastos.length + ' gastos';
+  const elRIng = document.getElementById('r-ing-total'); if (elRIng) elRIng.textContent = fmt(ing);
+  const elRGas = document.getElementById('r-gas-total'); if (elRGas) elRGas.textContent = fmt(gas);
+  const elGTot = document.getElementById('g-total'); if (elGTot) elGTot.textContent = fmt(gas);
 
   const aEl = document.getElementById('aho-main');
   if (aEl) {
@@ -1409,10 +1409,10 @@ function updTotales() {
   const ing = nomE + nomS;
   const aho = ing - gas;
 
-  document.getElementById('m-gas').textContent = fmt(gas);
-  document.getElementById('r-gas-total').textContent = fmt(gas);
-  document.getElementById('g-total').textContent = fmt(gas);
-  document.getElementById('m-aho').textContent = ing > 0 ? fmt(aho) : '\u2014 \u20ac';
+  const ug1 = document.getElementById('m-gas'); if (ug1) ug1.textContent = fmt(gas);
+  const ug2 = document.getElementById('r-gas-total'); if (ug2) ug2.textContent = fmt(gas);
+  const ug3 = document.getElementById('g-total'); if (ug3) ug3.textContent = fmt(gas);
+  const ug4 = document.getElementById('m-aho'); if (ug4) ug4.textContent = ing > 0 ? fmt(aho) : '\u2014 \u20ac';
   const aEl2 = document.getElementById('aho-main');
   if (aEl2 && ing > 0) {
     aEl2.textContent = fmt(aho);

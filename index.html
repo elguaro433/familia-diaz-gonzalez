@@ -10,7 +10,7 @@ if ('serviceWorker' in navigator) {
     regs.forEach(r => r.update());
   });
   // Si la versión cacheada es vieja, limpiar y recargar
-  const APP_VERSION = '7.1';
+  const APP_VERSION = '7.2';
   const stored = localStorage.getItem('app_version');
   if (stored !== APP_VERSION) {
     localStorage.setItem('app_version', APP_VERSION);
@@ -1417,8 +1417,10 @@ function renderMes() {
   const aho = ing - gas;
   const pct = ing > 0 ? Math.max(0, Math.min(100, (aho/ing)*100)) : 0;
 
-  document.getElementById('nom-e').value = nomE || '';
-  document.getElementById('nom-s').value = nomS || '';
+  const nomEEl = document.getElementById('nom-e');
+  const nomSEl = document.getElementById('nom-s');
+  if (nomEEl && document.activeElement !== nomEEl) nomEEl.value = nomE || '';
+  if (nomSEl && document.activeElement !== nomSEl) nomSEl.value = nomS || '';
 
   const elIng = document.getElementById('m-ing'); if (elIng) elIng.textContent = ing > 0 ? fmt(ing) : '\u2014 \u20ac';
   const elGas = document.getElementById('m-gas'); if (elGas) elGas.textContent = fmt(gas);
@@ -1683,7 +1685,11 @@ function recalc() {
   const id = MESES[mesIdx].id;
   ST[id+'_e'] = pf(document.getElementById('nom-e').value);
   ST[id+'_s'] = pf(document.getElementById('nom-s').value);
-  renderMes();
+  // Actualizar totales SIN tocar los inputs (para no perder decimales mientras se escribe)
+  const ing = ST[id+'_e'] + ST[id+'_s'];
+  const gas = totalGastos(MESES[mesIdx]);
+  const elIng = document.getElementById('m-ing'); if (elIng) elIng.textContent = ing > 0 ? fmt(ing) : '\u2014 \u20ac';
+  const elRIng = document.getElementById('r-ing-total'); if (elRIng) elRIng.textContent = fmt(ing);
   autoSave();
 }
 
@@ -1787,7 +1793,10 @@ function saveNomEdit() {
   const valS = pf(document.getElementById('nom-edit-s')?.value);
   ST[id+'_e'] = valE;
   ST[id+'_s'] = valS;
-  renderMes();
+  // Actualizar totales sin re-renderizar inputs
+  const ing = valE + valS;
+  const elIng = document.getElementById('m-ing'); if (elIng) elIng.textContent = ing > 0 ? fmt(ing) : '\u2014 \u20ac';
+  const elRIng = document.getElementById('r-ing-total'); if (elRIng) elRIng.textContent = fmt(ing);
   if (typeof autoSave === 'function') autoSave();
   if (typeof syncToCloud === 'function') syncToCloud();
 }

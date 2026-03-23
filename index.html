@@ -699,11 +699,11 @@ body {
           </div>
           <div class="nomina-row">
             <div><div class="nom-who" id="nom-name-e" onclick="editNomName('e')" style="cursor:pointer;" title="Clic para editar nombre">Emmanuel</div><div class="nom-sub">Día 27-30 del mes</div></div>
-            <input class="nom-inp" id="nom-e" type="number" placeholder="0" oninput="recalc()">
+            <input class="nom-inp" id="nom-e" type="text" inputmode="decimal" placeholder="0" oninput="recalc()">
           </div>
           <div class="nomina-row">
             <div><div class="nom-who" id="nom-name-s" onclick="editNomName('s')" style="cursor:pointer;" title="Clic para editar nombre">Esposa (Elibel)</div><div class="nom-sub">Día 27-30 del mes</div></div>
-            <input class="nom-inp" id="nom-s" type="number" placeholder="0" oninput="recalc()" style="background:rgba(155,109,255,.12);color:var(--violet);">
+            <input class="nom-inp" id="nom-s" type="text" inputmode="decimal" placeholder="0" oninput="recalc()" style="background:rgba(155,109,255,.12);color:var(--violet);">
           </div>
         </div>
 
@@ -759,7 +759,7 @@ body {
         <div id="gastos-list"></div>
         <div class="add-row">
           <input class="add-inp" id="add-con" placeholder="Concepto" type="text">
-          <input class="add-inp" id="add-imp" placeholder="&euro;" type="number" style="width:80px;flex:none;" onkeydown="if(event.key==='Enter')addGasto()">
+          <input class="add-inp" id="add-imp" placeholder="&euro;" type="text" inputmode="decimal" style="width:80px;flex:none;" onkeydown="if(event.key==='Enter')addGasto()">
           <select class="cat-sel add-inp" id="add-cat" style="flex:none;width:110px;">
             <option value="fijos">Fijo</option>
             <option value="variable">Variable</option>
@@ -801,11 +801,11 @@ body {
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
             <div style="flex:1;">
               <div style="font-size:12px;color:var(--muted);margin-bottom:4px;" id="nom-edit-name-e">Emmanuel</div>
-              <input class="nom-inp" id="nom-edit-e" type="number" placeholder="0" style="width:100%;" oninput="saveNomEdit()">
+              <input class="nom-inp" id="nom-edit-e" type="text" inputmode="decimal" placeholder="0" style="width:100%;" oninput="saveNomEdit()">
             </div>
             <div style="flex:1;">
               <div style="font-size:12px;color:var(--muted);margin-bottom:4px;" id="nom-edit-name-s">Elibel</div>
-              <input class="nom-inp" id="nom-edit-s" type="number" placeholder="0" style="width:100%;background:rgba(123,97,255,.12);color:var(--violet);" oninput="saveNomEdit()">
+              <input class="nom-inp" id="nom-edit-s" type="text" inputmode="decimal" placeholder="0" style="width:100%;background:rgba(123,97,255,.12);color:var(--violet);" oninput="saveNomEdit()">
             </div>
           </div>
           <div style="font-size:11px;color:var(--hint);">Edita las nominas del mes seleccionado arriba. Los cambios se guardan automaticamente.</div>
@@ -887,7 +887,7 @@ body {
           </div>
           <div style="padding:12px 18px;border-top:1px solid var(--border);">
             <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Consumo actual marzo: ~1.026 &euro; registrado. Actualizar si hay mas compras:</div>
-            <input class="add-inp" id="t-inp" type="number" placeholder="Consumido &euro;" style="width:100%;" oninput="updTarjeta()">
+            <input class="add-inp" id="t-inp" type="text" inputmode="decimal" placeholder="Consumido &euro;" style="width:100%;" oninput="updTarjeta()">
           </div>
         </div>
 
@@ -899,7 +899,7 @@ body {
           </div>
           <div id="ninos-list"></div>
           <div style="padding:12px 18px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;">
-            <div style="font-size:12px;color:var(--muted);flex:1;">+<input class="add-inp" id="dep-inp" type="number" value="30" style="width:50px;display:inline;padding:3px 6px;"> &euro;/mes por nino</div>
+            <div style="font-size:12px;color:var(--muted);flex:1;">+<input class="add-inp" id="dep-inp" type="text" inputmode="decimal" value="30" style="width:50px;display:inline;padding:3px 6px;"> &euro;/mes por nino</div>
             <button class="add-btn" onclick="addMesAhorro()">+ Mes</button>
           </div>
         </div>
@@ -915,7 +915,7 @@ body {
         <div id="otros-list"></div>
         <div class="add-row">
           <input class="add-inp" id="otro-con" placeholder="Concepto" type="text">
-          <input class="add-inp" id="otro-imp" placeholder="&euro;" type="number" style="width:80px;flex:none;" onkeydown="if(event.key==='Enter')addOtro()">
+          <input class="add-inp" id="otro-imp" placeholder="&euro;" type="text" inputmode="decimal" style="width:80px;flex:none;" onkeydown="if(event.key==='Enter')addOtro()">
           <button class="add-btn" onclick="addOtro()">+ Anadir</button>
         </div>
       </div>
@@ -1528,13 +1528,13 @@ function editImp(i) {
   const row = document.getElementById('gr-'+i);
   if (!row) return;
   const el = row.querySelector('.gasto-importe');
-  el.outerHTML = `<input class="gasto-importe-edit" id="iedit-${i}" type="number" value="${MESES[mesIdx].gastos[i][1]}" onblur="saveImp(${i})" onkeydown="if(event.key==='Enter'||event.key==='Tab')saveImp(${i})">`;
+  el.outerHTML = `<input class="gasto-importe-edit" id="iedit-${i}" type="text" inputmode="decimal" value="${MESES[mesIdx].gastos[i][1]}" onblur="saveImp(${i})" onkeydown="if(event.key==='Enter'||event.key==='Tab')saveImp(${i})">`;
   document.getElementById('iedit-'+i)?.focus();
 }
 function saveImp(i) {
   const inp = document.getElementById('iedit-'+i);
   if (!inp) return;
-  MESES[mesIdx].gastos[i][1] = parseFloat(inp.value) || MESES[mesIdx].gastos[i][1];
+  MESES[mesIdx].gastos[i][1] = pf(inp.value) || MESES[mesIdx].gastos[i][1];
   renderGastosList(); updTotales(); autoSave();
 }
 function cambiaCat(i, val) {
@@ -1547,7 +1547,7 @@ function delGasto(i) {
 }
 function addGasto() {
   const c = document.getElementById('add-con').value.trim();
-  const v = parseFloat(document.getElementById('add-imp').value) || 0;
+  const v = pf(document.getElementById('add-imp').value);
   const cat = document.getElementById('add-cat').value;
   if (!c || !v) return;
   MESES[mesIdx].gastos.push([c, v, cat]);
@@ -1659,10 +1659,12 @@ function updTotales() {
   }
 }
 
+function pf(v) { if (typeof v === 'string') v = v.replace(',', '.'); return parseFloat(v) || 0; }
+
 function recalc() {
   const id = MESES[mesIdx].id;
-  ST[id+'_e'] = parseFloat(document.getElementById('nom-e').value) || 0;
-  ST[id+'_s'] = parseFloat(document.getElementById('nom-s').value) || 0;
+  ST[id+'_e'] = pf(document.getElementById('nom-e').value);
+  ST[id+'_s'] = pf(document.getElementById('nom-s').value);
   renderMes();
   autoSave();
 }
@@ -1697,7 +1699,7 @@ function renderCategorias() {
         return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;">
           <span style="font-size:14px;">${c.icon}</span>
           <span style="font-size:12px;flex:1;color:var(--muted);font-weight:500;">${c.label}</span>
-          <input class="budget-edit-inp" type="number" value="${PRESUPUESTOS[k]||0}" onchange="updateBudget('${k}',this.value)">
+          <input class="budget-edit-inp" type="text" inputmode="decimal" value="${PRESUPUESTOS[k]||0}" onchange="updateBudget('${k}',this.value)">
           <span style="font-size:11px;color:var(--hint);">\u20ac</span>
         </div>`;
       }).join('') + `</div>`;
@@ -1755,7 +1757,7 @@ function renderCategorias() {
 }
 
 function updateBudget(cat, val) {
-  PRESUPUESTOS[cat] = parseFloat(val) || 0;
+  PRESUPUESTOS[cat] = pf(val);
   autoSave();
   renderCategorias();
 }
@@ -1763,8 +1765,8 @@ function updateBudget(cat, val) {
 // ── NOMINAS PAGE ──
 function saveNomEdit() {
   const id = MESES[mesIdx].id;
-  const valE = parseFloat(document.getElementById('nom-edit-e')?.value) || 0;
-  const valS = parseFloat(document.getElementById('nom-edit-s')?.value) || 0;
+  const valE = pf(document.getElementById('nom-edit-e')?.value);
+  const valS = pf(document.getElementById('nom-edit-s')?.value);
   ST[id+'_e'] = valE;
   ST[id+'_s'] = valS;
   renderMes();
@@ -1933,7 +1935,7 @@ function renderYearChart(year) {
 
 // ── FINANZAS ──
 function updTarjeta() {
-  const v = parseFloat(document.getElementById('t-inp')?.value) || tarjetaConsumo;
+  const v = pf(document.getElementById('t-inp')?.value) || tarjetaConsumo;
   tarjetaConsumo = v;
   const disp = Math.max(0, 2000 - v);
   const pct = Math.min(100, (v/2000)*100);
@@ -1964,11 +1966,11 @@ try { const sv = localStorage.getItem('familiadiaz_saldocuenta'); if (sv) saldoC
 function editSaldoCuenta() {
   const el = document.getElementById('saldo-cuenta');
   if (!el) return;
-  el.innerHTML = `<input type="number" style="font-size:24px;font-weight:700;border:2px solid var(--emerald);border-radius:8px;padding:4px 10px;width:180px;outline:none;background:white;color:var(--emerald);font-family:'JetBrains Mono',monospace;" value="${saldoCuenta}" onblur="saveSaldoCuenta(this.value)" onkeydown="if(event.key==='Enter')saveSaldoCuenta(this.value)">`;
+  el.innerHTML = `<input type="text" inputmode="decimal" style="font-size:24px;font-weight:700;border:2px solid var(--emerald);border-radius:8px;padding:4px 10px;width:180px;outline:none;background:white;color:var(--emerald);font-family:'JetBrains Mono',monospace;" value="${saldoCuenta}" onblur="saveSaldoCuenta(this.value)" onkeydown="if(event.key==='Enter')saveSaldoCuenta(this.value)">`;
   el.querySelector('input')?.focus();
 }
 function saveSaldoCuenta(val) {
-  const v = parseFloat(val);
+  const v = pf(val);
   if (!isNaN(v)) saldoCuenta = v;
   localStorage.setItem('familiadiaz_saldocuenta', saldoCuenta);
   const el = document.getElementById('saldo-cuenta');
@@ -2040,11 +2042,11 @@ function saveCredNombre(i, val) {
 function editCredPendiente(i) {
   const el = document.querySelector(`#cred-${i} span[onclick*="editCredPendiente"]`);
   if (!el) return;
-  el.outerHTML = `<input type="number" style="font-size:11px;border:1.5px solid var(--amber);border-radius:4px;padding:2px 6px;width:100px;outline:none;background:var(--amber-dim);color:var(--text);font-family:'JetBrains Mono',monospace;" value="${CREDITOS[i].pendiente}" onblur="saveCredPendiente(${i},this.value)" onkeydown="if(event.key==='Enter')saveCredPendiente(${i},this.value)">`;
+  el.outerHTML = `<input type="text" inputmode="decimal" style="font-size:11px;border:1.5px solid var(--amber);border-radius:4px;padding:2px 6px;width:100px;outline:none;background:var(--amber-dim);color:var(--text);font-family:'JetBrains Mono',monospace;" value="${CREDITOS[i].pendiente}" onblur="saveCredPendiente(${i},this.value)" onkeydown="if(event.key==='Enter')saveCredPendiente(${i},this.value)">`;
   document.querySelector(`#cred-${i} input[type=number]`)?.focus();
 }
 function saveCredPendiente(i, val) {
-  const v = parseFloat(val);
+  const v = pf(val);
   if (!isNaN(v) && v >= 0) CREDITOS[i].pendiente = v;
   if (CREDITOS[i].pendiente <= 0) { CREDITOS[i].pendiente = 0; CREDITOS[i].pagado = true; }
   saveCreditos(); renderCreditos();
@@ -2082,7 +2084,7 @@ function removeCredCuotas(c) {
 }
 
 function renderNinos() {
-  const dep = parseFloat(document.getElementById('dep-inp')?.value) || 30;
+  const dep = pf(document.getElementById('dep-inp')?.value) || 30;
   const total = NINOS.reduce((s,n)=>s+n.saldo,0);
   const badge = document.getElementById('ninos-total-badge');
   if (badge) badge.textContent = fmt(total);
@@ -2110,17 +2112,17 @@ function renderNinos() {
 function editNino(i) {
   const el = document.getElementById('ns-'+i);
   if (!el) return;
-  el.outerHTML = `<input class="nino-edit" id="ni-${i}" type="number" value="${NINOS[i].saldo}" onblur="saveNino(${i})" onkeydown="if(event.key==='Enter')saveNino(${i})">`;
+  el.outerHTML = `<input class="nino-edit" id="ni-${i}" type="text" inputmode="decimal" value="${NINOS[i].saldo}" onblur="saveNino(${i})" onkeydown="if(event.key==='Enter')saveNino(${i})">`;
   document.getElementById('ni-'+i)?.focus();
 }
 function saveNino(i) {
   const inp = document.getElementById('ni-'+i);
   if (!inp) return;
-  NINOS[i].saldo = parseFloat(inp.value) || NINOS[i].saldo;
+  NINOS[i].saldo = pf(inp.value) || NINOS[i].saldo;
   renderNinos(); autoSave();
 }
 function addMesAhorro() {
-  const dep = parseFloat(document.getElementById('dep-inp')?.value) || 30;
+  const dep = pf(document.getElementById('dep-inp')?.value) || 30;
   NINOS.forEach(n => n.saldo += dep);
   renderNinos(); autoSave();
 }
@@ -2154,14 +2156,14 @@ function saveOtroN(i) { const inp = document.getElementById('one-'+i); if (!inp)
 function editOtroI(i) {
   const el = document.getElementById('or-'+i)?.querySelector('.otro-imp');
   if (!el) return;
-  el.outerHTML = `<input class="otro-imp-edit" id="oie-${i}" type="number" value="${otrosIngresos[i].importe}" onblur="saveOtroI(${i})" onkeydown="if(event.key==='Enter')saveOtroI(${i})">`;
+  el.outerHTML = `<input class="otro-imp-edit" id="oie-${i}" type="text" inputmode="decimal" value="${otrosIngresos[i].importe}" onblur="saveOtroI(${i})" onkeydown="if(event.key==='Enter')saveOtroI(${i})">`;
   document.getElementById('oie-'+i)?.focus();
 }
-function saveOtroI(i) { const inp = document.getElementById('oie-'+i); if (!inp) return; otrosIngresos[i].importe = parseFloat(inp.value)||otrosIngresos[i].importe; renderOtros(); autoSave(); }
+function saveOtroI(i) { const inp = document.getElementById('oie-'+i); if (!inp) return; otrosIngresos[i].importe = pf(inp.value)||otrosIngresos[i].importe; renderOtros(); autoSave(); }
 function delOtro(i) { otrosIngresos.splice(i,1); renderOtros(); autoSave(); }
 function addOtro() {
   const n = document.getElementById('otro-con').value.trim();
-  const v = parseFloat(document.getElementById('otro-imp').value)||0;
+  const v = pf(document.getElementById('otro-imp').value);
   if (!n||!v) return;
   otrosIngresos.push({nombre:n,importe:v});
   document.getElementById('otro-con').value='';

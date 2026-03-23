@@ -1,4 +1,4 @@
-const CACHE_NAME = 'diaz-gonzalez-v6';
+const CACHE_NAME = 'diaz-gonzalez-v7';
 const URLS_TO_CACHE = [
   './',
   './index.html',
@@ -22,6 +22,10 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   e.respondWith(
-    caches.match(e.request).then(r => r || fetch(e.request).catch(() => caches.match('./index.html')))
+    fetch(e.request).then(response => {
+      const clone = response.clone();
+      caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
+      return response;
+    }).catch(() => caches.match(e.request).then(r => r || caches.match('./index.html')))
   );
 });

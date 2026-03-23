@@ -4,23 +4,27 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script>
-// Forzar actualización del Service Worker en todos los dispositivos
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then(regs => {
-    regs.forEach(r => r.update());
-  });
-  // Si la versión cacheada es vieja, limpiar y recargar
-  const APP_VERSION = '7.2';
+// Limpiar Service Workers y caches viejos - APP NO USA CACHE
+(async function() {
+  const APP_VERSION = '8.0';
   const stored = localStorage.getItem('app_version');
+  if ('serviceWorker' in navigator) {
+    const regs = await navigator.serviceWorker.getRegistrations();
+    for (const r of regs) { await r.unregister(); }
+  }
+  if ('caches' in window) {
+    const keys = await caches.keys();
+    for (const k of keys) { await caches.delete(k); }
+  }
   if (stored !== APP_VERSION) {
     localStorage.setItem('app_version', APP_VERSION);
-    if ('caches' in window) {
-      caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
-    }
-    if (stored) location.reload(true);
+    if (stored) { location.reload(true); return; }
   }
-}
+})();
 </script>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#1e293b">
@@ -977,6 +981,7 @@ function syncToCloud() {
     pagos: JSON.stringify(PAGOS),
     creditos: JSON.stringify(CREDITOS),
     nomNames: JSON.stringify(NOM_NAMES),
+    nominasEditadas: JSON.stringify(ST),
     saldoCuenta: saldoCuenta,
     tarjetaConsumo: tarjetaConsumo,
     ninos: JSON.stringify(NINOS),
@@ -1019,6 +1024,13 @@ function syncFromCloud() {
           cloudNinos.forEach(n => NINOS.push(n));
         }
         if (data.otrosIngresos) otrosIngresos = JSON.parse(data.otrosIngresos);
+        if (data.nominasEditadas) {
+          const cloudST = JSON.parse(data.nominasEditadas);
+          Object.keys(ST).forEach(k => delete ST[k]);
+          Object.assign(ST, cloudST);
+          // Guardar en localStorage también
+          Object.entries(ST).forEach(([k,v]) => localStorage.setItem('familiadiaz_'+k, v));
+        }
         if (data.notas) localStorage.setItem('familiadiaz_notas', data.notas);
 
         // Save to localStorage too
@@ -2525,10 +2537,7 @@ updateThemeButton();
 syncFromCloud();
 listenForChanges();
 
-// ── PWA SERVICE WORKER ──
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(() => {});
-}
+// NO registrar Service Worker - la app usa Firebase sync y no necesita cache offline
 </script>
 </body>
 </html>

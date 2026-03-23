@@ -1,4 +1,4 @@
-const CACHE_NAME = 'diaz-gonzalez-v7';
+const CACHE_NAME = 'diaz-gonzalez-v8';
 const URLS_TO_CACHE = [
   './',
   './index.html',

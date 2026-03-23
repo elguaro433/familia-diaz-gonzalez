@@ -3,6 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+// Forzar actualización del Service Worker en todos los dispositivos
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(regs => {
+    regs.forEach(r => r.update());
+  });
+  // Si la versión cacheada es vieja, limpiar y recargar
+  const APP_VERSION = '7.1';
+  const stored = localStorage.getItem('app_version');
+  if (stored !== APP_VERSION) {
+    localStorage.setItem('app_version', APP_VERSION);
+    if ('caches' in window) {
+      caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+    }
+    if (stored) location.reload(true);
+  }
+}
+</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#1e293b">

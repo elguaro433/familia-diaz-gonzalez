@@ -1102,7 +1102,8 @@ const NOMINAS_REAL = {
   'Dic 2025': { e: 3400.86, s: 5518.59 },
   'Ene 2026': { e: 3102.39, s: 6035.75 },
   'Feb 2026': { e: 0, s: 3134.49 },
-  'Mar 2026': { e: 2675.70, s: 0 },
+  'Mar 2026': { e: 2675.70, s: 2917.44 },
+  'Abr 2026': { e: 3215.18, s: 0 },
 };
 
 // ══ PRESUPUESTOS (improvement #2) ══
@@ -1181,23 +1182,26 @@ const MESES = [
   {id:"Ene 2026",gastos:[["Microsoft mensual",7,"fijos"],["Morabanc 10/24",292,"fijos"],["Cantina",790,"fijos"],["Actividad APACEF",92,"fijos"],["Universidad",266,"fijos"],["Dacia 11/60",337,"fijos"],["Piso",887,"fijos"],["Trastero",127,"fijos"],["Telecom Andorra",100,"fijos"],["FEDA",198.06,"fijos"],["Parking",85,"fijos"],["Netflix",14,"fijos"],["Inlingua",146,"fijos"],["Basas EYE",48,"salud"],["Crem Salud",105,"salud"],["Artal",270,"variable"],["Colegio Enfermeria",49,"fijos"],["Gastos fijos extra",91,"fijos"],["ARTAL SA (domiciliado)",269.63,"variable"],["CLINICA DENTAL",168.09,"salud"],["WISE",200,"variable"],["Caprabo",88.50,"super"],["Andorra 2000 (TC)",123.46,"super"],["Hiper Andorra 2 (TC)",64.95,"super"],["Caprabo/Proxi (TC)",23.3,"super"],["Supermercats Proxi 4 (TC)",15.02,"super"],["Saltoki (TC)",45.05,"super"],["Total MKT FR (TC)",48.03,"super"],["Migros Suiza (TC)",151.21,"super"],["Clinica Dental (TC)",206.58,"salud"],["Farmacia Galeno (TC)",36.54,"salud"],["Saas Clinica (TC)",10.15,"salud"],["Centro Hospitalari (TC)",16.97,"salud"],["Universidad TC",266.67,"fijos"],["Netflix TC",13.99,"fijos"],["Break Pizza (TC)",58.0,"restaurante"],["Bar Rest Raco d'Aixovall (TC)",1.4,"restaurante"],["Petro Belmont Suiza (TC)",63.81,"variable"],["VTP / UCPA VITAM (TC)",112.5,"variable"],["Passway CA (TC)",139.8,"variable"],["IHG Points (TC)",76.88,"variable"],["Rentaki-2 (TC)",44.0,"variable"],["Temu.com (TC)",32.11,"variable"],["Gasolina/peajes (TC)",26.07,"variable"],["Artal (TC)",11.96,"variable"],["Aparcamiento (TC)",21.2,"variable"],["Andorra Telecom TPV (TC)",10.0,"fijos"]]},
   {id:"Feb 2026",gastos:[["Microsoft mensual",7,"fijos"],["Poliza Dacia anual",674,"fijos"],["Morabanc 10/24",292,"fijos"],["Cantina",140,"fijos"],["Actividad APACEF",92,"fijos"],["Universidad",266,"fijos"],["Dacia 12/60",337,"fijos"],["Piso",865,"fijos"],["Trastero",127,"fijos"],["Telecom Andorra",100,"fijos"],["FEDA",213,"fijos"],["Parking",88,"fijos"],["Netflix",14,"fijos"],["Inlingua",146,"fijos"],["Basas EDE",62,"salud"],["Crem Salud",105,"salud"],["Pintura piso mano obra",182,"variable"],["Peaje Via-T Suiza",750,"variable"],["Artal",400,"variable"],["Lavadora",178,"variable"],["4Health anual",35,"salud"],["BECIER ASSEGURA",673.75,"fijos"],["Andorra 2000",93.87,"super"],["Caprabo",14.01,"super"],["Decathlon",25.47,"variable"],["MC Donalds",8.90,"restaurante"],["Farmacia Galeno",21.51,"salud"],["Barberia",50,"variable"],["Andorra 2000 (TC)",203.82,"super"],["Hiper Andorra 2 (TC)",27.08,"super"],["Caprabo (TC)",21.69,"super"],["CCA El Centre (TC)",13.08,"super"],["El Rei del Pollastre (TC)",33.88,"restaurante"],["Restaurante Mi Tierra (TC)",87.0,"restaurante"],["MC Donald's (TC)",8.8,"restaurante"],["Holiday Inn St. Cugat (TC)",13.9,"restaurante"],["Clinica Verge Meritxell (TC)",16.97,"salud"],["Residencia Marticella (TC)",58.45,"salud"],["Farmacia Galeno III (TC)",33.65,"salud"],["Universidad TC",266.63,"fijos"],["Netflix TC",13.99,"fijos"],["Claude.ai / Anthropic (TC)",113.29,"variable"],["Gainzalgo.com (TC)",177.26,"variable"],["Shein (TC)",55.22,"variable"],["Temu.com (TC)",67.77,"variable"],["VIA MODA 4 (TC)",16.15,"variable"],["Google Play / Workspace (TC)",30.21,"variable"],["360Extrem (TC)",24.5,"variable"],["Pythonanywhere (TC)",8.52,"variable"],["Artal / gasolina (TC)",18.58,"variable"],["Ski Home 2017 (TC)",23.25,"variable"],["Aparcamiento (TC)",10.0,"variable"],["ONCE (TC)",23.0,"otros"]]},
   {id:"Mar 2026",gastos:[["Microsoft",7,"fijos"],["Morabanc 11/24",292,"fijos"],["Morabanc Dacia 13/60",337,"fijos"],["Cantina",190,"fijos"],["Actividad APACEF",92,"fijos"],["Piso",910,"fijos"],["Trastero",127,"fijos"],["Telecom Andorra",100,"fijos"],["FEDA",193.93,"fijos"],["Parking",88,"fijos"],["Netflix",14,"fijos"],["Inlingua",146,"fijos"],["Basas salud",62,"salud"],["Crem Salud",105,"salud"],["Lavadora",90,"variable"],["Artal gasolinera",77,"variable"],["Mercadona La Seu",98.72,"super"],["WISE",52.60,"variable"],["RAPIDAND",135.47,"variable"],["Barberia Espai",50,"variable"],["Casa Berge",12.90,"restaurante"],["Bershka",30.14,"variable"],["Taxi",8.80,"variable"],["APACEF actividad",46,"fijos"],["Andorra Telecom domicil",100,"fijos"],["Cafeteria L'Altra (varias)",9.30,"restaurante"],["Pago pasaje avion",316.70,"variable"],["Pasajes viaje Venezuela",3765.00,"otros"],["Andorra 2000",84.54,"super"],["Hiper Andorra 2",63.29,"super"],["Aldi La Seu",49.94,"super"],["Caprabo (varias)",32.27,"super"],["Farmacia Galeno III (TC)",134.48,"salud"],["Aldara Martinez",11.93,"salud"],["Clinica Dental",28.01,"salud"],["Centre Hospitalari",45.90,"salud"],["Karting El Pla (TC)",202.5,"variable"],["Netflix TC",13.99,"fijos"],["Artal S.A. (TC+gasolina)",50.62,"variable"],["Uber (TC)",25.9,"restaurante"],["Amazon (TC)",15.0,"variable"],["Gasolina La Margineda+Becier",24.60,"variable"],["Primor",14.99,"variable"],["Grauvell",15.0,"variable"],["Tecteltic 01 (TC)",220.0,"otros"],["Congreso Navarra",87.50,"otros"]]},
-  {id:"Abr 2026",gastos:[["Microsoft",7,"fijos"],["Morabanc 12/24",292,"fijos"],["Morabanc Dacia 14/60",337,"fijos"],["Cantina",190,"fijos"],["Actividad APACEF",92,"fijos"],["Piso",910,"fijos"],["Trastero",127,"fijos"],["Telecom Andorra",100,"fijos"],["FEDA",150,"fijos"],["Parking",88,"fijos"],["Netflix",14,"fijos"],["Inlingua",146,"fijos"],["Basas salud",62,"salud"],["Crem Salud",105,"salud"]]},
-  {id:"May 2026",gastos:[["Microsoft",7,"fijos"],["Preconcedit 12K",553.22,"fijos"],["Preconcedit 3640",292.11,"fijos"],["Prestec cotxe",335.47,"fijos"],["Cantina",190,"fijos"],["Actividad APACEF",92,"fijos"],["Piso",910,"fijos"],["Trastero",127,"fijos"],["Telecom Andorra",100,"fijos"],["FEDA",150,"fijos"],["Parking",88,"fijos"],["Netflix",14,"fijos"],["Inlingua",146,"fijos"],["Basas salud",62,"salud"],["Crem Salud",105,"salud"]]},
-  {id:"Jun 2026",gastos:[["Microsoft",7,"fijos"],["Preconcedit 12K",553.22,"fijos"],["Preconcedit 3640",292.11,"fijos"],["Prestec cotxe",335.47,"fijos"],["Cantina",190,"fijos"],["Actividad APACEF",92,"fijos"],["Piso",910,"fijos"],["Trastero",127,"fijos"],["Telecom Andorra",100,"fijos"],["FEDA",150,"fijos"],["Parking",88,"fijos"],["Netflix",14,"fijos"],["Inlingua",146,"fijos"],["Basas salud",62,"salud"],["Crem Salud",105,"salud"]]},
-  {id:"Jul 2026",gastos:[["Microsoft",7,"fijos"],["Preconcedit 12K",553.22,"fijos"],["Preconcedit 3640",292.11,"fijos"],["Prestec cotxe",335.47,"fijos"],["Cantina",190,"fijos"],["Actividad APACEF",92,"fijos"],["Piso",910,"fijos"],["Trastero",127,"fijos"],["Telecom Andorra",100,"fijos"],["FEDA",150,"fijos"],["Parking",88,"fijos"],["Netflix",14,"fijos"],["Inlingua",146,"fijos"],["Basas salud",62,"salud"],["Crem Salud",105,"salud"]]},
-  {id:"Ago 2026",gastos:[["Microsoft",7,"fijos"],["Preconcedit 12K",553.22,"fijos"],["Preconcedit 3640",292.11,"fijos"],["Prestec cotxe",335.47,"fijos"],["Piso",910,"fijos"],["Trastero",127,"fijos"],["Telecom Andorra",100,"fijos"],["FEDA",150,"fijos"],["Parking",88,"fijos"],["Netflix",14,"fijos"],["Inlingua",146,"fijos"],["Basas salud",62,"salud"],["Crem Salud",105,"salud"]]},
-  {id:"Sep 2026",gastos:[["Microsoft",7,"fijos"],["Preconcedit 12K",553.22,"fijos"],["Preconcedit 3640",292.11,"fijos"],["Prestec cotxe",335.47,"fijos"],["Cantina",190,"fijos"],["Actividad APACEF",92,"fijos"],["Piso",910,"fijos"],["Trastero",127,"fijos"],["Telecom Andorra",100,"fijos"],["FEDA",150,"fijos"],["Parking",88,"fijos"],["Netflix",14,"fijos"],["Inlingua",146,"fijos"],["Basas salud",62,"salud"],["Crem Salud",105,"salud"]]},
-  {id:"Oct 2026",gastos:[["Microsoft",7,"fijos"],["Preconcedit 12K",553.22,"fijos"],["Preconcedit 3640",292.11,"fijos"],["Prestec cotxe",335.47,"fijos"],["Cantina",190,"fijos"],["Actividad APACEF",92,"fijos"],["Piso",910,"fijos"],["Trastero",127,"fijos"],["Telecom Andorra",100,"fijos"],["FEDA",150,"fijos"],["Parking",88,"fijos"],["Netflix",14,"fijos"],["Inlingua",146,"fijos"],["Basas salud",62,"salud"],["Crem Salud",105,"salud"]]},
-  {id:"Nov 2026",gastos:[["Microsoft",7,"fijos"],["Preconcedit 12K",553.22,"fijos"],["Preconcedit 3640",292.11,"fijos"],["Prestec cotxe",335.47,"fijos"],["Cantina",190,"fijos"],["Actividad APACEF",92,"fijos"],["Piso",910,"fijos"],["Trastero",127,"fijos"],["Telecom Andorra",100,"fijos"],["FEDA",150,"fijos"],["Parking",88,"fijos"],["Netflix",14,"fijos"],["Inlingua",146,"fijos"],["Basas salud",62,"salud"],["Crem Salud",105,"salud"]]},
-  {id:"Dic 2026",gastos:[["Microsoft",7,"fijos"],["Preconcedit 12K",553.22,"fijos"],["Preconcedit 3640",292.11,"fijos"],["Prestec cotxe",335.47,"fijos"],["Cantina",790,"fijos"],["Actividad APACEF",92,"fijos"],["Piso",910,"fijos"],["Trastero",127,"fijos"],["Telecom Andorra",100,"fijos"],["FEDA",150,"fijos"],["Parking",88,"fijos"],["Netflix",14,"fijos"],["Inlingua",146,"fijos"],["Basas salud",62,"salud"],["Crem Salud",105,"salud"]]}
+  {id:"Abr 2026",gastos:[["Microsoft",7,"fijos"],["Morabanc Dacia 14/60",335.47,"fijos"],["Cantina",190,"fijos"],["Actividad APACEF",92,"fijos"],["Piso",910.87,"fijos"],["Trastero",127,"fijos"],["Telecom Andorra",100,"fijos"],["FEDA",186.45,"fijos"],["Parking",88.50,"fijos"],["Netflix",14,"fijos"],["Inlingua",146,"fijos"],["Seguro CA Vida",61.92,"fijos"],["Bizum préstamo",100,"fijos"],["Basas salud",62,"salud"],["Crem Salud",104.17,"salud"],["Consultori Medic",7.77,"salud"],["Saas Clinica",8.92,"salud"],["Centre Hospitalari",10.20,"salud"],["Farmacia Edelweiss",22.50,"salud"],["Temu.com (varias)",83.01,"variable"],["Airbnb",81.63,"variable"],["Souvenirs Shop",7.50,"variable"],["Institut Oceano",2.00,"variable"],["Aparcament (varios)",12.30,"variable"],["Gasolina (varios)",7.67,"variable"],["Alojamiento",100,"variable"],["Caprabo (varias)",9.13,"super"],["Andorra 2000",79.57,"super"],["Sant Eloi La Massana",2.07,"restaurante"],["Reserva coche viaje verano",500,"otros"],["Viaje transferencia",100,"otros"],["Pago transferencia",500,"otros"]]},
+  {id:"May 2026",gastos:[["Microsoft",7,"fijos"],["Preconcedit 12K",553.22,"fijos"],["Prestec cotxe",335.47,"fijos"],["Cantina",190,"fijos"],["Actividad APACEF",92,"fijos"],["Piso",910,"fijos"],["Trastero",127,"fijos"],["Telecom Andorra",100,"fijos"],["FEDA",150,"fijos"],["Parking",88,"fijos"],["Netflix",14,"fijos"],["Inlingua",146,"fijos"],["Basas salud",62,"salud"],["Crem Salud",105,"salud"]]},
+  {id:"Jun 2026",gastos:[["Microsoft",7,"fijos"],["Preconcedit 12K",553.22,"fijos"],["Prestec cotxe",335.47,"fijos"],["Cantina",190,"fijos"],["Actividad APACEF",92,"fijos"],["Piso",910,"fijos"],["Trastero",127,"fijos"],["Telecom Andorra",100,"fijos"],["FEDA",150,"fijos"],["Parking",88,"fijos"],["Netflix",14,"fijos"],["Inlingua",146,"fijos"],["Basas salud",62,"salud"],["Crem Salud",105,"salud"]]},
+  {id:"Jul 2026",gastos:[["Microsoft",7,"fijos"],["Preconcedit 12K",553.22,"fijos"],["Prestec cotxe",335.47,"fijos"],["Cantina",190,"fijos"],["Actividad APACEF",92,"fijos"],["Piso",910,"fijos"],["Trastero",127,"fijos"],["Telecom Andorra",100,"fijos"],["FEDA",150,"fijos"],["Parking",88,"fijos"],["Netflix",14,"fijos"],["Inlingua",146,"fijos"],["Basas salud",62,"salud"],["Crem Salud",105,"salud"]]},
+  {id:"Ago 2026",gastos:[["Microsoft",7,"fijos"],["Preconcedit 12K",553.22,"fijos"],["Prestec cotxe",335.47,"fijos"],["Piso",910,"fijos"],["Trastero",127,"fijos"],["Telecom Andorra",100,"fijos"],["FEDA",150,"fijos"],["Parking",88,"fijos"],["Netflix",14,"fijos"],["Inlingua",146,"fijos"],["Basas salud",62,"salud"],["Crem Salud",105,"salud"]]},
+  {id:"Sep 2026",gastos:[["Microsoft",7,"fijos"],["Preconcedit 12K",553.22,"fijos"],["Prestec cotxe",335.47,"fijos"],["Cantina",190,"fijos"],["Actividad APACEF",92,"fijos"],["Piso",910,"fijos"],["Trastero",127,"fijos"],["Telecom Andorra",100,"fijos"],["FEDA",150,"fijos"],["Parking",88,"fijos"],["Netflix",14,"fijos"],["Inlingua",146,"fijos"],["Basas salud",62,"salud"],["Crem Salud",105,"salud"]]},
+  {id:"Oct 2026",gastos:[["Microsoft",7,"fijos"],["Preconcedit 12K",553.22,"fijos"],["Prestec cotxe",335.47,"fijos"],["Cantina",190,"fijos"],["Actividad APACEF",92,"fijos"],["Piso",910,"fijos"],["Trastero",127,"fijos"],["Telecom Andorra",100,"fijos"],["FEDA",150,"fijos"],["Parking",88,"fijos"],["Netflix",14,"fijos"],["Inlingua",146,"fijos"],["Basas salud",62,"salud"],["Crem Salud",105,"salud"]]},
+  {id:"Nov 2026",gastos:[["Microsoft",7,"fijos"],["Preconcedit 12K",553.22,"fijos"],["Prestec cotxe",335.47,"fijos"],["Cantina",190,"fijos"],["Actividad APACEF",92,"fijos"],["Piso",910,"fijos"],["Trastero",127,"fijos"],["Telecom Andorra",100,"fijos"],["FEDA",150,"fijos"],["Parking",88,"fijos"],["Netflix",14,"fijos"],["Inlingua",146,"fijos"],["Basas salud",62,"salud"],["Crem Salud",105,"salud"]]},
+  {id:"Dic 2026",gastos:[["Microsoft",7,"fijos"],["Preconcedit 12K",553.22,"fijos"],["Prestec cotxe",335.47,"fijos"],["Cantina",790,"fijos"],["Actividad APACEF",92,"fijos"],["Piso",910,"fijos"],["Trastero",127,"fijos"],["Telecom Andorra",100,"fijos"],["FEDA",150,"fijos"],["Parking",88,"fijos"],["Netflix",14,"fijos"],["Inlingua",146,"fijos"],["Basas salud",62,"salud"],["Crem Salud",105,"salud"]]}
 ];
 
-// Mes inicial = Mar 2026 (mes actual)
-let mesIdx = MESES.findIndex(m => m.id === 'Mar 2026');
+// Mes inicial = mes actual (detección automática)
+const _MNAMES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+const _now = new Date();
+const _mesActual = _MNAMES[_now.getMonth()] + ' ' + _now.getFullYear();
+let mesIdx = MESES.findIndex(m => m.id === _mesActual);
 if (mesIdx < 0) mesIdx = MESES.length - 1;
 let catFilter = 'todos';
 let otrosIngresos = [];
-let tarjetaConsumo = 1847.51;
+let tarjetaConsumo = 707.18;
 let searchQuery = '';
 
 const NINOS = [
@@ -1205,17 +1209,25 @@ const NINOS = [
   { nombre: "Emmanuel", ini: "EA", color: "#00b87a", bg: "rgba(0,184,122,.12)", saldo: 450 }
 ];
 
-const ALERTAS = [
-  {concepto:"Morabanc cuota prestamo",importe:292,fecha:"1 mayo 2026"},
-  {concepto:"Morabanc Dacia",importe:337,fecha:"1 mayo 2026"},
-  {concepto:"Piso",importe:910,fecha:"1 mayo 2026"},
-  {concepto:"Telecom Andorra",importe:100,fecha:"1 mayo 2026"},
-  {concepto:"Universidad",importe:266,fecha:"1 mayo 2026"},
-  {concepto:"Netflix",importe:14,fecha:"1 mayo 2026"},
-  {concepto:"Inlingua",importe:146,fecha:"1 mayo 2026"},
-  {concepto:"Crem Salud",importe:105,fecha:"1 mayo 2026"},
-  {concepto:"Microsoft mensual",importe:7,fecha:"11 junio 2026"}
-];
+// ALERTAS dinámicas — se generan del próximo mes automáticamente
+function generarAlertas() {
+  const _MN = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const _MNfull = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const sigIdx = mesIdx + 1;
+  if (sigIdx >= MESES.length) return [];
+  const sigMes = MESES[sigIdx];
+  const parts = sigMes.id.split(' ');
+  const mesNum = _MN.indexOf(parts[0]);
+  const anio = parts[1];
+  return sigMes.gastos
+    .filter(([,,cat]) => cat === 'fijos')
+    .map(([concepto, importe]) => ({
+      concepto,
+      importe,
+      fecha: '1 ' + _MNfull[mesNum] + ' ' + anio
+    }));
+}
+let ALERTAS = generarAlertas();
 
 // ══ PAGO STATUS — persistido en localStorage ══
 const PAY_KEY = 'familiadiaz_pagos';
@@ -1635,7 +1647,7 @@ function toggleNotaInput(gastoIdx) {
   const currentNote = GASTO_NOTAS[key] || '';
   const noteDiv = document.createElement('div');
   noteDiv.style.cssText = 'padding:2px 18px 6px 18px;display:flex;gap:6px;align-items:center;';
-  noteDiv.innerHTML = `<input class="gasto-note-input" id="nota-inp-${gastoIdx}" placeholder="Escribe una nota..." value="${currentNote.replace(/"/g,'&quot;')}" onkeydown="if(event.key==='Enter')saveNota(${gastoIdx})"><button class="add-btn" style="padding:4px 10px;font-size:11px;" onclick="saveNota(${gastoIdx})">OK</button>`;
+  noteDiv.innerHTML = `<input class="gasto-note-input" id="nota-inp-${gastoIdx}" placeholder="Escribe una nota..." value="${currentNote.replace(/"/g,'&quot;')}" onkeydown="if(event.key==='Enter')saveNota(${gastoIdx})"><button class="add-btn" style="padding:4px 10px;font-size:11px;" onclick="saveNota(${gastoIdx})">Guardar</button>`;
   row.insertAdjacentElement('afterend', noteDiv);
   document.getElementById('nota-inp-' + gastoIdx)?.focus();
 }
@@ -1835,7 +1847,7 @@ function renderNominas() {
   const histS = document.getElementById('nom-hist-s');
   if (!histE) return;
 
-  const meses26 = MESES.filter(m => m.id.includes('2026')||m.id.includes('2025'));
+  const meses26 = MESES.slice(-14);
   histE.innerHTML = meses26.map((m,i) => {
     const n = getNominas(m.id);
     const v = ST[m.id+'_e'] ?? n.e;
@@ -1885,7 +1897,8 @@ function renderNominas() {
 
 // ── HISTORIAL ──
 function renderHistorico() {
-  const years = [2022,2023,2024,2025,2026];
+  const yearsSet = new Set(MESES.map(m => parseInt(m.id.slice(-4))));
+  const years = [...yearsSet].sort();
   const yearTotals = {};
   years.forEach(y => yearTotals[y] = 0);
   MESES.forEach(m => {
@@ -1908,7 +1921,7 @@ function renderHistorico() {
     if (window._ca) window._ca.destroy();
     window._ca = new Chart(ctx1, {
       type: 'bar',
-      data: { labels: years.map(String), datasets: [{ data: years.map(y=>Math.round(yearTotals[y])), backgroundColor: ['rgba(56,199,255,.5)','rgba(155,109,255,.5)','rgba(255,179,64,.5)','rgba(0,229,160,.5)','rgba(255,92,106,.5)'], borderRadius: 8 }] },
+      data: { labels: years.map(String), datasets: [{ data: years.map(y=>Math.round(yearTotals[y])), backgroundColor: years.map((_,i)=>['rgba(56,199,255,.5)','rgba(155,109,255,.5)','rgba(255,179,64,.5)','rgba(0,229,160,.5)','rgba(255,92,106,.5)','rgba(56,199,255,.5)','rgba(155,109,255,.5)'][i%7]), borderRadius: 8 }] },
       options: { responsive:true,maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{grid:{display:false},ticks:{color:'#9ca3af',font:{family:'JetBrains Mono',size:11}}},y:{grid:{color:'rgba(0,0,0,.07)'},ticks:{color:'#9ca3af',font:{family:'JetBrains Mono',size:10},callback:v=>(v/1000).toFixed(0)+'k'}}}}
     });
   }
@@ -1925,14 +1938,17 @@ function renderHistorico() {
   }).join('');
 
   // Year detail chart
-  renderYearChart(2026);
+  renderYearChart(new Date().getFullYear());
 }
 
-let selectedYear = 2026;
+let selectedYear = new Date().getFullYear();
 function renderYearChart(year) {
   selectedYear = year;
-  const years = [2022,2023,2024,2025,2026];
-  const colors = {2022:'#00b4d8',2023:'#7b61ff',2024:'#ffaa00',2025:'#00d68f',2026:'#ff3d71'};
+  const yearsSet2 = new Set(MESES.map(m => parseInt(m.id.slice(-4))));
+  const years = [...yearsSet2].sort();
+  const palette = ['#00b4d8','#7b61ff','#ffaa00','#00d68f','#ff3d71','#38c7ff','#ff6fb0'];
+  const colors = {};
+  years.forEach((y,i) => colors[y] = palette[i % palette.length]);
   const btnEl = document.getElementById('year-btns');
   if (btnEl) {
     btnEl.innerHTML = years.map(y => {
@@ -1994,12 +2010,12 @@ const CRED_KEY = 'familiadiaz_creditos';
 let CREDITOS = [
   { id: 'cotxe', nombre: 'Prestec cotxe', tasa: 6.22, vence: 'Feb 2030', ref: '250047', cuota: 335.47, pendiente: 13960.38, color: 'var(--coral)', pagado: false },
   { id: '12k', nombre: 'Preconcedit consum 12.000', tasa: 9.54, vence: 'Abr 2028', ref: '266545', cuota: 553.22, pendiente: 12000, color: 'var(--pink)', pagado: false, cuotasTotales: 24 },
-  { id: '3640', nombre: 'Preconcedit consum 3.640', tasa: 7.34, vence: 'Abr 2027', ref: '256635', cuota: 292.11, pendiente: 3639.51, color: 'var(--amber)', pagado: false }
+  { id: '3640', nombre: 'Preconcedit consum 3.640 (LIQUIDADO)', tasa: 7.34, vence: 'Mar 2026', ref: '256635', cuota: 292.11, pendiente: 0, color: 'var(--amber)', pagado: true }
 ];
 try { const saved = JSON.parse(localStorage.getItem(CRED_KEY)); if (saved && saved.length) CREDITOS = saved; } catch(e) {}
 function saveCreditos() { localStorage.setItem(CRED_KEY, JSON.stringify(CREDITOS)); syncToCloud(); }
 
-let saldoCuenta = 5190.25;
+let saldoCuenta = 2213.63;
 try { const sv = localStorage.getItem('familiadiaz_saldocuenta'); if (sv) saldoCuenta = parseFloat(sv); } catch(e) {}
 
 function editSaldoCuenta() {
@@ -2211,6 +2227,7 @@ function addOtro() {
 }
 
 function renderAlertas() {
+  ALERTAS = generarAlertas();
   const total = ALERTAS.reduce((s,a)=>s+a.importe,0);
   const el = document.getElementById('alertas-total');
   if (el) el.textContent = fmt(total);
@@ -2371,7 +2388,7 @@ function renderProjection() {
     const n = getNominas(m.id);
     const e = ST[m.id+'_e'] ?? n.e;
     const s = ST[m.id+'_s'] ?? n.s;
-    return (e + s) > 0 && m.id.includes('2026');
+    return (e + s) > 0;
   });
 
   if (withIncome.length < 2) {
@@ -2427,7 +2444,74 @@ function updateThemeButton() {
 
 // ── EXPORT PDF (improvement #4) ──
 function exportPDF() {
-  window.print();
+  const mes = MESES[mesIdx];
+  if (!mes) return;
+  const id = mes.id;
+  const gas = totalGastos(mes);
+  const nom = getNominas(id);
+  const nomE = ST[id+'_e'] ?? nom.e;
+  const nomS = ST[id+'_s'] ?? nom.s;
+  const ing = nomE + nomS;
+  const aho = ing - gas;
+
+  // Agrupar por categoría
+  const porCat = {};
+  mes.gastos.forEach(([concepto, importe, cat]) => {
+    if (!porCat[cat]) porCat[cat] = { items: [], total: 0 };
+    porCat[cat].items.push({ concepto, importe });
+    porCat[cat].total += importe;
+  });
+
+  const catOrder = ['fijos','variable','super','restaurante','salud','otros'];
+  let tablaHTML = '';
+  catOrder.forEach(cat => {
+    if (!porCat[cat]) return;
+    const c = CATS[cat];
+    tablaHTML += `<tr style="background:${c.bg};"><td colspan="2" style="font-weight:700;padding:8px 12px;font-size:13px;">${c.icon} ${c.label} — ${porCat[cat].total.toLocaleString('es-ES',{minimumFractionDigits:2})} &euro;</td></tr>`;
+    porCat[cat].items.forEach(g => {
+      const pagado = isPagado(id, mes.gastos.indexOf(mes.gastos.find(x => x[0]===g.concepto && x[1]===g.importe)));
+      const estado = cat === 'fijos' ? (pagado ? ' ✓' : ' ⏳') : '';
+      tablaHTML += `<tr><td style="padding:5px 12px 5px 28px;font-size:12px;">${g.concepto}${estado}</td><td style="padding:5px 12px;text-align:right;font-family:monospace;font-size:12px;">${g.importe.toLocaleString('es-ES',{minimumFractionDigits:2})} &euro;</td></tr>`;
+    });
+  });
+
+  // Estado pagos fijos
+  const fijos = mes.gastos.map((g,i) => ({g,i})).filter(x => x.g[2]==='fijos');
+  const pagados = fijos.filter(x => isPagado(id, x.i)).length;
+  const estadoPagos = `${pagados} de ${fijos.length} pagados`;
+
+  const w = window.open('', '_blank', 'width=700,height=900');
+  w.document.write(`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
+<title>Resumen ${id} — Familia Díaz González</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',system-ui,sans-serif;color:#1e293b;padding:32px;max-width:650px;margin:0 auto;font-size:14px}
+  h1{font-size:20px;margin-bottom:4px}
+  .sub{color:#64748b;font-size:12px;margin-bottom:20px}
+  .metrics{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px}
+  .m{border:1px solid #e2e8f0;border-radius:10px;padding:14px;text-align:center}
+  .m .lbl{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#64748b;margin-bottom:4px;font-weight:600}
+  .m .val{font-size:20px;font-weight:700;font-family:monospace}
+  .green{color:#00b87a} .red{color:#ef4444} .blue{color:#3b82f6}
+  table{width:100%;border-collapse:collapse;margin-bottom:16px}
+  table td{border-bottom:1px solid #f1f5f9}
+  .footer{margin-top:20px;padding-top:12px;border-top:1px solid #e2e8f0;font-size:11px;color:#94a3b8;text-align:center}
+  .pagos{background:#f8fafc;border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:#64748b}
+  @media print{body{padding:20px}@page{margin:15mm}}
+</style></head><body>
+<h1>📊 Resumen Financiero — ${id}</h1>
+<div class="sub">Familia Díaz González &bull; Generado el ${new Date().toLocaleDateString('es-ES')}</div>
+<div class="metrics">
+  <div class="m"><div class="lbl">Ingresos</div><div class="val green">${ing > 0 ? ing.toLocaleString('es-ES',{minimumFractionDigits:2}) + ' €' : '—'}</div></div>
+  <div class="m"><div class="lbl">Gastos</div><div class="val red">${gas.toLocaleString('es-ES',{minimumFractionDigits:2})} €</div></div>
+  <div class="m"><div class="lbl">Ahorro</div><div class="val ${aho >= 0 ? 'blue' : 'red'}">${ing > 0 ? aho.toLocaleString('es-ES',{minimumFractionDigits:2}) + ' €' : '—'}</div></div>
+</div>
+<div class="pagos">Estado de pagos fijos: <strong>${estadoPagos}</strong></div>
+<table>${tablaHTML}</table>
+<div class="footer">Familia Díaz González — Control Financiero</div>
+<script>window.onload=function(){window.print();}<\/script>
+</body></html>`);
+  w.document.close();
 }
 
 // ── RESUMEN DEBT SUMMARY ──

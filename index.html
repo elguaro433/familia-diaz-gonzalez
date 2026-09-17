@@ -6,7 +6,7 @@
 <script>
 // Limpiar Service Workers y caches viejos - APP NO USA CACHE
 (async function() {
-  const APP_VERSION = '8.2';
+  const APP_VERSION = '8.3';
   const stored = localStorage.getItem('app_version');
   if ('serviceWorker' in navigator) {
     const regs = await navigator.serviceWorker.getRegistrations();
@@ -967,6 +967,19 @@ body {
         </div>
       </div>
 
+      <!-- Copias de seguridad -->
+      <div class="sc" style="margin-top:16px;">
+        <div class="sc-hdr">
+          <div class="sc-title">Copias de seguridad</div>
+          <div style="display:flex;gap:8px;">
+            <button class="add-btn" style="padding:5px 12px;font-size:12px;" onclick="crearBackupManual()">+ Copia ahora</button>
+            <button class="add-btn" style="padding:5px 12px;font-size:12px;background:var(--card2);color:var(--text);border:1px solid var(--border);" onclick="descargarJSON()">Descargar JSON</button>
+          </div>
+        </div>
+        <div class="hint" style="border-top:none;">Se guarda una copia completa en la nube cada dia que cambias algo (se conservan 45). "Restaurar" vuelve a esa copia en todos los dispositivos; antes de hacerlo se guarda el estado actual.</div>
+        <div id="backups-list"></div>
+      </div>
+
       <!-- alertas removido -->
     </div>
 
@@ -974,7 +987,7 @@ body {
     <div style="text-align:center;padding:30px 20px 20px;color:var(--hint);font-size:11px;border-top:1px solid var(--border);margin-top:30px;">
       <div style="font-weight:600;margin-bottom:4px;">Propiedad Familia Díaz González</div>
       <div>Creado por Emmanuel Díaz</div>
-      <div style="margin-top:6px;font-size:10px;opacity:.6;">v8.2 — 2026</div>
+      <div style="margin-top:6px;font-size:10px;opacity:.6;">v8.3 — 2026</div>
     </div>
   </div><!-- /content -->
 </div><!-- /app -->
@@ -1020,9 +1033,108 @@ function syncToCloud() {
   };
 
   db.collection('appdata').doc(SYNC_DOC).set(data, { merge: true })
-    .then(() => { updateSyncStatus('synced'); })
+    .then(() => { updateSyncStatus('synced'); backupDiario(data); })
     .catch(err => { console.warn('Sync error:', err); updateSyncStatus('error'); });
 }
+
+// ══ COPIAS DE SEGURIDAD EN LA NUBE ══
+// Cada dia que se guarda algo, se deja una copia completa en appdata/backup-AAAA-MM-DD.
+// Se conservan las ultimas 45 copias diarias. Sirven para restaurar si algo se borra o se dana.
+const BACKUP_PREFIX = 'backup-';
+const BACKUP_KEEP = 45;
+function hoyISO() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+function backupDiario(data) {
+  try {
+    const hoy = hoyISO();
+    if (localStorage.getItem('familiadiaz_backup_dia') === hoy) return; // ya hecha hoy desde este dispositivo
+    crearBackup(data, hoy).then(() => localStorage.setItem('familiadiaz_backup_dia', hoy)).catch(e => console.warn('Backup error:', e));
+  } catch(e) {}
+}
+function crearBackup(data, id) {
+  const copia = Object.assign({}, data, { backupDe: SYNC_DOC, creadoEn: new Date().toISOString() });
+  delete copia.updatedAt;
+  return db.collection('appdata').doc(BACKUP_PREFIX + id).set(copia).then(() => limpiarBackups());
+}
+function listarBackups() {
+  return db.collection('appdata').get().then(snap => {
+    const arr = [];
+    snap.forEach(d => { if (d.id.startsWith(BACKUP_PREFIX)) arr.push({ id: d.id, data: d.data() }); });
+    arr.sort((a,b) => b.id.localeCompare(a.id));
+    return arr;
+  });
+}
+function limpiarBackups() {
+  return listarBackups().then(arr => {
+    const viejas = arr.slice(BACKUP_KEEP);
+    return Promise.all(viejas.map(b => db.collection('appdata').doc(b.id).delete()));
+  });
+}
+function crearBackupManual() {
+  const data = {
+    meses: JSON.stringify(MESES), pagos: JSON.stringify(PAGOS), creditos: JSON.stringify(CREDITOS),
+    nomNames: JSON.stringify(NOM_NAMES), nominasEditadas: JSON.stringify(ST), saldoCuenta: saldoCuenta,
+    tarjetaConsumo: tarjetaConsumo, ninos: JSON.stringify(NINOS), otrosIngresos: JSON.stringify(otrosIngresos),
+    notas: localStorage.getItem('familiadiaz_notas') || '{}'
+  };
+  const id = hoyISO() + '-manual-' + String(Date.now()).slice(-5);
+  return crearBackup(data, id).then(() => { renderBackups(); alert('Copia creada: ' + BACKUP_PREFIX + id); });
+}
+function resumenBackup(b) {
+  try {
+    const ms = JSON.parse(b.data.meses || '[]');
+    const ng = ms.reduce((s,m) => s + (m.gastos||[]).length, 0);
+    return `${ms.length} meses \u00b7 ${ng} gastos \u00b7 ${ms.length ? ms[ms.length-1].id : ''}`;
+  } catch(e) { return '?'; }
+}
+function renderBackups() {
+  const list = document.getElementById('backups-list');
+  if (!list) return;
+  list.innerHTML = '<div style="padding:12px 18px;font-size:12px;color:var(--hint);">Cargando copias...</div>';
+  listarBackups().then(arr => {
+    if (!arr.length) { list.innerHTML = '<div style="padding:12px 18px;font-size:12px;color:var(--hint);">Aun no hay copias. Se crea una automaticamente cada dia que guardas algo.</div>'; return; }
+    list.innerHTML = arr.slice(0, 20).map(b => `
+      <div class="otro-row">
+        <span class="otro-nom" style="cursor:default;">${b.id.replace(BACKUP_PREFIX,'')}<div style="font-size:11px;color:var(--hint);">${resumenBackup(b)}</div></span>
+        <button class="add-btn" style="padding:4px 10px;font-size:11px;" onclick="restaurarBackup('${b.id}')">Restaurar</button>
+      </div>`).join('') + (arr.length > 20 ? `<div style="padding:8px 18px;font-size:11px;color:var(--hint);">y ${arr.length-20} mas antiguas</div>` : '');
+  }).catch(e => { list.innerHTML = '<div style="padding:12px 18px;font-size:12px;color:var(--coral);">No se pudieron leer las copias: ' + e.message + '</div>'; });
+}
+function restaurarBackup(id) {
+  if (!confirm(`Restaurar la copia "${id.replace(BACKUP_PREFIX,'')}"?\n\nSe reemplazaran TODOS los datos actuales (gastos, nominas, pagos, creditos...) por los de esa copia.`)) return;
+  if (!confirm('Segunda confirmacion: esta accion sobrescribe los datos actuales en todos los dispositivos. Continuar?')) return;
+  // Antes de restaurar, guardar una copia del estado actual por si acaso
+  const actual = {
+    meses: JSON.stringify(MESES), pagos: JSON.stringify(PAGOS), creditos: JSON.stringify(CREDITOS),
+    nomNames: JSON.stringify(NOM_NAMES), nominasEditadas: JSON.stringify(ST), saldoCuenta: saldoCuenta,
+    tarjetaConsumo: tarjetaConsumo, ninos: JSON.stringify(NINOS), otrosIngresos: JSON.stringify(otrosIngresos),
+    notas: localStorage.getItem('familiadiaz_notas') || '{}'
+  };
+  crearBackup(actual, hoyISO() + '-antes-restaurar-' + String(Date.now()).slice(-5))
+    .then(() => db.collection('appdata').doc(id).get())
+    .then(d => {
+      if (!d.exists) throw new Error('La copia ya no existe');
+      const data = d.data(); delete data.backupDe; delete data.creadoEn;
+      data.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
+      data.device = 'restauracion';
+      lastSyncTime = Date.now() + 10000; // bloquear escrituras mientras se restaura
+      return db.collection('appdata').doc(SYNC_DOC).set(data, { merge: true });
+    })
+    .then(() => { alert('Restaurado. La app se recargara.'); location.reload(); })
+    .catch(e => alert('Error al restaurar: ' + e.message));
+}
+function descargarJSON() {
+  const data = {
+    exportadoEn: new Date().toISOString(), version: APP_VERSION_STR,
+    meses: MESES, pagos: PAGOS, creditos: CREDITOS, nomNames: NOM_NAMES, nominasEditadas: ST,
+    saldoCuenta: saldoCuenta, tarjetaConsumo: tarjetaConsumo, ninos: NINOS, otrosIngresos: otrosIngresos,
+    notas: JSON.parse(localStorage.getItem('familiadiaz_notas') || '{}')
+  };
+  const blob = new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'familia-diaz-gonzalez-' + hoyISO() + '.json'; document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+}
+const APP_VERSION_STR = '8.3';
 
 // Load from Firestore
 function syncFromCloud() {
@@ -1656,6 +1768,8 @@ function reindexTrasBorrar(mesId, idx) {
 }
 function delGasto(i) {
   const mes = MESES[mesIdx];
+  const g = mes.gastos[i];
+  if (g && !confirm(`Borrar "${g[0]}" (${fmtDec(g[1])}) de ${mes.id}?`)) return;
   mes.gastos.splice(i,1);
   reindexTrasBorrar(mes.id, i);
   renderGastosList(); updTotales(); autoSave();
@@ -2675,7 +2789,7 @@ function showPage(name, btn) {
   if (name==='categorias') renderCategorias();
   if (name==='nominas') renderNominas();
   if (name==='historico') renderHistorico();
-  if (name==='finanzas') { renderCreditos(); renderNinos(); renderOtros(); renderDebtCountdown(); }
+  if (name==='finanzas') { renderCreditos(); renderNinos(); renderOtros(); renderDebtCountdown(); renderBackups(); }
   renderMes();
 }
 

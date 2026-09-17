@@ -6,7 +6,7 @@
 <script>
 // Limpiar Service Workers y caches viejos - APP NO USA CACHE
 (async function() {
-  const APP_VERSION = '8.1';
+  const APP_VERSION = '8.2';
   const stored = localStorage.getItem('app_version');
   if ('serviceWorker' in navigator) {
     const regs = await navigator.serviceWorker.getRegistrations();
@@ -333,6 +333,18 @@ body {
   flex-shrink: 0; opacity: 0; transition: opacity .15s;
 }
 .gasto-row:hover .gasto-del { opacity: 1; }
+.fut-btn {
+  border: 1px solid var(--border); background: transparent; color: var(--hint);
+  border-radius: 6px; padding: 2px 7px; font-size: 10px; cursor: pointer; flex-shrink: 0;
+  font-family: 'Plus Jakarta Sans', sans-serif; opacity: .5; transition: opacity .15s;
+}
+.gasto-row:hover .fut-btn { opacity: 1; }
+.fut-btn.apply:hover { border-color: var(--sky); color: var(--sky); background: var(--sky-dim); }
+.fut-btn.remove:hover { border-color: var(--coral); color: var(--coral); background: var(--coral-dim); }
+@media (max-width: 700px) { .fut-btn { opacity: 1; } }
+.cmp-row { display:flex; align-items:center; padding:9px 18px; border-bottom:1px solid var(--border); gap:10px; font-size:13px; }
+.cmp-row:last-child { border-bottom:none; }
+.cmp-up { color: var(--coral); font-weight:600; } .cmp-down { color: var(--emerald); font-weight:600; } .cmp-flat { color: var(--muted); }
 .gasto-del:hover { background: var(--coral-dim); color: var(--coral); }
 .cat-sel {
   font-size: 11px; padding: 2px 6px; border-radius: 6px;
@@ -752,6 +764,15 @@ body {
         <div id="resumen-pay-status" style="padding:16px 18px;"></div>
       </div>
 
+      <!-- Comparativa con meses anteriores -->
+      <div class="sc" style="margin-bottom:16px;">
+        <div class="sc-hdr">
+          <div class="sc-title">Comparado con los 3 meses anteriores</div>
+          <div class="sc-total" id="cmp-total" style="font-size:12px;"></div>
+        </div>
+        <div id="cmp-list"></div>
+      </div>
+
       <!-- Debt summary card -->
       <div id="resumen-debt-summary" class="sc" style="margin-bottom:16px;cursor:pointer;" onclick="showPage('finanzas',document.getElementById('nav-finanzas'))"></div>
 
@@ -953,7 +974,7 @@ body {
     <div style="text-align:center;padding:30px 20px 20px;color:var(--hint);font-size:11px;border-top:1px solid var(--border);margin-top:30px;">
       <div style="font-weight:600;margin-bottom:4px;">Propiedad Familia Díaz González</div>
       <div>Creado por Emmanuel Díaz</div>
-      <div style="margin-top:6px;font-size:10px;opacity:.6;">v8.1 — 2026</div>
+      <div style="margin-top:6px;font-size:10px;opacity:.6;">v8.2 — 2026</div>
     </div>
   </div><!-- /content -->
 </div><!-- /app -->
@@ -1500,6 +1521,7 @@ function renderMes() {
   if (aFill) { aFill.style.width = pct + '%'; aFill.style.background = aho >= 0 ? 'var(--emerald)' : 'var(--coral)'; }
 
   // resumen cat
+  renderComparativa();
   const cats = gastosBycat(mes);
   const rcList = document.getElementById('resumen-cat-list');
   if (rcList) {
@@ -1574,8 +1596,9 @@ function renderGastosList() {
       <select class="cat-sel" onchange="cambiaCat(${origIdx},this.value)">
         ${Object.entries(CATS).map(([k,c])=>`<option value="${k}"${k===cat?' selected':''}>${c.label}</option>`).join('')}
       </select>
-      <span class="gasto-importe" onclick="editImp(${origIdx})">${fmt(val)}</span>
+      <span class="gasto-importe" onclick="editImp(${origIdx})">${fmtDec(val)}</span>
       ${payBtn}
+      ${isFijo ? `<button class="fut-btn apply" onclick="aplicarFuturos(${origIdx})" title="Poner este fijo con este importe en todos los meses siguientes">&rarr; futuros</button><button class="fut-btn remove" onclick="quitarFuturos(${origIdx})" title="Quitar este fijo de todos los meses siguientes">&#10005; futuros</button>` : ''}
       <button class="${notaBtnClass}" onclick="toggleNotaInput(${origIdx})" title="${nota ? 'Editar nota' : 'Agregar nota'}">&#128221;</button>
       <button class="gasto-del" onclick="delGasto(${origIdx})">x</button>
     </div>${notaHtml}`;
@@ -1614,9 +1637,58 @@ function cambiaCat(i, val) {
   MESES[mesIdx].gastos[i][2] = val;
   updTotales(); autoSave();
 }
+// Al borrar un gasto, los "pagado" y las notas de ese mes van por posicion: hay que re-indexarlos
+function reindexTrasBorrar(mesId, idx) {
+  const fix = (obj) => {
+    const out = {};
+    Object.entries(obj).forEach(([k,v]) => {
+      if (!k.startsWith(mesId + '|')) { out[k] = v; return; }
+      const n = parseInt(k.split('|')[1]);
+      if (n === idx) return;
+      out[mesId + '|' + (n > idx ? n - 1 : n)] = v;
+    });
+    return out;
+  };
+  PAGOS = fix(PAGOS);
+  GASTO_NOTAS = fix(GASTO_NOTAS);
+  localStorage.setItem(PAY_KEY, JSON.stringify(PAGOS));
+  saveNotas();
+}
 function delGasto(i) {
-  MESES[mesIdx].gastos.splice(i,1);
+  const mes = MESES[mesIdx];
+  mes.gastos.splice(i,1);
+  reindexTrasBorrar(mes.id, i);
   renderGastosList(); updTotales(); autoSave();
+}
+// ── FIJOS EN MESES SIGUIENTES ──
+function mismoFijo(a, b) { return a.trim().toLowerCase() === b.trim().toLowerCase(); }
+function aplicarFuturos(i) {
+  const [con, val] = MESES[mesIdx].gastos[i];
+  const futuros = MESES.slice(mesIdx + 1);
+  if (!futuros.length) { alert('No hay meses siguientes'); return; }
+  if (!confirm(`Poner "${con}" = ${fmtDec(val)} como fijo en los ${futuros.length} meses siguientes (${futuros[0].id} \u2192 ${futuros[futuros.length-1].id})?`)) return;
+  let act = 0, nue = 0;
+  futuros.forEach(m => {
+    const g = m.gastos.find(x => x[2] === 'fijos' && mismoFijo(x[0], con));
+    if (g) { if (g[1] !== val) { g[1] = val; act++; } }
+    else { const pos = m.gastos.findIndex(x => x[2] !== 'fijos'); m.gastos.splice(pos < 0 ? m.gastos.length : pos, 0, [con, val, 'fijos']); nue++; }
+  });
+  alert(`Hecho: ${act} actualizados, ${nue} anadidos.`);
+  autoSave();
+}
+function quitarFuturos(i) {
+  const [con] = MESES[mesIdx].gastos[i];
+  const futuros = MESES.slice(mesIdx + 1);
+  const afectados = futuros.filter(m => m.gastos.some(x => x[2] === 'fijos' && mismoFijo(x[0], con)));
+  if (!afectados.length) { alert(`"${con}" no esta en ningun mes siguiente`); return; }
+  if (!confirm(`Quitar "${con}" de ${afectados.length} meses siguientes (${afectados[0].id} \u2192 ${afectados[afectados.length-1].id})? Este mes no se toca.`)) return;
+  afectados.forEach(m => {
+    const idx = m.gastos.findIndex(x => x[2] === 'fijos' && mismoFijo(x[0], con));
+    m.gastos.splice(idx, 1);
+    reindexTrasBorrar(m.id, idx);
+  });
+  alert(`Quitado de ${afectados.length} meses.`);
+  autoSave();
 }
 function addGasto() {
   const c = document.getElementById('add-con').value.trim();
@@ -1722,6 +1794,7 @@ function updTotales() {
       return `<div style="display:flex;align-items:center;padding:9px 18px;border-bottom:1px solid var(--border);gap:10px;"><span class="cat-dot" style="background:${catC.color}"></span><span style="flex:1;font-size:13px;">${c}</span><span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:${catC.color};">${fmt(v)}</span></div>`;
     }).join('');
   }
+  renderComparativa();
   const cats = gastosBycat(mes);
   const rcList = document.getElementById('resumen-cat-list');
   if (rcList) {
@@ -1730,6 +1803,30 @@ function updTotales() {
       return `<div style="display:flex;align-items:center;padding:9px 18px;border-bottom:1px solid var(--border);gap:10px;"><span style="font-size:16px;">${c.icon}</span><span style="flex:1;font-size:13px;font-weight:500;">${c.label}</span><span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:${c.color};">${fmt(v)}</span></div>`;
     }).join('');
   }
+}
+
+function renderComparativa() {
+  const list = document.getElementById('cmp-list'); if (!list) return;
+  const mes = MESES[mesIdx];
+  const prev = MESES.slice(Math.max(0, mesIdx - 3), mesIdx).filter(m => totalGastos(m) > 0);
+  const tot = document.getElementById('cmp-total');
+  if (!prev.length) { list.innerHTML = '<div style="padding:14px 18px;font-size:13px;color:var(--hint);">Sin meses anteriores con datos</div>'; if (tot) tot.textContent=''; return; }
+  const cur = gastosBycat(mes);
+  const avg = {}; Object.keys(CATS).forEach(k => avg[k] = prev.reduce((s,m) => s + (gastosBycat(m)[k]||0), 0) / prev.length);
+  const totCur = totalGastos(mes), totAvg = prev.reduce((s,m)=>s+totalGastos(m),0)/prev.length;
+  const diffTxt = (c, a) => {
+    const d = c - a; if (Math.abs(d) < 1) return '<span class="cmp-flat">=</span>';
+    const pct = a > 0 ? Math.round(Math.abs(d)/a*100) : null;
+    return `<span class="${d > 0 ? 'cmp-up' : 'cmp-down'}">${d > 0 ? '\u25b2' : '\u25bc'} ${fmt(Math.abs(Math.round(d)))}${pct !== null ? ' ('+pct+'%)' : ''}</span>`;
+  };
+  if (tot) tot.innerHTML = `media ${prev.map(m=>m.id.split(' ')[0]).join('/')}: ${fmt(Math.round(totAvg))} &middot; ${diffTxt(totCur, totAvg)}`;
+  list.innerHTML = Object.keys(CATS).filter(k => (cur[k]||0) > 0 || avg[k] > 0).map(k => {
+    const c = CATS[k];
+    return `<div class="cmp-row"><span style="font-size:16px;">${c.icon}</span><span style="flex:1;font-weight:500;">${c.label}</span>
+      <span style="font-family:'JetBrains Mono',monospace;color:${c.color};font-weight:600;min-width:70px;text-align:right;">${fmt(Math.round(cur[k]||0))}</span>
+      <span style="font-size:11px;color:var(--hint);min-width:90px;text-align:right;">media ${fmt(Math.round(avg[k]))}</span>
+      <span style="min-width:110px;text-align:right;font-size:12px;">${diffTxt(cur[k]||0, avg[k])}</span></div>`;
+  }).join('');
 }
 
 function pf(v) { if (typeof v === 'string') v = v.replace(',', '.'); return parseFloat(v) || 0; }

@@ -6,7 +6,7 @@
 <script>
 // Limpiar Service Workers y caches viejos - APP NO USA CACHE
 (async function() {
-  const APP_VERSION = '8.6.1';
+  const APP_VERSION = '8.7';
   const stored = localStorage.getItem('app_version');
   if ('serviceWorker' in navigator) {
     const regs = await navigator.serviceWorker.getRegistrations();
@@ -678,6 +678,54 @@ body {
 .jub-bar-val { width: 54px; text-align: right; font-size: 11px; flex-shrink: 0; }
 .jub-proy { margin-top: 8px; font-size: 11px; color: var(--muted); }
 
+/* ── v8.7: inicio con 4 cifras + barra del mes ── */
+.metrics-4 { grid-template-columns: repeat(4,1fr); }
+.metric.m-sky::before { background: linear-gradient(90deg, #00b4d8, #38c7ff); }
+.metric.m-sky { border-left: 3px solid var(--sky); }
+.metric-val.sky { color: var(--sky); }
+.mesbar-top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+.mesbar-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); }
+.mesbar-txt { font-size: 13px; color: var(--text); }
+.mesbar-txt b { font-family: 'JetBrains Mono', monospace; }
+.mesbar-track { position: relative; height: 12px; background: rgba(0,0,0,.07); border-radius: 6px; overflow: visible; }
+[data-theme="dark"] .mesbar-track { background: rgba(255,255,255,.08); }
+.mesbar-fill { height: 100%; border-radius: 6px; transition: width .5s ease; }
+.mesbar-today { position: absolute; top: -5px; width: 2px; height: 22px; background: var(--text); border-radius: 1px; opacity: .7; }
+.mesbar-today::after { content: 'hoy'; position: absolute; top: 22px; left: 50%; transform: translateX(-50%); font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; }
+.mesbar-foot { display: flex; justify-content: space-between; margin-top: 18px; font-size: 11px; color: var(--muted); flex-wrap: wrap; gap: 6px 12px; }
+
+/* ── v8.7: tira de meses ── */
+.mes-strip { display: flex; gap: 6px; overflow-x: auto; padding: 8px 2px 2px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.mes-strip::-webkit-scrollbar { display: none; }
+.mes-chip {
+  flex: 0 0 auto; display: flex; align-items: center; gap: 6px; padding: 5px 11px; border-radius: 16px;
+  border: 1px solid var(--border); background: var(--card); color: var(--muted); font-size: 12px; font-weight: 600;
+  cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; transition: all .15s;
+}
+.mes-chip:hover { color: var(--text); border-color: var(--sky); }
+.mes-chip.sel { border-color: var(--emerald); color: var(--text); background: var(--emerald-dim); }
+.mes-chip.hoy { box-shadow: inset 0 0 0 1px var(--sky); }
+.mes-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── v8.7: gastos agrupados por categoria ── */
+.grp-hdr {
+  display: flex; align-items: center; gap: 8px; padding: 9px 18px; background: var(--card2);
+  border-bottom: 1px solid var(--border); cursor: pointer; user-select: none;
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--muted);
+}
+.grp-hdr:hover { color: var(--text); }
+.grp-caret { display: inline-block; transition: transform .15s; font-size: 12px; }
+.grp-hdr.collapsed .grp-caret { transform: rotate(-90deg); }
+.grp-name { flex: 1; }
+.grp-count { font-size: 11px; font-weight: 500; text-transform: none; letter-spacing: 0; color: var(--hint); }
+.grp-total { font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+.grp-body.collapsed { display: none; }
+
+/* ── v8.7: grafico de deuda bajando ── */
+.deuda-chart { margin-top: 14px; background: var(--card); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 10px 12px 6px; }
+.deuda-chart-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); margin-bottom: 4px; display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.deuda-chart-wrap { height: 190px; }
+
 /* ── CABECERA: sync y menu (v8.6) ── */
 .sync-status { font-size: 10px; margin-right: 8px; font-family: 'JetBrains Mono', monospace; }
 .hdr-sync { background: transparent; border: 1px solid var(--border); border-radius: 6px; color: rgba(255,255,255,.7); padding: 2px 8px; font-size: 11px; cursor: pointer; margin-right: 6px; }
@@ -918,22 +966,35 @@ body {
         <button onclick="crearNuevoMes()" style="flex:0 0 auto;height:48px;padding:0 14px;border:none;background:linear-gradient(135deg,#00d68f,#00b87a);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;letter-spacing:.3px;transition:opacity .15s;" title="Crear nuevo mes">+ Mes</button>
       </div>
       <div id="mes-pop" class="mes-pop" hidden></div>
+      <div class="mes-strip" id="mes-strip"></div>
     </div>
 
     <!-- RESUMEN -->
     <div id="page-resumen" class="page active">
-      <div class="metrics" style="grid-template-columns:1fr 1fr;">
+      <div class="metrics metrics-4">
         <div class="metric m-green">
-          <div class="metric-lbl">Saldo a favor</div>
+          <div class="metric-lbl">Ingresos del mes</div>
           <div class="metric-val green mono" id="m-ing">&mdash; &euro;</div>
           <div class="metric-sub" id="m-ing-sub">Anade nominas</div>
         </div>
         <div class="metric m-red">
-          <div class="metric-lbl">Gastos totales</div>
+          <div class="metric-lbl">Gastos del mes</div>
           <div class="metric-val red mono" id="m-gas">&mdash; &euro;</div>
           <div class="metric-sub" id="m-gas-sub">Este mes</div>
         </div>
+        <div class="metric m-violet">
+          <div class="metric-lbl">Resultado del mes</div>
+          <div class="metric-val mono" id="m-res">&mdash; &euro;</div>
+          <div class="metric-sub" id="m-res-sub">ingresos &minus; gastos</div>
+        </div>
+        <div class="metric m-sky">
+          <div class="metric-lbl">Dinero en cuenta</div>
+          <div class="metric-val sky mono" id="m-cuenta">&mdash; &euro;</div>
+          <div class="metric-sub" id="m-cuenta-sub"></div>
+        </div>
       </div>
+      <!-- Barra del mes (v8.7) -->
+      <div class="sc" style="margin-bottom:16px;"><div id="mes-bar" style="padding:14px 18px 16px;"></div></div>
 
       <!-- gráficos removidos por el usuario -->
 
@@ -1154,21 +1215,10 @@ body {
       </div>
 
       <div class="two-col">
-        <!-- Tarjeta -->
+        <!-- Tarjetas de credito (v8.7: varias) -->
         <div class="sc">
-          <div class="sc-hdr"><div class="sc-title">Tarjeta de credito</div><div class="chip chip-sky">Limite 2.000 &euro;</div></div>
-          <div class="tarjeta-vis">
-            <div class="tarjeta-num">4506 0906 2747 3012 &middot; Elibel</div>
-            <div class="tarjeta-vals">
-              <div><div class="t-lbl">Consumido</div><div class="t-val consumed" id="t-consumed">1.848 &euro;</div></div>
-              <div style="text-align:right"><div class="t-lbl">Disponible</div><div class="t-val avail" id="t-avail">152 &euro;</div></div>
-            </div>
-            <div class="tarjeta-prog"><div class="tarjeta-prog-fill" id="t-bar" style="width:92%"></div></div>
-          </div>
-          <div style="padding:12px 18px;border-top:1px solid var(--border);">
-            <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Consumido este mes segun el banco. Actualizar si hay mas compras:</div>
-            <input class="add-inp" id="t-inp" type="text" inputmode="decimal" placeholder="Consumido &euro;" style="width:100%;" oninput="updTarjeta()">
-          </div>
+          <div class="sc-hdr"><div class="sc-title">Tarjetas de credito</div><div class="chip chip-sky" id="tarjetas-badge">&mdash;</div></div>
+          <div id="tarjetas-list"></div>
         </div>
 
         <!-- Ahorro ninos -->
@@ -1245,7 +1295,7 @@ body {
     <div style="text-align:center;padding:30px 20px 20px;color:var(--hint);font-size:11px;border-top:1px solid var(--border);margin-top:30px;">
       <div style="font-weight:600;margin-bottom:4px;">Propiedad Familia Díaz González</div>
       <div>Creado por Emmanuel Díaz</div>
-      <div style="margin-top:6px;font-size:10px;opacity:.6;">v8.6.1 — 2026</div>
+      <div style="margin-top:6px;font-size:10px;opacity:.6;">v8.7 — 2026</div>
     </div>
   </div><!-- /content -->
 </div><!-- /app -->
@@ -1307,6 +1357,7 @@ function syncToCloud() {
     presupuestos: JSON.stringify(PRESUPUESTOS),
     activos: JSON.stringify(ACTIVOS),
     jubilacion: JSON.stringify(JUBILACION),
+    tarjetas: JSON.stringify(TARJETAS),
     notas: localStorage.getItem('familiadiaz_notas') || '{}',
     updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
     device: navigator.userAgent.includes('iPhone') ? 'iPhone' : 'PC'
@@ -1355,7 +1406,7 @@ function datosActuales() {
     meses: JSON.stringify(MESES), pagos: JSON.stringify(PAGOS), creditos: JSON.stringify(CREDITOS),
     nomNames: JSON.stringify(NOM_NAMES), nominasEditadas: JSON.stringify(ST), saldoCuenta: saldoCuenta,
     tarjetaConsumo: tarjetaConsumo, ninos: JSON.stringify(NINOS), otrosIngresos: JSON.stringify(otrosIngresos),
-    presupuestos: JSON.stringify(PRESUPUESTOS), activos: JSON.stringify(ACTIVOS), jubilacion: JSON.stringify(JUBILACION),
+    presupuestos: JSON.stringify(PRESUPUESTOS), activos: JSON.stringify(ACTIVOS), jubilacion: JSON.stringify(JUBILACION), tarjetas: JSON.stringify(TARJETAS),
     notas: localStorage.getItem('familiadiaz_notas') || '{}'
   };
 }
@@ -1406,7 +1457,7 @@ function descargarJSON() {
     exportadoEn: new Date().toISOString(), version: APP_VERSION_STR,
     meses: MESES, pagos: PAGOS, creditos: CREDITOS, nomNames: NOM_NAMES, nominasEditadas: ST,
     saldoCuenta: saldoCuenta, tarjetaConsumo: tarjetaConsumo, ninos: NINOS, otrosIngresos: otrosIngresos,
-    presupuestos: PRESUPUESTOS, activos: ACTIVOS, jubilacion: JUBILACION,
+    presupuestos: PRESUPUESTOS, activos: ACTIVOS, jubilacion: JUBILACION, tarjetas: TARJETAS,
     notas: JSON.parse(localStorage.getItem('familiadiaz_notas') || '{}')
   };
   const blob = new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' });
@@ -1414,7 +1465,7 @@ function descargarJSON() {
   a.download = 'familia-diaz-gonzalez-' + hoyISO() + '.json'; document.body.appendChild(a); a.click();
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
 }
-const APP_VERSION_STR = '8.6.1';
+const APP_VERSION_STR = '8.7';
 
 // Load from Firestore
 function syncFromCloud() {
@@ -1449,6 +1500,7 @@ function syncFromCloud() {
         if (data.presupuestos) PRESUPUESTOS = Object.assign({}, DEFAULT_BUDGETS, JSON.parse(data.presupuestos));
         if (data.activos) { const ca = JSON.parse(data.activos); if (Array.isArray(ca)) ACTIVOS = ca; }
         if (data.jubilacion) { const cj = JSON.parse(data.jubilacion); if (cj && typeof cj === 'object') JUBILACION = cj; }
+        if (data.tarjetas) { const ct = JSON.parse(data.tarjetas); if (Array.isArray(ct) && ct.length) TARJETAS = ct; }
         if (data.nominasEditadas) {
           const cloudST = JSON.parse(data.nominasEditadas);
           Object.keys(ST).forEach(k => delete ST[k]);
@@ -1869,6 +1921,7 @@ function poblarSel() {
   if (btn) btn.innerHTML = `${MESES[mesIdx].id} <span class="mes-caret">&#9660;</span>`;
   const pop = document.getElementById('mes-pop');
   if (pop && !pop.hidden) renderMesPicker();
+  renderMesStrip();
 }
 function toggleMesPicker(force) {
   const pop = document.getElementById('mes-pop'); if (!pop) return;
@@ -1978,6 +2031,8 @@ function renderMes() {
   renderProjection();
   renderEvolucion();
   renderDebtSummary();
+  renderResumenTop(mes);
+  renderMesStrip();
 }
 
 // "Gastos por tipo" del Resumen, con semaforo de presupuesto si hay limite
@@ -2053,7 +2108,7 @@ function renderGastosList() {
   }
   // Orden por fecha (solo visual): con fecha primero, ascendente; sin fecha al final en su orden
   if (ordenFecha) filtered = filtered.slice().sort((a,b) => { const fa = fechaGasto(a.g), fb = fechaGasto(b.g); if (!fa && !fb) return 0; if (!fa) return 1; if (!fb) return -1; return fa.localeCompare(fb); });
-  list.innerHTML = filtered.map(({g, i: origIdx}) => {
+  const rowHtml = ({g, i: origIdx}) => {
     const [con, val, cat] = g;
     const catC = CATS[cat]||CATS.otros;
     const fecha = fechaGasto(g);
@@ -2083,7 +2138,25 @@ function renderGastosList() {
       <button class="${notaBtnClass}" onclick="toggleNotaInput(${origIdx})" title="${nota ? 'Editar nota' : 'Agregar nota'}">&#128221;</button>
       <button class="gasto-del" onclick="delGasto(${origIdx})">x</button>
     </div>${notaHtml}`;
-  }).join('');
+  };
+  // v8.7: sin filtro ni busqueda, agrupado por categoria (plegable); si no, lista plana
+  if (catFilter === 'todos' && !searchQuery) {
+    list.innerHTML = Object.entries(CATS).map(([k, c]) => {
+      const items = filtered.filter(({g}) => g[2] === k);
+      if (!items.length) return '';
+      const total = items.reduce((s, {g}) => s + (g[1] || 0), 0);
+      const pag = k === 'fijos' ? items.filter(({i}) => isPagado(mes.id, i)).length : 0;
+      const cerrado = GRUPOS_CERRADOS.has(k);
+      return `<div class="grp-hdr${cerrado ? ' collapsed' : ''}" onclick="toggleGrupo('${k}')">
+          <span class="grp-caret">&#9662;</span><span style="font-size:15px;">${c.icon}</span>
+          <span class="grp-name">${c.label}</span>
+          <span class="grp-count">${items.length} gasto${items.length !== 1 ? 's' : ''}${k === 'fijos' ? ` \u00b7 ${pag} pagados` : ''}</span>
+          <span class="grp-total" style="color:${c.color};">${fmt(Math.round(total))}</span>
+        </div><div class="grp-body${cerrado ? ' collapsed' : ''}">${items.map(rowHtml).join('')}</div>`;
+    }).join('');
+  } else {
+    list.innerHTML = filtered.map(rowHtml).join('');
+  }
   renderPaySummary();
 }
 
@@ -2283,6 +2356,7 @@ function updTotales() {
   }
   renderComparativa();
   renderResumenCats(mes);
+  renderResumenTop(mes);
 }
 
 function renderComparativa() {
@@ -2629,26 +2703,52 @@ function renderYearChart(year) {
 
 // ── FINANZAS ──
 // Pinta la tarjeta con el consumo guardado (sin escribir nada): al abrir Finanzas y al llegar datos de la nube
+// ══ TARJETAS DE CREDITO (v8.7): varias tarjetas ══
+// [{ id, titular, numero, limite, consumido }] — campo `tarjetas` en la nube. `tarjetaConsumo` (legado) = consumido de la primera.
+let TARJETAS = [
+  { id: 'elibel', titular: 'Elibel', numero: '4506 0906 2747 3012', limite: 2000, consumido: 0 },
+  { id: 'emmanuel', titular: 'Emmanuel', numero: '4506 0905 1378 4332', limite: 1200, consumido: 0 }
+];
 function renderTarjeta() {
-  const v = tarjetaConsumo;
-  const disp = Math.max(0, 2000 - v);
-  const pct = Math.min(100, (v/2000)*100);
-  const tC = document.getElementById('t-consumed');
-  const tA = document.getElementById('t-avail');
-  const tB = document.getElementById('t-bar');
-  const sT = document.getElementById('saldo-tarj');
-  const inp = document.getElementById('t-inp');
-  if (tC) tC.textContent = fmt(v);
-  if (tA) tA.textContent = fmt(disp);
-  if (tB) tB.style.width = pct + '%';
-  if (sT) sT.textContent = fmt(v);
-  if (inp && document.activeElement !== inp) inp.value = v || '';
+  const list = document.getElementById('tarjetas-list'); if (!list) return;
+  if (TARJETAS.length && !(TARJETAS[0].consumido > 0) && tarjetaConsumo > 0) TARJETAS[0].consumido = tarjetaConsumo;   // migracion desde el campo antiguo
+  const dispTotal = TARJETAS.reduce((s,t) => s + Math.max(0, (t.limite||0) - (t.consumido||0)), 0);
+  const badge = document.getElementById('tarjetas-badge'); if (badge) badge.textContent = fmt(Math.round(dispTotal)) + ' disponibles';
+  list.innerHTML = TARJETAS.map((t, i) => {
+    const v = t.consumido || 0, lim = t.limite || 0;
+    const disp = Math.max(0, lim - v), pct = lim > 0 ? Math.min(100, v / lim * 100) : 0;
+    const inp = document.getElementById('t-inp-' + i);
+    const focused = inp && document.activeElement === inp;
+    return `<div class="tarjeta-vis">
+        <div class="tarjeta-num">${t.numero} &middot; ${t.titular}</div>
+        <div class="tarjeta-vals">
+          <div><div class="t-lbl">Consumido</div><div class="t-val consumed">${fmt(v)}</div></div>
+          <div style="text-align:center"><div class="t-lbl">Limite</div><div class="t-val" style="color:rgba(255,255,255,.75);">${fmt(lim)}</div></div>
+          <div style="text-align:right"><div class="t-lbl">Disponible</div><div class="t-val avail">${fmt(disp)}</div></div>
+        </div>
+        <div class="tarjeta-prog"><div class="tarjeta-prog-fill" style="width:${pct}%;${pct >= 95 ? 'background:var(--coral);' : ''}"></div></div>
+      </div>
+      <div style="padding:6px 18px 12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <span style="font-size:11px;color:var(--muted);flex:1;min-width:140px;">Consumido este mes (${t.titular}):</span>
+        <input class="add-inp" id="t-inp-${i}" type="text" inputmode="decimal" placeholder="&euro;" style="width:120px;flex:none;" value="${focused ? inp.value : (v || '')}" oninput="updTarjeta(${i})">
+        <span style="font-size:11px;color:var(--hint);">limite</span>
+        <input class="add-inp" type="text" inputmode="decimal" style="width:80px;flex:none;" value="${lim || ''}" onchange="updTarjetaLimite(${i}, this.value)" title="Limite mensual de la tarjeta">
+      </div>`;
+  }).join('');
 }
-function updTarjeta() {
-  const v = pf(document.getElementById('t-inp')?.value) || tarjetaConsumo;
-  tarjetaConsumo = v;
-  renderTarjeta();
+function updTarjeta(i) {
+  const inp = document.getElementById('t-inp-' + i); if (!inp || !TARJETAS[i]) return;
+  const v = pf(inp.value);
+  TARJETAS[i].consumido = v;
+  if (i === 0) tarjetaConsumo = v;      // campo legado
+  // Repintar sin perder el foco del campo que se esta escribiendo
+  const list = document.getElementById('tarjetas-list');
+  if (list) { const pos = inp.selectionStart; renderTarjeta(); const n = document.getElementById('t-inp-' + i); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch(e) {} } }
   autoSave();
+}
+function updTarjetaLimite(i, val) {
+  const v = pf(val); if (!TARJETAS[i] || !(v > 0)) return;
+  TARJETAS[i].limite = v; renderTarjeta(); autoSave();
 }
 
 // ── CREDITOS DINÁMICOS ──
@@ -3075,7 +3175,12 @@ function renderDebtCountdown() {
       <div style="font-size:12px;font-weight:600;color:var(--sky);margin-bottom:6px;">Simulacion: +${extra} € extra/mes en cada credito</div>
       <div style="font-size:12px;color:var(--muted);">Terminarias ~${mesesAhorrados} meses antes y ahorrarias ~${fmt(Math.round(intAhorrados))} en intereses. El mas caro es <b>${caro.nombre}</b> (${caro.tasa}%): cualquier extra, ahi primero.</div>
     </div>
+    <div class="deuda-chart">
+      <div class="deuda-chart-title"><span>Camino a cero</span><span style="color:var(--emerald);">Libre de deuda en ${freeDate}</span></div>
+      <div class="deuda-chart-wrap"><canvas id="chart-deuda"></canvas></div>
+    </div>
   `;
+  renderDeudaChart();
 }
 
 // ── EVOLUCION MES A MES (v8.4): los 12 meses hasta el mes seleccionado, en Historial ──
@@ -3197,6 +3302,7 @@ function toggleDarkMode() {
   updateThemeButton();
   autoSave();
   if (document.getElementById('page-historico')?.classList.contains('active')) renderEvolucion();
+  if (document.getElementById('page-finanzas')?.classList.contains('active')) renderDeudaChart();
 }
 function updateThemeButton() {
   const btn = document.getElementById('theme-toggle');
@@ -3285,6 +3391,7 @@ function exportPDF() {
 function renderDebtSummary() {
   const sc = document.getElementById('saldo-cuenta');
   if (sc && !sc.querySelector('input')) sc.textContent = fmt(Math.round(saldoCuenta));
+  const mc = document.getElementById('m-cuenta'); if (mc) mc.textContent = fmt(Math.round(saldoCuenta));
   const totalDeuda = CREDITOS.filter(c => !c.pagado).reduce((s, c) => s + pendienteHoy(c), 0);
   const totalCuotas = CREDITOS.filter(c => !c.pagado).reduce((s, c) => s + c.cuota, 0);
   const aFavor = totalActivos();
@@ -3532,6 +3639,123 @@ document.addEventListener('touchend', e => {
   syncFromCloud();
   setTimeout(() => { if (p) p.hidden = true; }, 1500);
 }, { passive: true });
+
+// ══ v8.7: INICIO CON CIFRAS CLAVE + BARRA DEL MES ══
+function pendienteFijos(mes) {
+  let t = 0; mes.gastos.forEach((g,i) => { if (g[2] === 'fijos' && !isPagado(mes.id, i)) t += g[1] || 0; }); return t;
+}
+function renderResumenTop(mes) {
+  const id = mes.id;
+  const ing = ingresosMes(id), gas = totalGastos(mes), res = ing - gas;
+  const elRes = document.getElementById('m-res');
+  if (elRes) { elRes.textContent = ing > 0 ? (res >= 0 ? '+' : '') + fmt(Math.round(res)) : '— €'; elRes.className = 'metric-val mono ' + (ing > 0 ? (res >= 0 ? 'green' : 'red') : ''); }
+  const elResSub = document.getElementById('m-res-sub');
+  if (elResSub) elResSub.textContent = ing > 0 ? (res >= 0 ? 'Te queda libre este mes' : 'Gastas mas de lo que entra') : 'Faltan las nominas';
+  const elC = document.getElementById('m-cuenta'); if (elC) elC.textContent = fmt(Math.round(saldoCuenta));
+  const pend = pendienteFijos(mes);
+  const elCS = document.getElementById('m-cuenta-sub');
+  if (elCS) elCS.innerHTML = pend > 0 ? `Falta por pagar: <b style="color:var(--amber);font-family:'JetBrains Mono',monospace;">${fmt(Math.round(pend))}</b>` : 'Fijos del mes al dia';
+  renderMesBar(mes);
+}
+// Barra del mes: gastado frente a lo previsto (media de los 6 meses anteriores con datos), con la marca de hoy
+function renderMesBar(mes) {
+  const el = document.getElementById('mes-bar'); if (!el) return;
+  const hoy = new Date();
+  const [mn, yy] = mes.id.split(' '); const mi = _MNAMES.indexOf(mn); const y = parseInt(yy);
+  const diasMes = new Date(y, mi + 1, 0).getDate();
+  const esActual = mes.id === _mesActual;
+  const esFuturo = (y * 12 + mi) > (hoy.getFullYear() * 12 + hoy.getMonth());
+  const prev = MESES.slice(Math.max(0, mesIdx - 6), mesIdx).filter(m => totalGastos(m) > 0 && m.gastos.some(g => g[2] !== 'fijos'));
+  const previsto = prev.length ? prev.reduce((s,m) => s + totalGastos(m), 0) / prev.length : 0;
+  const gas = totalGastos(mes);
+  const pct = previsto > 0 ? gas / previsto * 100 : 0;
+  const dia = esActual ? hoy.getDate() : (esFuturo ? 0 : diasMes);
+  const pctDia = dia / diasMes * 100;
+  let color = 'var(--emerald)';
+  if (previsto > 0) { if (pct > 100) color = 'var(--coral)'; else if (pct > pctDia + 8) color = 'var(--amber)'; }
+  let titulo, txt;
+  if (esActual) { titulo = `Dia ${dia} de ${diasMes}`; txt = `Llevas <b>${fmt(Math.round(gas))}</b>${previsto ? ` de ~<b>${fmt(Math.round(previsto))}</b> previstos` : ''}`; }
+  else if (esFuturo) { titulo = 'Mes futuro'; txt = `Ya cargados <b>${fmt(Math.round(gas))}</b> (fijos)${previsto ? ` · media anterior <b>${fmt(Math.round(previsto))}</b>` : ''}`; }
+  else { titulo = 'Mes cerrado'; txt = `Gastaste <b>${fmt(Math.round(gas))}</b>${previsto ? ` · media de los ${prev.length} meses anteriores <b>${fmt(Math.round(previsto))}</b>` : ''}`; }
+  // Proyeccion a fin de mes: los fijos ya estan cargados; solo se extrapola lo variable por dias
+  const fij = mes.gastos.filter(g => g[2] === 'fijos').reduce((s,g) => s + (g[1]||0), 0);
+  const proy = fij + (gas - fij) / Math.max(1, dia) * diasMes;
+  const ritmo = esActual && previsto > 0 ? `A este ritmo: ~${fmt(Math.round(proy))} a fin de mes` : '';
+  const diff = previsto > 0 ? (pct > 100 ? `<span class="cmp-up">▲ ${Math.round(pct - 100)}% por encima de lo previsto</span>` : `<span class="cmp-down">${Math.round(100 - pct)}% de margen</span>`) : 'Sin meses anteriores para comparar';
+  el.innerHTML = `
+    <div class="mesbar-top"><span class="mesbar-title">${titulo} · ${mes.id}</span><span class="mesbar-txt">${txt}</span></div>
+    <div class="mesbar-track">
+      <div class="mesbar-fill" style="width:${Math.min(100, pct || (esFuturo ? 0 : 100))}%;background:${color};"></div>
+      ${esActual ? `<div class="mesbar-today" style="left:${pctDia}%;"></div>` : ''}
+    </div>
+    <div class="mesbar-foot"><span>${diff}</span><span>${ritmo}</span></div>`;
+}
+
+// ══ v8.7: TIRA DE MESES (color por resultado del mes) ══
+function colorMes(m) {
+  const ing = ingresosMes(m.id), gas = totalGastos(m);
+  if (!(gas > 0)) return 'var(--hint)';
+  if (!(ing > 0)) return 'var(--hint)';
+  return ing >= gas ? 'var(--emerald)' : 'var(--coral)';
+}
+function renderMesStrip() {
+  const el = document.getElementById('mes-strip'); if (!el) return;
+  const a = Math.max(0, mesIdx - 8), b = Math.min(MESES.length - 1, mesIdx + 3);
+  el.innerHTML = MESES.slice(a, b + 1).map((m, k) => {
+    const i = a + k;
+    return `<button class="mes-chip${i === mesIdx ? ' sel' : ''}${m.id === _mesActual ? ' hoy' : ''}" onclick="selMes(${i})" title="${m.id}"><span class="mes-dot" style="background:${colorMes(m)};"></span>${m.id.replace(' 20', ' ')}</button>`;
+  }).join('');
+  requestAnimationFrame(() => { const sel = el.querySelector('.mes-chip.sel'); if (sel) el.scrollLeft = Math.max(0, sel.offsetLeft - el.clientWidth / 2 + sel.offsetWidth / 2); });
+}
+
+// ══ v8.7: GASTOS AGRUPADOS POR CATEGORIA (plegables) ══
+let GRUPOS_CERRADOS = new Set();
+try { GRUPOS_CERRADOS = new Set(JSON.parse(localStorage.getItem('familiadiaz_grupos') || '[]')); } catch(e) {}
+function toggleGrupo(k) {
+  if (GRUPOS_CERRADOS.has(k)) GRUPOS_CERRADOS.delete(k); else GRUPOS_CERRADOS.add(k);
+  localStorage.setItem('familiadiaz_grupos', JSON.stringify([...GRUPOS_CERRADOS]));
+  renderGastosList();
+}
+
+// ══ v8.7: GRAFICO DE LA DEUDA BAJANDO ══
+function saldoDeudaEn(c, ym) {           // pendiente de un credito al final del mes "AAAA-MM"
+  if (c.pagado) return 0;
+  const fin = ym + '-31';
+  if (Array.isArray(c.tabla) && c.tabla.length) { let p = c.pendiente || 0; for (const [f, rest] of c.tabla) { if (f <= fin) p = rest; else break; } return p; }
+  // Sin cuadro: amortizacion francesa aproximada desde hoy
+  const hoy = new Date(); let saldo = c.pendiente || 0; const r = (c.tasa || 0) / 100 / 12;
+  let y = hoy.getFullYear(), m = hoy.getMonth();
+  const [ty, tm] = ym.split('-').map(Number);
+  while ((y * 12 + m) < (ty * 12 + tm - 1) && saldo > 0) { saldo = saldo + saldo * r - (c.cuota || 0); m++; if (m > 11) { m = 0; y++; } }
+  return Math.max(0, saldo);
+}
+function renderDeudaChart() {
+  const ctx = document.getElementById('chart-deuda')?.getContext('2d'); if (!ctx) return;
+  const activos = CREDITOS.filter(c => !c.pagado && c.cuota > 0); if (!activos.length) return;
+  const hoy = new Date(); let y = hoy.getFullYear(), m = hoy.getMonth();
+  const labels = [], data = []; let n = 0;
+  while (n < 240) {
+    const ym = `${y}-${String(m + 1).padStart(2, '0')}`;
+    const tot = activos.reduce((s, c) => s + saldoDeudaEn(c, ym), 0);
+    labels.push(_MNAMES[m] + ' ' + String(y).slice(2)); data.push(Math.round(tot));
+    if (tot <= 0.5) break;
+    m++; if (m > 11) { m = 0; y++; } n++;
+  }
+  if (window._cdeuda) window._cdeuda.destroy();
+  const th = chartTheme();
+  window._cdeuda = new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets: [{ label: 'Deuda pendiente', data, borderColor: '#ff3d71', backgroundColor: 'rgba(255,61,113,.12)', fill: true, tension: .25, pointRadius: 0, borderWidth: 2 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => fmt(c.parsed.y) } } },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: th.tick, font: { family: 'JetBrains Mono', size: 10 }, maxTicksLimit: 10 } },
+        y: { min: 0, grid: { color: th.grid }, ticks: { color: th.tick, font: { family: 'JetBrains Mono', size: 10 }, callback: v => (v/1000).toFixed(0) + 'k' } }
+      }
+    }
+  });
+}
 
 // ── INIT ──
 loadAllData();

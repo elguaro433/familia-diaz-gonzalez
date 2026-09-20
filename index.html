@@ -2,11 +2,11 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script>
 // Limpiar Service Workers y caches viejos - APP NO USA CACHE
 (async function() {
-  const APP_VERSION = '8.5.1';
+  const APP_VERSION = '8.6';
   const stored = localStorage.getItem('app_version');
   if ('serviceWorker' in navigator) {
     const regs = await navigator.serviceWorker.getRegistrations();
@@ -678,48 +678,162 @@ body {
 .jub-bar-val { width: 54px; text-align: right; font-size: 11px; flex-shrink: 0; }
 .jub-proy { margin-top: 8px; font-size: 11px; color: var(--muted); }
 
-/* ── MOBILE ── */
+/* ── CABECERA: sync y menu (v8.6) ── */
+.sync-status { font-size: 10px; margin-right: 8px; font-family: 'JetBrains Mono', monospace; }
+.hdr-sync { background: transparent; border: 1px solid var(--border); border-radius: 6px; color: rgba(255,255,255,.7); padding: 2px 8px; font-size: 11px; cursor: pointer; margin-right: 6px; }
+.hdr-more-wrap { position: relative; display: none; }
+.hdr-more { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15); color: #fff; border-radius: 8px; width: 36px; height: 32px; font-size: 18px; line-height: 1; cursor: pointer; }
+.hdr-menu { position: absolute; right: 0; top: 40px; z-index: 250; background: var(--card); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.25); min-width: 220px; padding: 6px; }
+.hdr-menu[hidden] { display: none; }
+.hdr-menu button { display: block; width: 100%; text-align: left; background: transparent; border: none; color: var(--text); padding: 12px 12px; font-size: 14px; border-radius: 8px; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; }
+.hdr-menu button:active { background: var(--card2); }
+
+/* ── ELEMENTOS SOLO MOVIL (ocultos en escritorio) ── */
+.tabbar, .fab, .ptr { display: none; }
+.sheet-bg[hidden], .sheet[hidden], .ptr[hidden] { display: none !important; }
+
+/* ── HOJA DESLIZANTE (v8.6) ── */
+.sheet-bg { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 300; }
+.sheet {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 301;
+  background: var(--card); color: var(--text); border-radius: 18px 18px 0 0;
+  padding: 10px 16px calc(18px + env(safe-area-inset-bottom));
+  box-shadow: 0 -8px 30px rgba(0,0,0,.25); max-height: 88vh; overflow-y: auto;
+  animation: sheetUp .22s ease-out;
+}
+@keyframes sheetUp { from { transform: translateY(100%); } to { transform: none; } }
+.sheet-handle { width: 36px; height: 4px; border-radius: 2px; background: var(--hint); opacity: .5; margin: 0 auto 12px; }
+.sheet-title { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.sheet-sub { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+.sheet-lbl { font-size: 11px; color: var(--muted); margin: 12px 0 5px; text-transform: uppercase; letter-spacing: .4px; font-weight: 600; }
+.sheet-inp {
+  width: 100%; font-size: 16px; padding: 11px 12px; border: 1px solid var(--border); border-radius: 10px;
+  background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; outline: none;
+}
+.sheet-inp:focus { border-color: var(--emerald); }
+.sheet-inp.big { font-size: 30px; font-family: 'JetBrains Mono', monospace; font-weight: 700; text-align: right; color: var(--coral); padding: 8px 12px; }
+.sheet-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.cat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+.cat-opt {
+  padding: 10px 4px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--card2); color: var(--text);
+  font-size: 12px; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.cat-opt span:first-child { font-size: 20px; }
+.cat-opt.sel { border-color: var(--emerald); background: var(--emerald-dim); color: var(--emerald); }
+.sheet-actions { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+.sheet-btn {
+  flex: 1; min-width: 40%; padding: 13px 10px; border-radius: 10px; border: 1px solid var(--border);
+  background: var(--card2); color: var(--text); font-weight: 700; font-size: 14px; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.sheet-btn.primary { background: var(--emerald); color: #000; border-color: var(--emerald); }
+.sheet-btn.danger { color: var(--coral); border-color: rgba(255,61,113,.4); background: transparent; }
+.sheet-btn.paid { color: var(--emerald); border-color: var(--emerald); background: var(--emerald-dim); }
+
+/* ── MOBILE (v8.6) ── */
 @media (max-width: 768px) {
-  .app { grid-template-columns: 1fr; grid-template-rows: auto auto 1fr; }
-  .mes-pop-grid { grid-template-columns: repeat(4,1fr); }
-  .gasto-fecha.empty { opacity: .5; }
-  .evo-row { padding: 6px 12px; font-size: 11px; gap: 4px; }
-  .side { flex-direction: row; flex-wrap: wrap; min-height: unset; padding: 8px; border-right: none; border-bottom: 1px solid var(--border); gap: 2px; }
-  .nav-item { width: auto; padding: 6px 10px; font-size: 12px; border-left: none !important; }
-  .side-mes { display: none; }
-  .content { padding: 12px; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { overscroll-behavior-y: contain; padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
+  .app { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+  .side { display: none; }
+  /* Cabecera compacta: logo en una linea, sin mes, sync como punto, botones en el menu ... */
+  .hdr { padding: calc(6px + env(safe-area-inset-top)) 16px 6px; height: auto; min-height: 52px; }
+  .hdr-logo { font-size: 15px; white-space: nowrap; }
+  .hdr-sub { display: none; }
+  .hdr-actions { gap: 10px; }
+  .hdr-btn, .hdr-sync { display: none; }
+  .hdr-more-wrap { display: block; }
+  .sync-status { font-size: 0; width: 9px; height: 9px; border-radius: 50%; background: currentColor; display: inline-block; margin: 0; box-shadow: 0 0 6px currentColor; }
+  /* Pestanas abajo */
+  .tabbar {
+    display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 200;
+    background: var(--surface); border-top: 1px solid var(--border);
+    padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
+    box-shadow: 0 -4px 16px rgba(0,0,0,.08);
+  }
+  .tab-item {
+    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
+    background: transparent; border: none; color: var(--muted); font-size: 10px; font-weight: 600;
+    font-family: 'Plus Jakarta Sans', sans-serif; padding: 4px 0; border-radius: 10px; cursor: pointer;
+  }
+  .tab-ico { font-size: 20px; line-height: 1; filter: grayscale(1); opacity: .75; }
+  .tab-item.active { color: var(--emerald); }
+  .tab-item.active .tab-ico { filter: none; opacity: 1; }
+  /* Boton flotante + (solo en Gastos) */
+  .fab {
+    position: fixed; right: 18px; bottom: calc(76px + env(safe-area-inset-bottom)); z-index: 210;
+    width: 56px; height: 56px; border-radius: 50%; border: none;
+    background: linear-gradient(135deg,#00d68f,#00b87a); color: #fff; font-size: 30px; font-weight: 700; line-height: 1;
+    box-shadow: 0 8px 20px rgba(0,214,143,.4); cursor: pointer; align-items: center; justify-content: center;
+  }
+  body[data-page="gastos"] .fab { display: flex; }
+  .ptr { position: fixed; top: calc(60px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); z-index: 260; background: var(--card); color: var(--sky); border: 1px solid var(--border); border-radius: 20px; padding: 6px 14px; font-size: 12px; font-weight: 600; box-shadow: 0 6px 20px rgba(0,0,0,.2); }
+  .ptr:not([hidden]) { display: block; }
+  /* Contenido y tamanos */
+  .content { padding: 12px 16px 24px; }
   .two-col { grid-template-columns: 1fr; }
   .three-col { grid-template-columns: 1fr 1fr; }
-  .metrics { grid-template-columns: 1fr 1fr !important; }
-  .hdr { padding: 0 12px; }
-  .hdr-logo { font-size: 13px; }
-  .hdr-sub { font-size: 10px; }
+  .metrics { grid-template-columns: 1fr 1fr !important; gap: 10px; }
+  .metric { padding: 14px 14px; }
+  .metric-val { font-size: 20px; }
   .ahorro-panel { flex-direction: column; }
-  .mobile-mes { display: flex; gap: 8px; margin-bottom: 16px; }
-  .mobile-mes select { flex:1; padding:9px 12px; border:1px solid var(--border); border-radius:var(--r-sm); background:var(--card); color:var(--text); font-size:14px; outline:none; appearance:none; font-family:'Plus Jakarta Sans',sans-serif; }
+  .mes-pop-grid { grid-template-columns: repeat(4,1fr); }
+  .sc-hdr { padding: 12px 14px 10px; flex-wrap: wrap; gap: 4px 10px; }
+  .sc-title { font-size: 11px; }
+  .sc-total { font-size: 13px; }
+  .search-clear { white-space: nowrap; }
+  .hint { padding: 8px 14px; }
   .debt-summary-bar { flex-direction: column !important; gap: 8px !important; }
   .debt-summary-bar > div { min-width: unset !important; }
-  /* Fix gastos on mobile */
-  .gasto-row { flex-wrap: wrap; padding: 8px 12px; gap: 6px; }
-  .gasto-concepto { font-size: 12px; min-width: 60%; }
-  .cat-sel { font-size: 10px; padding: 1px 4px; }
-  .pay-btn { font-size: 9px; padding: 2px 8px; }
-  .gasto-importe { font-size: 12px; }
-  .gasto-del { width: 18px; height: 18px; font-size: 12px; }
+  /* Filas de gastos: una linea (nombre + fecha - importe - tick); el resto en la hoja al tocar */
+  .gasto-row { padding: 0 14px; min-height: 48px; gap: 10px; }
+  .gasto-row:active { background: var(--card2); }
+  .gasto-concepto { font-size: 14px; padding: 12px 0; }
+  .gasto-importe { font-size: 15px; padding: 12px 0; }
+  .gasto-fecha { font-size: 10px; }
+  .gasto-fecha.empty { display: none; }
+  .cat-sel, .fut-btn, .gasto-note-btn, .gasto-del { display: none !important; }
+  .pay-btn { font-size: 0; width: 30px; height: 30px; border-radius: 50%; padding: 0; display: flex; align-items: center; justify-content: center; }
+  .pay-btn::after { font-size: 15px; font-weight: 700; }
+  .pay-btn.pagado::after { content: '\2713'; }
+  .pay-btn.pendiente::after { content: '\25CB'; }
+  .gasto-note-text { margin-left: 14px; font-size: 11px; }
+  .add-row { display: none; }             /* lo sustituye el boton + */
+  .search-bar { padding: 10px 14px; }
+  .search-clear { padding: 8px 10px; }
   .nomina-row { flex-wrap: wrap; gap: 8px; }
-  .nom-inp { width: 100px; font-size: 14px; padding: 4px 8px; }
-  .credito-row { flex-wrap: wrap; padding: 10px 12px; }
-  .pay-summary { flex-wrap: wrap; gap: 8px; padding: 8px 12px; }
+  .nom-inp { width: 110px; font-size: 15px; padding: 6px 8px; }
+  .credito-row { flex-wrap: wrap; padding: 12px 14px; }
+  .pay-summary { flex-wrap: wrap; gap: 8px; padding: 8px 14px; }
   .pay-chip { font-size: 11px; }
-  .sc-hdr { padding: 10px 12px; }
-  .sc-title { font-size: 10px; }
-  /* Month selector on mobile */
-  .cat-filter { gap: 4px; padding: 8px 12px; }
-  .cat-pill { font-size: 11px; padding: 3px 8px; }
-  .add-row { flex-wrap: wrap; padding: 8px 12px; }
-  .add-inp { font-size: 12px; }
-  /* Header buttons smaller on mobile */
-  .hdr button, .hdr a { font-size: 11px !important; padding: 4px 10px !important; }
+  .pay-all-btn { margin-left: 0; width: 100%; padding: 8px; }
+  .cat-filter { gap: 6px; padding: 10px 14px; overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
+  .cat-pill { font-size: 12px; padding: 6px 12px; white-space: nowrap; }
+  .otro-row { padding: 10px 14px; }
+  .otro-nom, .otro-imp { font-size: 14px; }
+  .otro-del { opacity: 1; }
+  /* Tablas anchas: dos lineas por mes */
+  .evo-row.head { display: none; }
+  .evo-row { grid-template-columns: 1fr 1fr 1fr; grid-template-areas: "mes mes delta" "ing gas aho"; row-gap: 2px; padding: 8px 14px; font-size: 12px; }
+  .evo-row > :nth-child(1) { grid-area: mes; font-weight: 600; }
+  .evo-row > :nth-child(2) { grid-area: ing; text-align: left; }
+  .evo-row > :nth-child(3) { grid-area: gas; text-align: center; }
+  .evo-row > :nth-child(4) { grid-area: aho; }
+  .evo-row > :nth-child(5) { grid-area: delta; }
+  .evo-row > :nth-child(2)::before { content: 'Ingresos'; } .evo-row > :nth-child(3)::before { content: 'Gastos'; } .evo-row > :nth-child(4)::before { content: 'Ahorro'; }
+  .evo-row > .mono::before { display: block; font-size: 9px; color: var(--hint); font-family: 'Plus Jakarta Sans', sans-serif; text-transform: uppercase; letter-spacing: .4px; }
+  .cmp-row { display: grid; grid-template-columns: 24px 1fr auto; grid-template-areas: "ico lbl cur" "ico media dif"; row-gap: 2px; padding: 8px 14px; }
+  .cmp-row > :nth-child(1) { grid-area: ico; } .cmp-row > :nth-child(2) { grid-area: lbl; } .cmp-row > :nth-child(3) { grid-area: cur; min-width: 0 !important; }
+  .cmp-row > :nth-child(4) { grid-area: media; min-width: 0 !important; text-align: left !important; } .cmp-row > :nth-child(5) { grid-area: dif; min-width: 0 !important; }
+  .chart-wrap { padding: 12px 8px; height: 220px !important; }
+  .budget-row { gap: 8px; }
+  .budget-edit-inp { width: 64px; }
+  .jub-bar-lbl { width: 58px; }
+  .mes-btn { font-size: 15px; }
+  /* Finanzas: panel de saldo en columna */
+  #page-finanzas > div:first-child { flex-direction: column; align-items: stretch; gap: 10px; }
+  #page-finanzas > div:first-child > div:last-child { text-align: left !important; }
+  #saldo-val { font-size: 20px !important; }
 }
 @media (min-width: 769px) { .mobile-mes { display: none; } }
 
@@ -748,10 +862,19 @@ body {
     <div class="hdr-logo">Familia <em>Diaz Gonzalez</em></div>
     <div class="hdr-sub" id="hdr-mes">Control financiero familiar</div>
     <div class="hdr-actions">
-      <span id="sync-status" style="font-size:10px;margin-right:8px;font-family:'JetBrains Mono',monospace;"></span>
-      <button onclick="syncFromCloud()" style="background:transparent;border:1px solid var(--border);border-radius:6px;color:rgba(255,255,255,.7);padding:2px 8px;font-size:11px;cursor:pointer;margin-right:6px;" title="Sincronizar">&#128260;</button>
+      <span id="sync-status" class="sync-status" title="Estado de sincronizacion"></span>
+      <button class="hdr-sync" onclick="syncFromCloud()" title="Sincronizar">&#128260;</button>
       <button class="hdr-btn" onclick="exportPDF()" title="Exportar mes a PDF">&#128424; Exportar</button>
       <button class="hdr-btn" id="theme-toggle" onclick="toggleDarkMode()" title="Modo oscuro/claro">&#9789; Modo</button>
+      <!-- Menu "..." (solo movil, v8.6) -->
+      <div class="hdr-more-wrap">
+        <button class="hdr-more" onclick="toggleHdrMenu()" title="Mas">&#8943;</button>
+        <div class="hdr-menu" id="hdr-menu" hidden>
+          <button onclick="syncFromCloud();toggleHdrMenu(false)">&#128260; Sincronizar ahora</button>
+          <button onclick="exportPDF();toggleHdrMenu(false)">&#128424; Exportar mes a PDF</button>
+          <button onclick="toggleDarkMode();toggleHdrMenu(false)" id="theme-toggle-m">&#9789; Modo oscuro / claro</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1116,10 +1239,28 @@ body {
     <div style="text-align:center;padding:30px 20px 20px;color:var(--hint);font-size:11px;border-top:1px solid var(--border);margin-top:30px;">
       <div style="font-weight:600;margin-bottom:4px;">Propiedad Familia Díaz González</div>
       <div>Creado por Emmanuel Díaz</div>
-      <div style="margin-top:6px;font-size:10px;opacity:.6;">v8.5.1 — 2026</div>
+      <div style="margin-top:6px;font-size:10px;opacity:.6;">v8.6 — 2026</div>
     </div>
   </div><!-- /content -->
 </div><!-- /app -->
+
+<!-- BARRA DE PESTANAS INFERIOR (solo movil, v8.6) -->
+<nav class="tabbar" id="tabbar">
+  <button class="tab-item active" data-page="resumen" onclick="showPage('resumen',document.getElementById('nav-resumen'))"><span class="tab-ico">&#127968;</span>Resumen</button>
+  <button class="tab-item" data-page="gastos" onclick="showPage('gastos',document.getElementById('nav-gastos'))"><span class="tab-ico">&#128179;</span>Gastos</button>
+  <button class="tab-item" data-page="categorias" onclick="showPage('categorias',document.getElementById('nav-categorias'))"><span class="tab-ico">&#128202;</span>Categ.</button>
+  <button class="tab-item" data-page="nominas" onclick="showPage('nominas',document.getElementById('nav-nominas'))"><span class="tab-ico">&#128181;</span>Nominas</button>
+  <button class="tab-item" data-page="historico" onclick="showPage('historico',document.getElementById('nav-historico'))"><span class="tab-ico">&#128200;</span>Historial</button>
+  <button class="tab-item" data-page="finanzas" onclick="showPage('finanzas',document.getElementById('nav-finanzas'))"><span class="tab-ico">&#127974;</span>Finanzas</button>
+</nav>
+
+<!-- BOTON + FLOTANTE (solo movil, pagina Gastos) -->
+<button class="fab" id="fab-add" onclick="openAddSheet()" title="Anadir gasto">+</button>
+
+<!-- HOJA DESLIZANTE (movil): editar gasto / anadir gasto -->
+<div class="sheet-bg" id="sheet-bg" hidden onclick="closeSheet()"></div>
+<div class="sheet" id="sheet" hidden></div>
+<div class="ptr" id="ptr" hidden>&#8635; Sincronizando...</div>
 
 <script>
 // ══ FIREBASE SYNC ══
@@ -1266,7 +1407,7 @@ function descargarJSON() {
   a.download = 'familia-diaz-gonzalez-' + hoyISO() + '.json'; document.body.appendChild(a); a.click();
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
 }
-const APP_VERSION_STR = '8.5.1';
+const APP_VERSION_STR = '8.6';
 
 // Load from Firestore
 function syncFromCloud() {
@@ -1940,6 +2081,7 @@ function renderGastosList() {
 }
 
 function editCon(i) {
+  if (isMobile()) { openGastoSheet(i); return; }
   const row = document.getElementById('gr-'+i);
   if (!row) return;
   const el = row.querySelector('.gasto-concepto');
@@ -1954,6 +2096,7 @@ function saveCon(i) {
   renderGastosList(); updTotales(); autoSave();
 }
 function editImp(i) {
+  if (isMobile()) { openGastoSheet(i); return; }
   const row = document.getElementById('gr-'+i);
   if (!row) return;
   const el = row.querySelector('.gasto-importe');
@@ -3053,6 +3196,8 @@ function updateThemeButton() {
   if (!btn) return;
   const isDark = document.body.getAttribute('data-theme') === 'dark';
   btn.innerHTML = isDark ? '\u2600 Claro' : '\u9789 Modo';
+  const btnM = document.getElementById('theme-toggle-m');
+  if (btnM) btnM.innerHTML = isDark ? '\u2600 Cambiar a modo claro' : '\u263d Cambiar a modo oscuro';
 }
 
 // ── EXPORT PDF (improvement #4) ──
@@ -3201,6 +3346,11 @@ function showPage(name, btn) {
   document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
   document.getElementById('page-'+name).classList.add('active');
   if (btn) btn.classList.add('active');
+  // v8.6: pestanas inferiores (movil), boton + solo en Gastos, cerrar hoja y menu
+  document.querySelectorAll('.tab-item').forEach(b => b.classList.toggle('active', b.dataset.page === name));
+  document.body.dataset.page = name;
+  closeSheet(); toggleHdrMenu(false);
+  if (isMobile()) window.scrollTo(0, 0);
   if (name==='categorias') renderCategorias();
   if (name==='nominas') renderNominas();
   if (name==='historico') renderHistorico();
@@ -3236,6 +3386,146 @@ function saveNomName(who) {
   syncToCloud();
 }
 
+// ══ MOVIL (v8.6): menu de cabecera, hojas deslizantes, boton + y deslizar para sincronizar ══
+function isMobile() { return window.matchMedia('(max-width: 768px)').matches; }
+function toggleHdrMenu(force) {
+  const m = document.getElementById('hdr-menu'); if (!m) return;
+  m.hidden = force !== undefined ? !force : !m.hidden;
+}
+document.addEventListener('click', e => {
+  const w = document.querySelector('.hdr-more-wrap');
+  if (w && !w.contains(e.target)) toggleHdrMenu(false);
+});
+
+// ── Hoja deslizante generica ──
+function openSheet(html) {
+  const sh = document.getElementById('sheet'), bg = document.getElementById('sheet-bg');
+  if (!sh || !bg) return;
+  sh.innerHTML = '<div class="sheet-handle"></div>' + html;
+  sh.hidden = false; bg.hidden = false;
+}
+function closeSheet() {
+  const sh = document.getElementById('sheet'), bg = document.getElementById('sheet-bg');
+  if (sh) { sh.hidden = true; sh.innerHTML = ''; }
+  if (bg) bg.hidden = true;
+}
+function catGridHtml(sel, fn) {
+  return `<div class="cat-grid">${Object.entries(CATS).map(([k,c]) =>
+    `<button class="cat-opt${k === sel ? ' sel' : ''}" onclick="${fn}('${k}')"><span>${c.icon}</span><span>${c.label}</span></button>`).join('')}</div>`;
+}
+
+// ── Editar un gasto (movil): todo lo de la fila en una hoja ──
+let sheetIdx = -1;
+function openGastoSheet(i) { sheetIdx = i; renderGastoSheet(); }
+function renderGastoSheet() {
+  const mes = MESES[mesIdx]; const g = mes.gastos[sheetIdx];
+  if (!g) { closeSheet(); return; }
+  const [con, val, cat] = g; const fecha = fechaGasto(g);
+  const isFijo = cat === 'fijos'; const paid = isFijo && isPagado(mes.id, sheetIdx);
+  const nota = GASTO_NOTAS[mes.id + '|' + sheetIdx] || '';
+  openSheet(`
+    <div class="sheet-title">Editar gasto</div>
+    <div class="sheet-sub">${mes.id} · ${CATS[cat] ? CATS[cat].label : cat}</div>
+    <div class="sheet-row2">
+      <div><div class="sheet-lbl">Importe</div><input class="sheet-inp big" id="sh-imp" type="text" inputmode="decimal" value="${val}" onchange="sheetSaveImp()" onblur="sheetSaveImp()"></div>
+      <div><div class="sheet-lbl">Fecha</div><input class="sheet-inp" id="sh-fecha" type="date" value="${fecha}" onchange="sheetSaveFecha()"></div>
+    </div>
+    <div class="sheet-lbl">Concepto</div>
+    <input class="sheet-inp" id="sh-con" type="text" value="${con.replace(/"/g,'&quot;')}" onchange="sheetSaveCon()" onblur="sheetSaveCon()">
+    <div class="sheet-lbl">Categoria</div>
+    ${catGridHtml(cat, 'sheetCat')}
+    <div class="sheet-lbl">Nota</div>
+    <input class="sheet-inp" id="sh-nota" type="text" placeholder="Escribe una nota..." value="${nota.replace(/"/g,'&quot;')}" onchange="sheetSaveNota()" onblur="sheetSaveNota()">
+    <div class="sheet-actions">
+      ${isFijo ? `<button class="sheet-btn${paid ? ' paid' : ''}" onclick="sheetTogglePago()">${paid ? '✓ Pagado' : '○ Marcar pagado'}</button>` : ''}
+      ${isFijo ? `<button class="sheet-btn" onclick="aplicarFuturos(${sheetIdx});renderGastosList()">→ A meses futuros</button><button class="sheet-btn" onclick="quitarFuturos(${sheetIdx});renderGastosList()">✕ Quitar de futuros</button>` : ''}
+      <button class="sheet-btn danger" onclick="sheetDel()">Borrar</button>
+      <button class="sheet-btn primary" onclick="closeSheet()">Listo</button>
+    </div>`);
+}
+function sheetSaveImp() {
+  const inp = document.getElementById('sh-imp'); if (!inp) return;
+  const v = pf(inp.value); const g = MESES[mesIdx].gastos[sheetIdx];
+  if (v > 0 && v !== g[1]) { g[1] = v; renderGastosList(); updTotales(); autoSave(); }
+}
+function sheetSaveCon() {
+  const inp = document.getElementById('sh-con'); if (!inp) return;
+  const v = inp.value.trim(); const g = MESES[mesIdx].gastos[sheetIdx];
+  if (v && v !== g[0]) { g[0] = v; renderGastosList(); autoSave(); }
+}
+function sheetSaveFecha() {
+  const inp = document.getElementById('sh-fecha'); if (!inp) return;
+  const g = MESES[mesIdx].gastos[sheetIdx];
+  if (fechaGasto(g) !== inp.value) { setFechaGasto(g, inp.value); renderGastosList(); autoSave(); }
+}
+function sheetCat(cat) {
+  cambiaCat(sheetIdx, cat); renderGastosList(); renderGastoSheet();
+}
+function sheetSaveNota() {
+  const inp = document.getElementById('sh-nota'); if (!inp) return;
+  const key = getNotaKey(sheetIdx); const v = inp.value.trim();
+  if ((GASTO_NOTAS[key] || '') === v) return;
+  if (v) GASTO_NOTAS[key] = v; else delete GASTO_NOTAS[key];
+  saveNotas(); renderGastosList();
+}
+function sheetTogglePago() { togglePago(sheetIdx); renderGastoSheet(); }
+function sheetDel() {
+  const g = MESES[mesIdx].gastos[sheetIdx]; const antes = MESES[mesIdx].gastos.length;
+  delGasto(sheetIdx);
+  if (MESES[mesIdx].gastos.length < antes) closeSheet();
+}
+
+// ── Anadir gasto (movil): boton + ──
+let addCat = 'variable';
+function openAddSheet() {
+  addCat = 'variable';
+  openSheet(`
+    <div class="sheet-title">Nuevo gasto</div>
+    <div class="sheet-sub">${MESES[mesIdx].id}</div>
+    <div class="sheet-lbl">Importe</div>
+    <input class="sheet-inp big" id="sha-imp" type="text" inputmode="decimal" placeholder="0,00" onkeydown="if(event.key==='Enter')document.getElementById('sha-con').focus()">
+    <div class="sheet-lbl">Categoria</div>
+    <div id="sha-cats">${catGridHtml(addCat, 'sheetAddCat')}</div>
+    <div class="sheet-lbl">Concepto</div>
+    <input class="sheet-inp" id="sha-con" type="text" placeholder="Mercadona, gasolina, farmacia..." onkeydown="if(event.key==='Enter')sheetAddSubmit()">
+    <div class="sheet-lbl">Fecha</div>
+    <input class="sheet-inp" id="sha-fecha" type="date" value="${fechaPorDefecto()}">
+    <div class="sheet-actions">
+      <button class="sheet-btn" onclick="closeSheet()">Cancelar</button>
+      <button class="sheet-btn primary" onclick="sheetAddSubmit()">+ Anadir</button>
+    </div>`);
+  setTimeout(() => document.getElementById('sha-imp')?.focus(), 250);
+}
+function sheetAddCat(cat) {
+  addCat = cat;
+  const el = document.getElementById('sha-cats'); if (el) el.innerHTML = catGridHtml(addCat, 'sheetAddCat');
+}
+function sheetAddSubmit() {
+  const v = pf(document.getElementById('sha-imp')?.value);
+  const c = (document.getElementById('sha-con')?.value || '').trim();
+  const f = document.getElementById('sha-fecha')?.value || '';
+  if (!v) { document.getElementById('sha-imp')?.focus(); return; }
+  if (!c) { document.getElementById('sha-con')?.focus(); return; }
+  const g = [c, v, addCat]; setFechaGasto(g, f);
+  MESES[mesIdx].gastos.push(g);
+  closeSheet(); renderGastosList(); updTotales(); autoSave();
+  const list = document.getElementById('gastos-list');
+  if (list) list.lastElementChild?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+}
+
+// ── Deslizar hacia abajo para sincronizar (movil) ──
+let ptrY = null;
+document.addEventListener('touchstart', e => { ptrY = (window.scrollY <= 0 && isMobile() && document.getElementById('sheet')?.hidden !== false) ? e.touches[0].clientY : null; }, { passive: true });
+document.addEventListener('touchend', e => {
+  if (ptrY === null) return;
+  const dy = e.changedTouches[0].clientY - ptrY; ptrY = null;
+  if (dy < 80 || window.scrollY > 0) return;
+  const p = document.getElementById('ptr'); if (p) p.hidden = false;
+  updateSyncStatus('syncing');
+  syncFromCloud();
+  setTimeout(() => { if (p) p.hidden = true; }, 1500);
+}, { passive: true });
+
 // ── INIT ──
 loadAllData();
 poblarSel();
@@ -3246,6 +3536,7 @@ renderPaySummary();
 renderDebtCountdown();
 renderDebtSummary();
 updateThemeButton();
+document.body.dataset.page = 'resumen';
 
 // Load from cloud on startup, then listen for changes
 syncFromCloud();

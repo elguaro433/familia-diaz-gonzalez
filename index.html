@@ -6,7 +6,7 @@
 <script>
 // Limpiar Service Workers y caches viejos - APP NO USA CACHE
 (async function() {
-  const APP_VERSION = '8.4';
+  const APP_VERSION = '8.5';
   const stored = localStorage.getItem('app_version');
   if ('serviceWorker' in navigator) {
     const regs = await navigator.serviceWorker.getRegistrations();
@@ -665,6 +665,19 @@ body {
 .evo-row.sel { background: var(--emerald-dim); font-weight: 600; }
 .evo-row .mono { text-align: right; }
 
+/* ── JUBILACION CASS (v8.5) ── */
+.jub-row { padding: 12px 18px; border-bottom: 1px solid var(--border); }
+.jub-row:last-child { border-bottom: none; }
+.jub-pts { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; color: var(--violet); cursor: text; }
+.jub-bars { margin-top: 10px; display: grid; gap: 4px; }
+.jub-bar-row { display: flex; align-items: center; gap: 8px; font-size: 11px; }
+.jub-bar-lbl { width: 66px; color: var(--muted); flex-shrink: 0; }
+.jub-bar-bg { flex: 1; height: 6px; background: rgba(0,0,0,.06); border-radius: 3px; overflow: hidden; }
+[data-theme="dark"] .jub-bar-bg { background: rgba(255,255,255,.08); }
+.jub-bar-fill { height: 100%; background: var(--violet); border-radius: 3px; }
+.jub-bar-val { width: 54px; text-align: right; font-size: 11px; flex-shrink: 0; }
+.jub-proy { margin-top: 8px; font-size: 11px; color: var(--muted); }
+
 /* ── MOBILE ── */
 @media (max-width: 768px) {
   .app { grid-template-columns: 1fr; grid-template-rows: auto auto 1fr; }
@@ -1058,6 +1071,16 @@ body {
         </div>
       </div>
 
+      <!-- Jubilacion CASS: puntos de vejez (v8.5) -->
+      <div class="sc" style="margin-top:16px;">
+        <div class="sc-hdr">
+          <div class="sc-title">Jubilacion CASS (puntos de vejez)</div>
+          <div class="chip chip-violet" id="jub-total">0 puntos</div>
+        </div>
+        <div class="hint" style="border-top:none;">Cada mes, el 12 % de la base de cotizacion se convierte en puntos al precio de compra del ano. Pension anual estimada = puntos &times; precio de venta del punto (<span id="jub-venta-txt"></span>), sin la reduccion progresiva de la reforma: comprueba la cifra en el simulador de la CASS &mdash; toca los puntos para ponerlos al dia con el extracto</div>
+        <div id="jub-list"></div>
+      </div>
+
       <!-- Otros ingresos -->
       <div class="sc" style="margin-top:16px;">
         <div class="sc-hdr">
@@ -1093,7 +1116,7 @@ body {
     <div style="text-align:center;padding:30px 20px 20px;color:var(--hint);font-size:11px;border-top:1px solid var(--border);margin-top:30px;">
       <div style="font-weight:600;margin-bottom:4px;">Propiedad Familia Díaz González</div>
       <div>Creado por Emmanuel Díaz</div>
-      <div style="margin-top:6px;font-size:10px;opacity:.6;">v8.4 — 2026</div>
+      <div style="margin-top:6px;font-size:10px;opacity:.6;">v8.5 — 2026</div>
     </div>
   </div><!-- /content -->
 </div><!-- /app -->
@@ -1135,6 +1158,7 @@ function syncToCloud() {
     otrosIngresos: JSON.stringify(otrosIngresos),
     presupuestos: JSON.stringify(PRESUPUESTOS),
     activos: JSON.stringify(ACTIVOS),
+    jubilacion: JSON.stringify(JUBILACION),
     notas: localStorage.getItem('familiadiaz_notas') || '{}',
     updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
     device: navigator.userAgent.includes('iPhone') ? 'iPhone' : 'PC'
@@ -1183,7 +1207,7 @@ function datosActuales() {
     meses: JSON.stringify(MESES), pagos: JSON.stringify(PAGOS), creditos: JSON.stringify(CREDITOS),
     nomNames: JSON.stringify(NOM_NAMES), nominasEditadas: JSON.stringify(ST), saldoCuenta: saldoCuenta,
     tarjetaConsumo: tarjetaConsumo, ninos: JSON.stringify(NINOS), otrosIngresos: JSON.stringify(otrosIngresos),
-    presupuestos: JSON.stringify(PRESUPUESTOS), activos: JSON.stringify(ACTIVOS),
+    presupuestos: JSON.stringify(PRESUPUESTOS), activos: JSON.stringify(ACTIVOS), jubilacion: JSON.stringify(JUBILACION),
     notas: localStorage.getItem('familiadiaz_notas') || '{}'
   };
 }
@@ -1234,7 +1258,7 @@ function descargarJSON() {
     exportadoEn: new Date().toISOString(), version: APP_VERSION_STR,
     meses: MESES, pagos: PAGOS, creditos: CREDITOS, nomNames: NOM_NAMES, nominasEditadas: ST,
     saldoCuenta: saldoCuenta, tarjetaConsumo: tarjetaConsumo, ninos: NINOS, otrosIngresos: otrosIngresos,
-    presupuestos: PRESUPUESTOS, activos: ACTIVOS,
+    presupuestos: PRESUPUESTOS, activos: ACTIVOS, jubilacion: JUBILACION,
     notas: JSON.parse(localStorage.getItem('familiadiaz_notas') || '{}')
   };
   const blob = new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' });
@@ -1242,7 +1266,7 @@ function descargarJSON() {
   a.download = 'familia-diaz-gonzalez-' + hoyISO() + '.json'; document.body.appendChild(a); a.click();
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
 }
-const APP_VERSION_STR = '8.4';
+const APP_VERSION_STR = '8.5';
 
 // Load from Firestore
 function syncFromCloud() {
@@ -1276,6 +1300,7 @@ function syncFromCloud() {
         if (data.otrosIngresos) otrosIngresos = normalizarOtros(JSON.parse(data.otrosIngresos));
         if (data.presupuestos) PRESUPUESTOS = Object.assign({}, DEFAULT_BUDGETS, JSON.parse(data.presupuestos));
         if (data.activos) { const ca = JSON.parse(data.activos); if (Array.isArray(ca)) ACTIVOS = ca; }
+        if (data.jubilacion) { const cj = JSON.parse(data.jubilacion); if (cj && typeof cj === 'object') JUBILACION = cj; }
         if (data.nominasEditadas) {
           const cloudST = JSON.parse(data.nominasEditadas);
           Object.keys(ST).forEach(k => delete ST[k]);
@@ -1377,6 +1402,11 @@ function semaforo(cat, gastado) {
 // [{ nombre, importe, nota }] — no es ingreso del mes, suma al patrimonio
 let ACTIVOS = [];
 function totalActivos() { return ACTIVOS.reduce((s,a) => s + (a.importe||0), 0); }
+
+// ══ JUBILACION CASS (v8.5): puntos de vejez ══
+// { e: { nombre, nacimiento:"AAAA-MM-DD", puntos, fecha:"AAAA-MM-DD", porAno:{ "2025": 213.31 }, fuente }, s: {...},
+//   valorVenta, valorCompra, anoValor }  — valores del punto segun el decreto anual (BOPA)
+let JUBILACION = { valorVenta: 2.7735, valorCompra: 26.6256, anoValor: 2026 };
 
 // ══ FECHAS DE COBRO (improvement #8) ══
 const FECHAS_COBRO = {
@@ -1742,7 +1772,7 @@ function renderMes() {
   const pct = ing > 0 ? Math.max(0, Math.min(100, (aho/ing)*100)) : 0;
   const elOtros = document.getElementById('r-otros-val'); if (elOtros) elOtros.textContent = fmt(otros);
   const rowOtros = document.getElementById('r-otros-row'); if (rowOtros) rowOtros.style.display = otros > 0 ? '' : 'none';
-  if (document.getElementById('page-finanzas')?.classList.contains('active') && typeof renderOtros === 'function') { renderOtros(); renderActivos(); renderTarjeta(); }
+  if (document.getElementById('page-finanzas')?.classList.contains('active') && typeof renderOtros === 'function') { renderOtros(); renderActivos(); renderJubilacion(); renderTarjeta(); }
 
   // Fecha por defecto al anadir gasto: hoy si el mes elegido es el actual (solo al cambiar de mes)
   const addF = document.getElementById('add-fecha');
@@ -2756,6 +2786,64 @@ function addActivo() {
   document.getElementById('activo-con').value = ''; document.getElementById('activo-imp').value = '';
   renderActivos(); renderDebtSummary(); autoSave();
 }
+
+// ── JUBILACION CASS (v8.5) ──
+function fmtPts(n) { return (n||0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function renderJubilacion() {
+  const list = document.getElementById('jub-list'); if (!list) return;
+  const venta = JUBILACION.valorVenta || 0;
+  const vt = document.getElementById('jub-venta-txt');
+  if (vt) vt.textContent = venta.toLocaleString('es-ES', { minimumFractionDigits: 4 }) + ' € en ' + (JUBILACION.anoValor || '');
+  const personas = ['e','s'].filter(k => JUBILACION[k] && typeof JUBILACION[k] === 'object');
+  const tot = document.getElementById('jub-total');
+  if (tot) tot.textContent = fmtPts(personas.reduce((s,k) => s + (JUBILACION[k].puntos||0), 0)) + ' puntos';
+  if (!personas.length) { list.innerHTML = '<div style="padding:12px 18px;font-size:12px;color:var(--hint);">Sin datos todavia: pasa el "Extracto de puntos" de la CASS.</div>'; return; }
+  const hoy = new Date();
+  list.innerHTML = personas.map(k => {
+    const p = JUBILACION[k]; const pts = p.puntos || 0;
+    const porAno = p.porAno || {};
+    const anos = Object.keys(porAno).sort();
+    const max = Math.max(1, ...anos.map(a => porAno[a]));
+    // Ritmo: ultimo ano completo (los puntos de un ano dependen del precio de compra de ese ano)
+    const completos = anos.filter(a => /^\d{4}$/.test(a) && parseInt(a) < hoy.getFullYear());
+    const ritmo = completos.length ? porAno[completos[completos.length-1]] : 0;
+    let proy = '';
+    if (p.nacimiento && ritmo > 0) {
+      const nac = new Date(p.nacimiento + 'T00:00:00');
+      const j65 = new Date(nac.getFullYear() + 65, nac.getMonth(), nac.getDate());
+      const anosRest = Math.max(0, (j65 - hoy) / (365.25 * 24 * 3600 * 1000));
+      const ptsFin = pts + ritmo * anosRest;
+      proy = `<div class="jub-proy">A los 65 (${_MSHORT[j65.getMonth()]} ${j65.getFullYear()}, faltan ${anosRest.toFixed(1)} anos): ~<b>${Math.round(ptsFin).toLocaleString('es-ES')} puntos</b> ≈ <b>${fmt(Math.round(ptsFin * venta / 12))}/mes</b> en euros de hoy, si sigue a ${Math.round(ritmo)} puntos/ano</div>`;
+    }
+    const barras = anos.map(a => `<div class="jub-bar-row"><span class="jub-bar-lbl">${a}</span><div class="jub-bar-bg"><div class="jub-bar-fill" style="width:${porAno[a] / max * 100}%;"></div></div><span class="jub-bar-val mono">${fmtPts(porAno[a])}</span></div>`).join('');
+    const nombre = p.nombre || (k === 'e' ? NOM_NAMES.e : NOM_NAMES.s);
+    return `<div class="jub-row">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
+        <div>
+          <div style="font-size:14px;font-weight:600;">${nombre}</div>
+          <div style="font-size:11px;color:var(--muted);">Extracto CASS del ${p.fecha ? p.fecha.split('-').reverse().join('/') : '—'}${p.fuente ? ' · ' + p.fuente : ''}</div>
+        </div>
+        <div style="text-align:right;">
+          <div class="jub-pts" id="jub-pts-${k}" onclick="editJubPuntos('${k}')" title="Clic para poner los puntos del ultimo extracto">${fmtPts(pts)} <span style="font-size:11px;font-weight:500;color:var(--muted);">puntos</span></div>
+          <div style="font-size:11px;color:var(--muted);">≈ ${fmt(Math.round(pts * venta / 12))}/mes de pension con lo acumulado hoy</div>
+        </div>
+      </div>
+      ${barras ? `<div class="jub-bars">${barras}</div>` : ''}
+      ${proy}
+    </div>`;
+  }).join('');
+}
+function editJubPuntos(k) {
+  const el = document.getElementById('jub-pts-' + k); if (!el) return;
+  el.outerHTML = `<input class="otro-imp-edit" id="jub-inp-${k}" type="text" inputmode="decimal" style="color:var(--violet);border-color:var(--violet);background:var(--violet-dim);" value="${JUBILACION[k].puntos || 0}" onblur="saveJubPuntos('${k}')" onkeydown="if(event.key==='Enter')saveJubPuntos('${k}')">`;
+  document.getElementById('jub-inp-' + k)?.focus();
+}
+function saveJubPuntos(k) {
+  const inp = document.getElementById('jub-inp-' + k); if (!inp) return;
+  const v = pf(inp.value);
+  if (v > 0 && v !== JUBILACION[k].puntos) { JUBILACION[k].puntos = v; JUBILACION[k].fecha = hoyISO(); autoSave(); }
+  renderJubilacion();
+}
 function addOtro() {
   const n = document.getElementById('otro-con').value.trim();
   const v = pf(document.getElementById('otro-imp').value);
@@ -3115,7 +3203,7 @@ function showPage(name, btn) {
   if (name==='categorias') renderCategorias();
   if (name==='nominas') renderNominas();
   if (name==='historico') renderHistorico();
-  if (name==='finanzas') { renderCreditos(); renderNinos(); renderOtros(); renderActivos(); renderTarjeta(); renderDebtCountdown(); renderBackups(); }
+  if (name==='finanzas') { renderCreditos(); renderNinos(); renderOtros(); renderActivos(); renderJubilacion(); renderTarjeta(); renderDebtCountdown(); renderBackups(); }
   renderMes();
 }
 

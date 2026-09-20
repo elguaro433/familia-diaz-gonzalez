@@ -1742,7 +1742,7 @@ function renderMes() {
   const pct = ing > 0 ? Math.max(0, Math.min(100, (aho/ing)*100)) : 0;
   const elOtros = document.getElementById('r-otros-val'); if (elOtros) elOtros.textContent = fmt(otros);
   const rowOtros = document.getElementById('r-otros-row'); if (rowOtros) rowOtros.style.display = otros > 0 ? '' : 'none';
-  if (document.getElementById('page-finanzas')?.classList.contains('active') && typeof renderOtros === 'function') { renderOtros(); renderActivos(); }
+  if (document.getElementById('page-finanzas')?.classList.contains('active') && typeof renderOtros === 'function') { renderOtros(); renderActivos(); renderTarjeta(); }
 
   // Fecha por defecto al anadir gasto: hoy si el mes elegido es el actual (solo al cambiar de mes)
   const addF = document.getElementById('add-fecha');
@@ -2447,19 +2447,26 @@ function renderYearChart(year) {
 }
 
 // ── FINANZAS ──
-function updTarjeta() {
-  const v = pf(document.getElementById('t-inp')?.value) || tarjetaConsumo;
-  tarjetaConsumo = v;
+// Pinta la tarjeta con el consumo guardado (sin escribir nada): al abrir Finanzas y al llegar datos de la nube
+function renderTarjeta() {
+  const v = tarjetaConsumo;
   const disp = Math.max(0, 2000 - v);
   const pct = Math.min(100, (v/2000)*100);
   const tC = document.getElementById('t-consumed');
   const tA = document.getElementById('t-avail');
   const tB = document.getElementById('t-bar');
   const sT = document.getElementById('saldo-tarj');
+  const inp = document.getElementById('t-inp');
   if (tC) tC.textContent = fmt(v);
   if (tA) tA.textContent = fmt(disp);
   if (tB) tB.style.width = pct + '%';
   if (sT) sT.textContent = fmt(v);
+  if (inp && document.activeElement !== inp) inp.value = v || '';
+}
+function updTarjeta() {
+  const v = pf(document.getElementById('t-inp')?.value) || tarjetaConsumo;
+  tarjetaConsumo = v;
+  renderTarjeta();
   autoSave();
 }
 
@@ -3108,7 +3115,7 @@ function showPage(name, btn) {
   if (name==='categorias') renderCategorias();
   if (name==='nominas') renderNominas();
   if (name==='historico') renderHistorico();
-  if (name==='finanzas') { renderCreditos(); renderNinos(); renderOtros(); renderActivos(); renderDebtCountdown(); renderBackups(); }
+  if (name==='finanzas') { renderCreditos(); renderNinos(); renderOtros(); renderActivos(); renderTarjeta(); renderDebtCountdown(); renderBackups(); }
   renderMes();
 }
 

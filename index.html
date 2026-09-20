@@ -6,7 +6,7 @@
 <script>
 // Limpiar Service Workers y caches viejos - APP NO USA CACHE
 (async function() {
-  const APP_VERSION = '8.5';
+  const APP_VERSION = '8.5.1';
   const stored = localStorage.getItem('app_version');
   if ('serviceWorker' in navigator) {
     const regs = await navigator.serviceWorker.getRegistrations();
@@ -1116,7 +1116,7 @@ body {
     <div style="text-align:center;padding:30px 20px 20px;color:var(--hint);font-size:11px;border-top:1px solid var(--border);margin-top:30px;">
       <div style="font-weight:600;margin-bottom:4px;">Propiedad Familia Díaz González</div>
       <div>Creado por Emmanuel Díaz</div>
-      <div style="margin-top:6px;font-size:10px;opacity:.6;">v8.5 — 2026</div>
+      <div style="margin-top:6px;font-size:10px;opacity:.6;">v8.5.1 — 2026</div>
     </div>
   </div><!-- /content -->
 </div><!-- /app -->
@@ -1266,7 +1266,7 @@ function descargarJSON() {
   a.download = 'familia-diaz-gonzalez-' + hoyISO() + '.json'; document.body.appendChild(a); a.click();
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
 }
-const APP_VERSION_STR = '8.5';
+const APP_VERSION_STR = '8.5.1';
 
 // Load from Firestore
 function syncFromCloud() {
@@ -2335,7 +2335,8 @@ function renderNominas() {
   const histS = document.getElementById('nom-hist-s');
   if (!histE) return;
 
-  const meses26 = MESES.slice(-14);
+  // Los 14 meses hasta el mes seleccionado (antes: los 14 ultimos de la app, que son futuros y salen vacios)
+  const meses26 = MESES.slice(Math.max(0, mesIdx - 13), mesIdx + 1);
   histE.innerHTML = meses26.map((m,i) => {
     const n = getNominas(m.id);
     const v = ST[m.id+'_e'] ?? n.e;

@@ -6,7 +6,7 @@
 <script>
 // Limpiar Service Workers y caches viejos - APP NO USA CACHE
 (async function() {
-  const APP_VERSION = '8.3';
+  const APP_VERSION = '8.4';
   const stored = localStorage.getItem('app_version');
   if ('serviceWorker' in navigator) {
     const regs = await navigator.serviceWorker.getRegistrations();
@@ -595,9 +595,82 @@ body {
   font-size: 10px; color: var(--hint); font-style: italic; margin-left: 4px;
 }
 
+/* ── v8.4: controles nativos (desplegables de categoria, calendario) tambien en oscuro ── */
+[data-theme="dark"] { color-scheme: dark; }
+
+/* ── SELECTOR DE MES PROPIO (v8.4): el desplegable nativo se veia blanco en modo oscuro ── */
+.mes-btn {
+  flex: 1; height: 48px; border: none;
+  background: linear-gradient(135deg,#1e293b,#334155); color: #fff;
+  font-size: 16px; font-weight: 700; font-family: 'Plus Jakarta Sans', sans-serif;
+  cursor: pointer; letter-spacing: .5px;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.mes-btn .mes-caret { font-size: 11px; opacity: .7; }
+.mes-pop {
+  position: absolute; top: 54px; left: 0; right: 0; z-index: 200;
+  background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+  box-shadow: 0 12px 32px rgba(0,0,0,.18); padding: 12px;
+}
+.mes-pop[hidden] { display: none; }
+.mes-pop-years { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.mes-pop-year {
+  padding: 4px 12px; border-radius: 14px; border: 1px solid var(--border);
+  background: transparent; color: var(--muted); font-size: 12px; font-weight: 600;
+  cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.mes-pop-year.active { background: var(--sky-dim); color: var(--sky); border-color: var(--sky); }
+.mes-pop-grid { display: grid; grid-template-columns: repeat(6,1fr); gap: 6px; }
+.mes-pop-m {
+  padding: 10px 0; border-radius: 10px; border: 1px solid var(--border);
+  background: var(--card2); color: var(--text); font-size: 13px; font-weight: 600;
+  cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.mes-pop-m:hover { border-color: var(--sky); color: var(--sky); }
+.mes-pop-m:disabled { opacity: .25; cursor: default; }
+.mes-pop-m:disabled:hover { border-color: var(--border); color: var(--text); }
+.mes-pop-m.sel { background: var(--emerald); color: #000; border-color: var(--emerald); }
+.mes-pop-m.hoy { box-shadow: inset 0 0 0 2px var(--sky); }
+
+/* ── FECHA POR GASTO (v8.4) ── */
+.gasto-fecha {
+  font-size: 10px; font-family: 'JetBrains Mono', monospace; color: var(--sky);
+  background: var(--sky-dim); border-radius: 6px; padding: 2px 6px;
+  cursor: pointer; white-space: nowrap; flex-shrink: 0;
+}
+.gasto-fecha.empty { background: transparent; color: var(--hint); opacity: 0; }
+.gasto-row:hover .gasto-fecha.empty { opacity: .7; }
+.gasto-fecha-edit {
+  font-family: 'JetBrains Mono', monospace; font-size: 12px; border: 1.5px solid var(--sky);
+  border-radius: 6px; padding: 2px 6px; background: var(--sky-dim); color: var(--text); outline: none;
+}
+.add-inp[type="date"] { flex: none; width: 150px; font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 6px 8px; }
+.search-clear.on { color: var(--sky); border-color: var(--sky); background: var(--sky-dim); }
+
+/* ── PRESUPUESTOS / SEMAFORO (v8.4) ── */
+.sem-chip {
+  display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px; border-radius: 12px;
+  font-size: 10px; font-weight: 700; font-family: 'JetBrains Mono', monospace; white-space: nowrap;
+}
+.budget-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.budget-row:last-of-type { border-bottom: none; }
+
+/* ── EVOLUCION 12 MESES (v8.4) ── */
+.evo-row {
+  display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr 1.1fr; gap: 6px;
+  padding: 7px 18px; border-bottom: 1px solid var(--border); font-size: 12px; align-items: center;
+}
+.evo-row:last-child { border-bottom: none; }
+.evo-row.head { font-size: 10px; text-transform: uppercase; letter-spacing: .4px; color: var(--hint); font-weight: 600; background: var(--card2); }
+.evo-row.sel { background: var(--emerald-dim); font-weight: 600; }
+.evo-row .mono { text-align: right; }
+
 /* ── MOBILE ── */
 @media (max-width: 768px) {
   .app { grid-template-columns: 1fr; grid-template-rows: auto auto 1fr; }
+  .mes-pop-grid { grid-template-columns: repeat(4,1fr); }
+  .gasto-fecha.empty { opacity: .5; }
+  .evo-row { padding: 6px 12px; font-size: 11px; gap: 4px; }
   .side { flex-direction: row; flex-wrap: wrap; min-height: unset; padding: 8px; border-right: none; border-bottom: 1px solid var(--border); gap: 2px; }
   .nav-item { width: auto; padding: 6px 10px; font-size: 12px; border-left: none !important; }
   .side-mes { display: none; }
@@ -690,22 +763,20 @@ body {
       <span class="nav-dot" style="background:var(--pink)"></span>Finanzas
     </button>
 
-    <div class="side-mes" style="display:none;">
-      <select class="mes-sel" id="mes-sel" onchange="selMes(this.value)"></select>
-    </div>
   </div>
 
   <!-- CONTENT -->
   <div class="content">
-    <!-- SELECTOR MES PRINCIPAL -->
-    <div style="display:flex;align-items:center;gap:0;margin-bottom:20px;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08);">
-      <button onclick="cambiarMes(-1)" style="flex:0 0 56px;height:48px;border:none;background:linear-gradient(135deg,#0ea5e9,#06b6d4);color:#fff;font-size:20px;cursor:pointer;font-weight:700;transition:opacity .15s;">&#8592;</button>
-      <select id="mes-sel-top" onchange="selMes(this.value)" style="flex:1;height:48px;padding:0 16px;border:none;background:linear-gradient(135deg,#1e293b,#334155);color:#fff;font-size:16px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;outline:none;appearance:none;cursor:pointer;text-align:center;letter-spacing:.5px;"></select>
-      <button onclick="cambiarMes(1)" style="flex:0 0 56px;height:48px;border:none;background:linear-gradient(135deg,#06b6d4,#0ea5e9);color:#fff;font-size:20px;cursor:pointer;font-weight:700;transition:opacity .15s;">&#8594;</button>
-      <button onclick="crearNuevoMes()" style="flex:0 0 auto;height:48px;padding:0 14px;border:none;background:linear-gradient(135deg,#00d68f,#00b87a);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;letter-spacing:.3px;transition:opacity .15s;" title="Crear nuevo mes">+ Mes</button>
+    <!-- SELECTOR MES PRINCIPAL (v8.4: desplegable propio, no nativo) -->
+    <div id="mes-picker" style="position:relative;margin-bottom:20px;">
+      <div style="display:flex;align-items:center;gap:0;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08);">
+        <button onclick="cambiarMes(-1)" style="flex:0 0 56px;height:48px;border:none;background:linear-gradient(135deg,#0ea5e9,#06b6d4);color:#fff;font-size:20px;cursor:pointer;font-weight:700;transition:opacity .15s;">&#8592;</button>
+        <button class="mes-btn" id="mes-btn-top" onclick="toggleMesPicker()" title="Elegir mes"></button>
+        <button onclick="cambiarMes(1)" style="flex:0 0 56px;height:48px;border:none;background:linear-gradient(135deg,#06b6d4,#0ea5e9);color:#fff;font-size:20px;cursor:pointer;font-weight:700;transition:opacity .15s;">&#8594;</button>
+        <button onclick="crearNuevoMes()" style="flex:0 0 auto;height:48px;padding:0 14px;border:none;background:linear-gradient(135deg,#00d68f,#00b87a);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;letter-spacing:.3px;transition:opacity .15s;" title="Crear nuevo mes">+ Mes</button>
+      </div>
+      <div id="mes-pop" class="mes-pop" hidden></div>
     </div>
-    <!-- mobile mes hidden -->
-    <div style="display:none;"><select id="mes-sel-m"></select></div>
 
     <!-- RESUMEN -->
     <div id="page-resumen" class="page active">
@@ -790,6 +861,7 @@ body {
         <div class="search-bar">
           <input class="search-inp" id="search-gastos" type="text" placeholder="Buscar gasto..." oninput="searchGastos()">
           <button class="search-clear" onclick="clearSearch()">Limpiar</button>
+          <button class="search-clear" id="btn-orden-fecha" onclick="toggleOrdenFecha()" title="Ordenar los gastos por fecha (los que no tienen fecha van al final)">&#128197; Por fecha</button>
         </div>
         <div class="search-results" id="search-results"></div>
         <div class="cat-filter" id="gastos-filter">
@@ -802,11 +874,12 @@ body {
           <button class="cat-pill" data-cat="otros" onclick="filtrarCat('otros',this)">Otros</button>
         </div>
         <div class="pay-summary" id="pay-summary"></div>
-        <div class="hint">Toca el nombre o importe para editar &middot; Usa el boton para marcar pagado/pendiente</div>
+        <div class="hint">Toca el nombre, importe o fecha para editar &middot; Usa el boton para marcar pagado/pendiente</div>
         <div id="gastos-list"></div>
         <div class="add-row">
           <input class="add-inp" id="add-con" placeholder="Concepto" type="text">
           <input class="add-inp" id="add-imp" placeholder="&euro;" type="text" inputmode="decimal" style="width:80px;flex:none;" onkeydown="if(event.key==='Enter')addGasto()">
+          <input class="add-inp" id="add-fecha" type="date" title="Fecha del gasto (opcional)">
           <select class="cat-sel add-inp" id="add-cat" style="flex:none;width:110px;">
             <option value="fijos">Fijo</option>
             <option value="variable">Variable</option>
@@ -823,7 +896,15 @@ body {
     <!-- CATEGORIAS -->
     <div id="page-categorias" class="page">
       <div class="three-col" id="cat-cards" style="margin-bottom:16px;"></div>
-      <!-- presupuestos removido -->
+      <!-- Presupuestos por categoria con semaforo (v8.4) -->
+      <div class="sc" style="margin-bottom:16px;">
+        <div class="sc-hdr">
+          <div class="sc-title">Presupuestos mensuales</div>
+          <div class="sc-total" id="budget-status" style="font-size:12px;"></div>
+        </div>
+        <div class="hint" style="border-top:none;">Limite por categoria para cada mes &middot; 0 = sin limite &middot; &#128994; menos del 80% &middot; &#128992; entre 80% y 100% &middot; &#128308; pasado</div>
+        <div id="budget-editor" style="padding:6px 18px 12px;"></div>
+      </div>
       <div class="two-col">
         <div class="sc">
           <div class="sc-hdr"><div class="sc-title">Gastos fijos este mes</div><div class="sc-total" style="color:var(--sky)" id="cat-fijos-total">0 &euro;</div></div>
@@ -872,6 +953,15 @@ body {
 
     <!-- HISTORIAL -->
     <div id="page-historico" class="page">
+      <!-- Evolucion mes a mes (v8.4): los 12 meses hasta el mes seleccionado -->
+      <div class="sc" style="margin-bottom:16px;">
+        <div class="sc-hdr">
+          <div class="sc-title">Evolucion mes a mes</div>
+          <div class="sc-total" id="evo-sub" style="font-size:12px;color:var(--muted);"></div>
+        </div>
+        <div class="chart-wrap" id="chart-ie-wrap" style="height:260px;"><canvas id="chart-ie"></canvas></div>
+        <div id="evo-list"></div>
+      </div>
       <div class="two-col">
         <div class="sc">
           <div class="sc-hdr"><div class="sc-title">Gasto total por ano</div></div>
@@ -904,6 +994,7 @@ body {
         <div style="text-align:right;">
           <div style="font-size:10px;color:var(--muted);">Deuda total</div>
           <div style="font-size:22px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--coral);" id="saldo-val">0 &euro;</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:6px;" id="saldo-neto"></div>
         </div>
       </div>
 
@@ -925,7 +1016,7 @@ body {
         <div class="sc">
           <div class="sc-hdr"><div class="sc-title">Tarjeta de credito</div><div class="chip chip-sky">Limite 2.000 &euro;</div></div>
           <div class="tarjeta-vis">
-            <div class="tarjeta-num">4506 0906 2037 7368 &middot; Elibel</div>
+            <div class="tarjeta-num">4506 0906 2747 3012 &middot; Elibel</div>
             <div class="tarjeta-vals">
               <div><div class="t-lbl">Consumido</div><div class="t-val consumed" id="t-consumed">1.848 &euro;</div></div>
               <div style="text-align:right"><div class="t-lbl">Disponible</div><div class="t-val avail" id="t-avail">152 &euro;</div></div>
@@ -933,7 +1024,7 @@ body {
             <div class="tarjeta-prog"><div class="tarjeta-prog-fill" id="t-bar" style="width:92%"></div></div>
           </div>
           <div style="padding:12px 18px;border-top:1px solid var(--border);">
-            <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Consumo actual marzo: ~1.026 &euro; registrado. Actualizar si hay mas compras:</div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Consumido este mes segun el banco. Actualizar si hay mas compras:</div>
             <input class="add-inp" id="t-inp" type="text" inputmode="decimal" placeholder="Consumido &euro;" style="width:100%;" oninput="updTarjeta()">
           </div>
         </div>
@@ -949,6 +1040,21 @@ body {
             <div style="font-size:12px;color:var(--muted);flex:1;">+<input class="add-inp" id="dep-inp" type="text" inputmode="decimal" value="30" style="width:50px;display:inline;padding:3px 6px;"> &euro;/mes por nino</div>
             <button class="add-btn" onclick="addMesAhorro()">+ Mes</button>
           </div>
+        </div>
+      </div>
+
+      <!-- A mi favor: dinero que me deben / depositos recuperables (v8.4) -->
+      <div class="sc" style="margin-top:16px;">
+        <div class="sc-hdr">
+          <div class="sc-title">A mi favor</div>
+          <div class="chip chip-green" id="activos-total">0 &euro;</div>
+        </div>
+        <div class="hint" style="border-top:none;">Dinero que te deben o depositos que recuperaras (fianza del piso, prestamos a terceros...). No cuenta como ingreso del mes; suma en tu patrimonio &mdash; toca para editar</div>
+        <div id="activos-list"></div>
+        <div class="add-row">
+          <input class="add-inp" id="activo-con" placeholder="Concepto (ej. Fianza piso)" type="text">
+          <input class="add-inp" id="activo-imp" placeholder="&euro;" type="text" inputmode="decimal" style="width:80px;flex:none;" onkeydown="if(event.key==='Enter')addActivo()">
+          <button class="add-btn" onclick="addActivo()">+ Anadir</button>
         </div>
       </div>
 
@@ -987,7 +1093,7 @@ body {
     <div style="text-align:center;padding:30px 20px 20px;color:var(--hint);font-size:11px;border-top:1px solid var(--border);margin-top:30px;">
       <div style="font-weight:600;margin-bottom:4px;">Propiedad Familia Díaz González</div>
       <div>Creado por Emmanuel Díaz</div>
-      <div style="margin-top:6px;font-size:10px;opacity:.6;">v8.3 — 2026</div>
+      <div style="margin-top:6px;font-size:10px;opacity:.6;">v8.4 — 2026</div>
     </div>
   </div><!-- /content -->
 </div><!-- /app -->
@@ -1027,6 +1133,8 @@ function syncToCloud() {
     tarjetaConsumo: tarjetaConsumo,
     ninos: JSON.stringify(NINOS),
     otrosIngresos: JSON.stringify(otrosIngresos),
+    presupuestos: JSON.stringify(PRESUPUESTOS),
+    activos: JSON.stringify(ACTIVOS),
     notas: localStorage.getItem('familiadiaz_notas') || '{}',
     updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
     device: navigator.userAgent.includes('iPhone') ? 'iPhone' : 'PC'
@@ -1069,13 +1177,18 @@ function limpiarBackups() {
     return Promise.all(viejas.map(b => db.collection('appdata').doc(b.id).delete()));
   });
 }
-function crearBackupManual() {
-  const data = {
+// Estado completo tal como se guarda en la nube (sin updatedAt/device)
+function datosActuales() {
+  return {
     meses: JSON.stringify(MESES), pagos: JSON.stringify(PAGOS), creditos: JSON.stringify(CREDITOS),
     nomNames: JSON.stringify(NOM_NAMES), nominasEditadas: JSON.stringify(ST), saldoCuenta: saldoCuenta,
     tarjetaConsumo: tarjetaConsumo, ninos: JSON.stringify(NINOS), otrosIngresos: JSON.stringify(otrosIngresos),
+    presupuestos: JSON.stringify(PRESUPUESTOS), activos: JSON.stringify(ACTIVOS),
     notas: localStorage.getItem('familiadiaz_notas') || '{}'
   };
+}
+function crearBackupManual() {
+  const data = datosActuales();
   const id = hoyISO() + '-manual-' + String(Date.now()).slice(-5);
   return crearBackup(data, id).then(() => { renderBackups(); alert('Copia creada: ' + BACKUP_PREFIX + id); });
 }
@@ -1103,13 +1216,7 @@ function restaurarBackup(id) {
   if (!confirm(`Restaurar la copia "${id.replace(BACKUP_PREFIX,'')}"?\n\nSe reemplazaran TODOS los datos actuales (gastos, nominas, pagos, creditos...) por los de esa copia.`)) return;
   if (!confirm('Segunda confirmacion: esta accion sobrescribe los datos actuales en todos los dispositivos. Continuar?')) return;
   // Antes de restaurar, guardar una copia del estado actual por si acaso
-  const actual = {
-    meses: JSON.stringify(MESES), pagos: JSON.stringify(PAGOS), creditos: JSON.stringify(CREDITOS),
-    nomNames: JSON.stringify(NOM_NAMES), nominasEditadas: JSON.stringify(ST), saldoCuenta: saldoCuenta,
-    tarjetaConsumo: tarjetaConsumo, ninos: JSON.stringify(NINOS), otrosIngresos: JSON.stringify(otrosIngresos),
-    notas: localStorage.getItem('familiadiaz_notas') || '{}'
-  };
-  crearBackup(actual, hoyISO() + '-antes-restaurar-' + String(Date.now()).slice(-5))
+  crearBackup(datosActuales(), hoyISO() + '-antes-restaurar-' + String(Date.now()).slice(-5))
     .then(() => db.collection('appdata').doc(id).get())
     .then(d => {
       if (!d.exists) throw new Error('La copia ya no existe');
@@ -1127,6 +1234,7 @@ function descargarJSON() {
     exportadoEn: new Date().toISOString(), version: APP_VERSION_STR,
     meses: MESES, pagos: PAGOS, creditos: CREDITOS, nomNames: NOM_NAMES, nominasEditadas: ST,
     saldoCuenta: saldoCuenta, tarjetaConsumo: tarjetaConsumo, ninos: NINOS, otrosIngresos: otrosIngresos,
+    presupuestos: PRESUPUESTOS, activos: ACTIVOS,
     notas: JSON.parse(localStorage.getItem('familiadiaz_notas') || '{}')
   };
   const blob = new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' });
@@ -1134,7 +1242,7 @@ function descargarJSON() {
   a.download = 'familia-diaz-gonzalez-' + hoyISO() + '.json'; document.body.appendChild(a); a.click();
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
 }
-const APP_VERSION_STR = '8.3';
+const APP_VERSION_STR = '8.4';
 
 // Load from Firestore
 function syncFromCloud() {
@@ -1166,6 +1274,8 @@ function syncFromCloud() {
           cloudNinos.forEach(n => NINOS.push(n));
         }
         if (data.otrosIngresos) otrosIngresos = normalizarOtros(JSON.parse(data.otrosIngresos));
+        if (data.presupuestos) PRESUPUESTOS = Object.assign({}, DEFAULT_BUDGETS, JSON.parse(data.presupuestos));
+        if (data.activos) { const ca = JSON.parse(data.activos); if (Array.isArray(ca)) ACTIVOS = ca; }
         if (data.nominasEditadas) {
           const cloudST = JSON.parse(data.nominasEditadas);
           Object.keys(ST).forEach(k => delete ST[k]);
@@ -1249,9 +1359,24 @@ const NOMINAS_REAL = {
   'Abr 2026': { e: 3215.18, s: 0 },
 };
 
-// ══ PRESUPUESTOS (improvement #2) ══
-const DEFAULT_BUDGETS = { fijos: 3000, variable: 500, super: 400, restaurante: 150, salud: 200, otros: 300 };
+// ══ PRESUPUESTOS POR CATEGORIA (v8.4) ══
+// 0 = sin limite (no se muestra semaforo). Viven en la nube (campo `presupuestos`), igual que el resto.
+const DEFAULT_BUDGETS = { fijos: 0, variable: 0, super: 0, restaurante: 0, salud: 0, otros: 0 };
 let PRESUPUESTOS = Object.assign({}, DEFAULT_BUDGETS);
+// Semaforo: verde < 80 %, ambar 80-100 %, rojo > 100 % del limite. null si no hay limite.
+function semaforo(cat, gastado) {
+  const lim = PRESUPUESTOS[cat] || 0;
+  if (!(lim > 0)) return null;
+  const pct = gastado / lim * 100;
+  if (pct > 100) return { lim, pct, color: '#ff3d71', bg: 'rgba(255,61,113,.12)', icono: '\u{1F534}', estado: 'pasado' };
+  if (pct >= 80) return { lim, pct, color: '#ffaa00', bg: 'rgba(255,170,0,.14)', icono: '\u{1F7E0}', estado: 'al limite' };
+  return { lim, pct, color: '#00d68f', bg: 'rgba(0,214,143,.12)', icono: '\u{1F7E2}', estado: 'ok' };
+}
+
+// ══ A MI FAVOR (v8.4): depositos recuperables / dinero que me deben ══
+// [{ nombre, importe, nota }] — no es ingreso del mes, suma al patrimonio
+let ACTIVOS = [];
+function totalActivos() { return ACTIVOS.reduce((s,a) => s + (a.importe||0), 0); }
 
 // ══ FECHAS DE COBRO (improvement #8) ══
 const FECHAS_COBRO = {
@@ -1464,8 +1589,8 @@ function loadAllData() {
     }
     // Restore otros ingresos
     if (data.otrosIngresos) otrosIngresos = normalizarOtros(data.otrosIngresos);
-    // Restore budgets
-    if (data.presupuestos) PRESUPUESTOS = Object.assign({}, DEFAULT_BUDGETS, data.presupuestos);
+    // Presupuestos: NO se restauran de localStorage (las versiones < 8.4 guardaban unos limites
+    // de ejemplo que no eran del usuario); la nube es la fuente de verdad.
     // Restore dark mode
     if (data.darkMode) {
       document.body.setAttribute('data-theme', 'dark');
@@ -1558,30 +1683,46 @@ function gastosBycat(mes) {
   return res;
 }
 
-// ── SELECTORES ──
+// ── SELECTOR DE MES (v8.4: desplegable propio por anos, el nativo se veia blanco en oscuro) ──
+let pickerYear = null;
+// Mantiene el nombre historico: refresca la etiqueta del boton (y el desplegable si esta abierto)
 function poblarSel() {
-  ['mes-sel','mes-sel-m','mes-sel-top'].forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.innerHTML = '';
-    MESES.forEach((m,i) => {
-      const o = document.createElement('option');
-      o.value = i; o.textContent = m.id;
-      if (i === mesIdx) o.selected = true;
-      el.appendChild(o);
-    });
-  });
+  const btn = document.getElementById('mes-btn-top');
+  if (btn) btn.innerHTML = `${MESES[mesIdx].id} <span class="mes-caret">&#9660;</span>`;
+  const pop = document.getElementById('mes-pop');
+  if (pop && !pop.hidden) renderMesPicker();
 }
+function toggleMesPicker(force) {
+  const pop = document.getElementById('mes-pop'); if (!pop) return;
+  const abrir = force !== undefined ? force : pop.hidden;
+  if (abrir) { pickerYear = parseInt(MESES[mesIdx].id.split(' ')[1]); renderMesPicker(); }
+  pop.hidden = !abrir;
+}
+function renderMesPicker() {
+  const pop = document.getElementById('mes-pop'); if (!pop) return;
+  const years = [...new Set(MESES.map(m => parseInt(m.id.split(' ')[1])))].sort();
+  if (!years.includes(pickerYear)) pickerYear = years[years.length-1];
+  const selId = MESES[mesIdx].id;
+  pop.innerHTML = `<div class="mes-pop-years">${years.map(y =>
+      `<button class="mes-pop-year${y===pickerYear?' active':''}" onclick="pickerYear=${y};renderMesPicker()">${y}</button>`).join('')}</div>
+    <div class="mes-pop-grid">${_MNAMES.map(mn => {
+      const id = mn + ' ' + pickerYear; const idx = MESES.findIndex(m => m.id === id);
+      const cls = 'mes-pop-m' + (id === selId ? ' sel' : '') + (id === _mesActual ? ' hoy' : '');
+      return `<button class="${cls}"${idx < 0 ? ' disabled' : ''} onclick="selMes(${idx});toggleMesPicker(false)" title="${idx < 0 ? 'No existe (usa + Mes)' : id}">${mn}</button>`;
+    }).join('')}</div>`;
+}
+document.addEventListener('click', e => { const w = document.getElementById('mes-picker'); if (w && !w.contains(e.target)) toggleMesPicker(false); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') toggleMesPicker(false); });
 
 function selMes(v) {
   mesIdx = parseInt(v);
-  ['mes-sel','mes-sel-m','mes-sel-top'].forEach(id => { const el = document.getElementById(id); if (el) el.value = mesIdx; });
+  poblarSel();
   renderMes();
 }
 
 function cambiarMes(d) {
   mesIdx = Math.max(0, Math.min(MESES.length-1, mesIdx+d));
-  ['mes-sel','mes-sel-m','mes-sel-top'].forEach(id => { const el = document.getElementById(id); if (el) el.value = mesIdx; });
+  poblarSel();
   renderMes();
 }
 
@@ -1601,7 +1742,11 @@ function renderMes() {
   const pct = ing > 0 ? Math.max(0, Math.min(100, (aho/ing)*100)) : 0;
   const elOtros = document.getElementById('r-otros-val'); if (elOtros) elOtros.textContent = fmt(otros);
   const rowOtros = document.getElementById('r-otros-row'); if (rowOtros) rowOtros.style.display = otros > 0 ? '' : 'none';
-  if (document.getElementById('page-finanzas')?.classList.contains('active') && typeof renderOtros === 'function') renderOtros();
+  if (document.getElementById('page-finanzas')?.classList.contains('active') && typeof renderOtros === 'function') { renderOtros(); renderActivos(); }
+
+  // Fecha por defecto al anadir gasto: hoy si el mes elegido es el actual (solo al cambiar de mes)
+  const addF = document.getElementById('add-fecha');
+  if (addF && addF.dataset.mes !== id) { addF.dataset.mes = id; addF.value = fechaPorDefecto(); }
 
   const nomEEl = document.getElementById('nom-e');
   const nomSEl = document.getElementById('nom-s');
@@ -1634,18 +1779,7 @@ function renderMes() {
 
   // resumen cat
   renderComparativa();
-  const cats = gastosBycat(mes);
-  const rcList = document.getElementById('resumen-cat-list');
-  if (rcList) {
-    rcList.innerHTML = Object.entries(cats).filter(([,v])=>v>0).sort(([,a],[,b])=>b-a).map(([k,v]) => {
-      const c = CATS[k];
-      return `<div style="display:flex;align-items:center;padding:9px 18px;border-bottom:1px solid var(--border);gap:10px;">
-        <span style="font-size:16px;">${c.icon}</span>
-        <span style="flex:1;font-size:13px;font-weight:500;">${c.label}</span>
-        <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:${c.color};">${fmt(v)}</span>
-      </div>`;
-    }).join('');
-  }
+  renderResumenCats(mes);
 
   // top gastos
   const sorted = [...mes.gastos].sort(([,a],[,b])=>b-a);
@@ -1664,8 +1798,56 @@ function renderMes() {
   renderGastosList();
   renderPaySummary();
   renderProjection();
-  renderIEChart();
+  renderEvolucion();
   renderDebtSummary();
+}
+
+// "Gastos por tipo" del Resumen, con semaforo de presupuesto si hay limite
+function renderResumenCats(mes) {
+  const rcList = document.getElementById('resumen-cat-list');
+  if (!rcList) return;
+  const cats = gastosBycat(mes);
+  rcList.innerHTML = Object.entries(cats).filter(([,v])=>v>0).sort(([,a],[,b])=>b-a).map(([k,v]) => {
+    const c = CATS[k]; const s = semaforo(k, v);
+    const sem = s ? `<span class="sem-chip" style="color:${s.color};background:${s.bg};" title="Presupuesto ${fmt(s.lim)} · ${s.estado}">${s.icono} ${Math.round(s.pct)}%</span>` : '';
+    return `<div style="display:flex;align-items:center;padding:9px 18px;border-bottom:1px solid var(--border);gap:10px;">
+      <span style="font-size:16px;">${c.icon}</span>
+      <span style="flex:1;font-size:13px;font-weight:500;">${c.label}</span>
+      ${sem}
+      <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:${c.color};">${fmt(v)}</span>
+    </div>`;
+  }).join('');
+}
+
+// ── FECHA POR GASTO (v8.4) ──
+// Un gasto es [concepto, importe, categoria] y, opcionalmente, [3] = fecha "AAAA-MM-DD".
+const _MSHORT = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+function fechaGasto(g) { return (g && typeof g[3] === 'string') ? g[3] : ''; }
+function setFechaGasto(g, f) { if (f) g[3] = f; else g.length = 3; }
+function fmtFecha(f) { if (!f) return ''; const p = f.split('-'); return parseInt(p[2]) + ' ' + (_MSHORT[parseInt(p[1])-1] || ''); }
+function fechaPorDefecto() { return MESES[mesIdx].id === _mesActual ? hoyISO() : ''; }
+let ordenFecha = localStorage.getItem('familiadiaz_orden_fecha') === '1';
+function toggleOrdenFecha() {
+  ordenFecha = !ordenFecha;
+  localStorage.setItem('familiadiaz_orden_fecha', ordenFecha ? '1' : '0');
+  renderGastosList();
+}
+function editFecha(i) {
+  const row = document.getElementById('gr-'+i);
+  if (!row) return;
+  const el = row.querySelector('.gasto-fecha');
+  if (!el) return;
+  // Se guarda al cambiar (sin redibujar, para no cerrar el calendario en el movil) y se redibuja al salir
+  el.outerHTML = `<input type="date" class="gasto-fecha-edit" id="fedit-${i}" value="${fechaGasto(MESES[mesIdx].gastos[i])}" onchange="saveFecha(${i},false)" onblur="saveFecha(${i},true)" onkeydown="if(event.key==='Enter')saveFecha(${i},true)">`;
+  const inp = document.getElementById('fedit-'+i);
+  if (inp) { inp.focus(); if (inp.showPicker) { try { inp.showPicker(); } catch(e) {} } }
+}
+function saveFecha(i, redibujar) {
+  const inp = document.getElementById('fedit-'+i);
+  if (!inp) return;
+  const g = MESES[mesIdx].gastos[i];
+  if (fechaGasto(g) !== inp.value) { setFechaGasto(g, inp.value); autoSave(); }
+  if (redibujar) renderGastosList();
 }
 
 // ── GASTO LIST ──
@@ -1673,11 +1855,15 @@ function renderGastosList() {
   const mes = MESES[mesIdx];
   const list = document.getElementById('gastos-list');
   if (!list) return;
-  let filtered = catFilter === 'todos' ? mes.gastos : mes.gastos.filter(([,,c])=>c===catFilter);
+  const btnOrden = document.getElementById('btn-orden-fecha');
+  if (btnOrden) btnOrden.classList.toggle('on', ordenFecha);
+  // Cada fila lleva su indice real (los pagos y notas van por posicion)
+  let filtered = mes.gastos.map((g,i) => ({ g, i }));
+  if (catFilter !== 'todos') filtered = filtered.filter(({g}) => g[2] === catFilter);
   // Apply search filter (improvement #6)
   if (searchQuery) {
     const q = searchQuery.toLowerCase();
-    filtered = filtered.filter(([con]) => con.toLowerCase().includes(q));
+    filtered = filtered.filter(({g}) => g[0].toLowerCase().includes(q));
     const srEl = document.getElementById('search-results');
     if (srEl) {
       srEl.style.display = 'block';
@@ -1687,9 +1873,13 @@ function renderGastosList() {
     const srEl = document.getElementById('search-results');
     if (srEl) srEl.style.display = 'none';
   }
-  list.innerHTML = filtered.map(([con,val,cat]) => {
+  // Orden por fecha (solo visual): con fecha primero, ascendente; sin fecha al final en su orden
+  if (ordenFecha) filtered = filtered.slice().sort((a,b) => { const fa = fechaGasto(a.g), fb = fechaGasto(b.g); if (!fa && !fb) return 0; if (!fa) return 1; if (!fb) return -1; return fa.localeCompare(fb); });
+  list.innerHTML = filtered.map(({g, i: origIdx}) => {
+    const [con, val, cat] = g;
     const catC = CATS[cat]||CATS.otros;
-    const origIdx = mes.gastos.findIndex(g=>g[0]===con&&g[1]===val&&g[2]===cat);
+    const fecha = fechaGasto(g);
+    const fechaHtml = `<span class="gasto-fecha${fecha ? '' : ' empty'}" onclick="editFecha(${origIdx})" title="${fecha ? 'Fecha: ' + fecha + ' (clic para cambiar)' : 'Poner fecha'}">&#128197;${fecha ? ' ' + fmtFecha(fecha) : ''}</span>`;
     const isFijo = cat === 'fijos';
     const paid = isFijo && isPagado(mes.id, origIdx);
     const payClass = paid ? 'pagado' : 'pendiente';
@@ -1705,6 +1895,7 @@ function renderGastosList() {
     return `<div class="gasto-row ${paid ? 'is-pagado' : ''}" id="gr-${origIdx}">
       <span class="cat-dot" style="background:${catC.color}"></span>
       <span class="gasto-concepto" onclick="editCon(${origIdx})">${con}${fcHtml}</span>
+      ${fechaHtml}
       <select class="cat-sel" onchange="cambiaCat(${origIdx},this.value)">
         ${Object.entries(CATS).map(([k,c])=>`<option value="${k}"${k===cat?' selected':''}>${c.label}</option>`).join('')}
       </select>
@@ -1808,8 +1999,10 @@ function addGasto() {
   const c = document.getElementById('add-con').value.trim();
   const v = pf(document.getElementById('add-imp').value);
   const cat = document.getElementById('add-cat').value;
+  const f = document.getElementById('add-fecha')?.value || '';
   if (!c || !v) return;
-  MESES[mesIdx].gastos.push([c, v, cat]);
+  const g = [c, v, cat]; setFechaGasto(g, f);
+  MESES[mesIdx].gastos.push(g);
   document.getElementById('add-con').value = '';
   document.getElementById('add-imp').value = '';
   renderGastosList(); updTotales(); autoSave();
@@ -1909,14 +2102,7 @@ function updTotales() {
     }).join('');
   }
   renderComparativa();
-  const cats = gastosBycat(mes);
-  const rcList = document.getElementById('resumen-cat-list');
-  if (rcList) {
-    rcList.innerHTML = Object.entries(cats).filter(([,v])=>v>0).sort(([,a],[,b])=>b-a).map(([k,v]) => {
-      const c = CATS[k];
-      return `<div style="display:flex;align-items:center;padding:9px 18px;border-bottom:1px solid var(--border);gap:10px;"><span style="font-size:16px;">${c.icon}</span><span style="flex:1;font-size:13px;font-weight:500;">${c.label}</span><span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:${c.color};">${fmt(v)}</span></div>`;
-    }).join('');
-  }
+  renderResumenCats(mes);
 }
 
 function renderComparativa() {
@@ -1969,28 +2155,48 @@ function renderCategorias() {
       const v = cats[k] || 0;
       const pct = total > 0 ? (v/total)*100 : 0;
       const items = mes.gastos.filter(g=>g[2]===k).length;
+      const s = semaforo(k, v);
+      const semHtml = s ? `<div style="font-size:10px;margin-top:4px;font-weight:700;color:${s.color};">${s.icono} ${Math.round(s.pct)}% de ${fmt(s.lim)}</div>` : '';
       return `<div class="cat-summary" style="border-color:${c.color}22;">
         <div class="cat-summary-icon">${c.icon}</div>
         <div class="cat-summary-name">${c.label}</div>
         <div class="cat-summary-amount" style="color:${c.color};">${fmt(v)}</div>
         <div class="cat-summary-count">${items} gastos \u00b7 ${pct.toFixed(0)}%</div>
+        ${semHtml}
         <div class="cat-bar" style="background:${c.bg};"><div style="height:100%;width:${pct}%;background:${c.color};border-radius:2px;transition:width .4s;"></div></div>
       </div>`;
     }).join('');
   }
 
-  // Budget editor (improvement #2)
+  // Presupuestos con semaforo (v8.4)
   const budgetEl = document.getElementById('budget-editor');
   if (budgetEl) {
-    budgetEl.innerHTML = `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">` +
-      Object.entries(CATS).map(([k,c]) => {
-        return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;">
-          <span style="font-size:14px;">${c.icon}</span>
-          <span style="font-size:12px;flex:1;color:var(--muted);font-weight:500;">${c.label}</span>
-          <input class="budget-edit-inp" type="text" inputmode="decimal" value="${PRESUPUESTOS[k]||0}" onchange="updateBudget('${k}',this.value)">
-          <span style="font-size:11px;color:var(--hint);">\u20ac</span>
-        </div>`;
-      }).join('') + `</div>`;
+    const conLimite = Object.keys(CATS).filter(k => PRESUPUESTOS[k] > 0);
+    budgetEl.innerHTML = Object.entries(CATS).map(([k,c]) => {
+      const v = cats[k] || 0; const s = semaforo(k, v);
+      const txt = s ? `${fmt(Math.round(v))} / ${fmt(s.lim)} (${Math.round(s.pct)}%)` : `${fmt(Math.round(v))} \u00b7 sin limite`;
+      return `<div class="budget-row">
+        <span style="font-size:16px;">${c.icon}</span>
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;justify-content:space-between;gap:8px;font-size:12px;margin-bottom:4px;">
+            <span style="font-weight:600;">${c.label}</span>
+            <span class="mono" style="font-size:11px;color:${s ? s.color : 'var(--hint)'};">${s ? s.icono + ' ' : ''}${txt}</span>
+          </div>
+          <div class="budget-bar-bg"><div class="budget-bar-fill" style="width:${s ? Math.min(100, s.pct) : 0}%;background:${s ? s.color : 'transparent'};"></div></div>
+        </div>
+        <input class="budget-edit-inp" type="text" inputmode="decimal" value="${PRESUPUESTOS[k] || ''}" placeholder="0" onchange="updateBudget('${k}',this.value)" title="Limite mensual para ${c.label}">
+        <span style="font-size:11px;color:var(--hint);">\u20ac</span>
+      </div>`;
+    }).join('') + `<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap;">
+        <span style="font-size:11px;color:var(--hint);">${conLimite.length ? 'Los limites valen para todos los meses.' : 'Pon un limite por categoria para activar el semaforo.'}</span>
+        <button class="add-btn" style="padding:5px 12px;font-size:11px;background:var(--card2);color:var(--text);border:1px solid var(--border);" onclick="sugerirPresupuestos()" title="Rellena los limites con la media de los 6 meses anteriores">Usar media de 6 meses</button>
+      </div>`;
+    const st = document.getElementById('budget-status');
+    if (st) {
+      const pasados = conLimite.filter(k => semaforo(k, cats[k]||0).estado === 'pasado').length;
+      const limite = conLimite.filter(k => semaforo(k, cats[k]||0).estado === 'al limite').length;
+      st.innerHTML = !conLimite.length ? '' : pasados ? `<span style="color:#ff3d71;">\u{1F534} ${pasados} pasad${pasados === 1 ? 'o' : 'os'}</span>` : limite ? `<span style="color:#ffaa00;">\u{1F7E0} ${limite} al limite</span>` : '<span style="color:#00d68f;">\u{1F7E2} todo dentro</span>';
+    }
   }
 
   // Fijos vs variables
@@ -2015,11 +2221,12 @@ function renderCategorias() {
     const vars = mes.gastos.filter(g=>g[2]!=='fijos');
     const tv = vars.reduce((s,[,v])=>s+v,0);
     if (varTot) varTot.textContent = fmt(tv);
-    varEl.innerHTML = vars.sort(([,a],[,b])=>b-a).map(([c,v,cat]) => {
+    varEl.innerHTML = vars.sort(([,a],[,b])=>b-a).map(g => {
+      const [c,v,cat] = g; const f = fechaGasto(g);
       const cc = CATS[cat]||CATS.otros;
       return `<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 18px;border-bottom:1px solid var(--border);font-size:13px;gap:8px;">
         <span class="cat-dot" style="background:${cc.color};flex-shrink:0;"></span>
-        <span style="flex:1;">${c}</span>
+        <span style="flex:1;">${c}${f ? ` <span style="font-size:10px;color:var(--hint);font-family:'JetBrains Mono',monospace;">${fmtFecha(f)}</span>` : ''}</span>
         <span style="font-family:'JetBrains Mono',monospace;font-weight:600;color:${cc.color};">${fmt(v)}</span>
       </div>`;
     }).join('');
@@ -2045,9 +2252,20 @@ function renderCategorias() {
 }
 
 function updateBudget(cat, val) {
-  PRESUPUESTOS[cat] = pf(val);
+  PRESUPUESTOS[cat] = Math.max(0, pf(val));
   autoSave();
   renderCategorias();
+  renderResumenCats(MESES[mesIdx]);
+}
+// Rellena los limites con la media de los 6 meses anteriores al seleccionado (redondeada a 10 € hacia arriba)
+function sugerirPresupuestos() {
+  const prev = MESES.slice(Math.max(0, mesIdx - 6), mesIdx).filter(m => totalGastos(m) > 0);
+  if (prev.length < 2) { alert('Hacen falta al menos 2 meses anteriores con gastos.'); return; }
+  const media = {}; Object.keys(CATS).forEach(k => media[k] = Math.ceil(prev.reduce((s,m) => s + (gastosBycat(m)[k]||0), 0) / prev.length / 10) * 10);
+  const resumen = Object.keys(CATS).map(k => `${CATS[k].label}: ${fmt(media[k])}`).join('\n');
+  if (!confirm(`Poner estos limites (media de ${prev[0].id} → ${prev[prev.length-1].id})?\n\n${resumen}`)) return;
+  Object.assign(PRESUPUESTOS, media);
+  autoSave(); renderCategorias(); renderResumenCats(MESES[mesIdx]);
 }
 
 // ── NOMINAS PAGE ──
@@ -2255,6 +2473,30 @@ let CREDITOS = [
 try { const saved = JSON.parse(localStorage.getItem(CRED_KEY)); if (saved && saved.length) CREDITOS = saved; } catch(e) {}
 function saveCreditos() { localStorage.setItem(CRED_KEY, JSON.stringify(CREDITOS)); syncToCloud(); }
 
+// ── CUADRO DE AMORTIZACION (v8.4) ──
+// c.tabla = [["AAAA-MM-DD", pendienteTrasEsaCuota], ...] (del banco). Si existe, el pendiente se calcula
+// solo por fecha: c.pendiente es el saldo ANTES de la primera fila del cuadro.
+function pendienteHoy(c) {
+  if (c.pagado) return 0;
+  if (!Array.isArray(c.tabla) || !c.tabla.length) return c.pendiente || 0;
+  const hoy = hoyISO();
+  let p = c.pendiente || 0;
+  for (const [f, rest] of c.tabla) { if (f <= hoy) p = rest; else break; }
+  return p;
+}
+function cuotasRestantes(c) {
+  if (Array.isArray(c.tabla) && c.tabla.length) { const hoy = hoyISO(); return c.tabla.filter(([f]) => f > hoy).length; }
+  return c.cuotasTotales || (c.cuota > 0 ? Math.ceil(pendienteHoy(c) / c.cuota) : 0);
+}
+function proximaCuota(c) {
+  if (!Array.isArray(c.tabla)) return null;
+  const hoy = hoyISO();
+  const fila = c.tabla.find(([f]) => f > hoy);
+  if (!fila) return null;
+  const p = fila[0].split('-');
+  return p[2] + '/' + p[1] + '/' + p[0];
+}
+
 let saldoCuenta = 2213.63;
 try { const sv = localStorage.getItem('familiadiaz_saldocuenta'); if (sv) saldoCuenta = parseFloat(sv); } catch(e) {}
 
@@ -2277,7 +2519,7 @@ function saveSaldoCuenta(val) {
 function renderCreditos() {
   const list = document.getElementById('creditos-list');
   if (!list) return;
-  const totalPend = CREDITOS.filter(c=>!c.pagado).reduce((s,c)=>s+c.pendiente,0);
+  const totalPend = CREDITOS.filter(c=>!c.pagado).reduce((s,c)=>s+pendienteHoy(c),0);
   const totalCuota = CREDITOS.filter(c=>!c.pagado).reduce((s,c)=>s+c.cuota,0);
   const badge = document.getElementById('creditos-total-badge');
   if (badge) badge.textContent = fmt(totalPend) + ' pendiente';
@@ -2300,16 +2542,20 @@ function renderCreditos() {
         </div>
       </div>`;
     }
-    const cuotasRest = c.cuotasTotales || (c.cuota > 0 ? Math.ceil(c.pendiente / c.cuota) : 0);
-    const pctPagado = c.cuota > 0 ? Math.max(0, 100 - (c.pendiente / (c.cuota * cuotasRest + c.pendiente)) * 100) : 0;
+    const pend = pendienteHoy(c);
+    const cuotasRest = cuotasRestantes(c);
+    const tieneTabla = Array.isArray(c.tabla) && c.tabla.length > 0;
+    // Barra: con cuotas totales conocidas es exacta; si no, la aproximacion de siempre
+    const pctBar = c.cuotasTotales > 0 ? Math.max(0, Math.min(100, 100 - cuotasRest / c.cuotasTotales * 100)) : Math.min(100, 100 - cuotasRest * 2);
+    const prox = proximaCuota(c);
     return `<div class="credito-row" id="cred-${i}">
       <div style="flex:1;min-width:0">
         <div style="font-size:14px;font-weight:600;cursor:pointer;" onclick="editCredNombre(${i})" title="Clic para editar">${c.nombre}</div>
-        <div style="font-size:11px;color:var(--muted);">${c.tasa}% · Vence ${c.vence} · ref: ${c.ref}</div>
-        <div class="cred-bar"><div class="cred-fill" style="width:${Math.min(100,100-cuotasRest*2)}%;background:${c.color}"></div></div>
+        <div style="font-size:11px;color:var(--muted);">${c.tasa}% · Vence ${c.vence} · ref: ${c.ref}${prox ? ' · proxima cuota ' + prox : ''}</div>
+        <div class="cred-bar"><div class="cred-fill" style="width:${pctBar}%;background:${c.color}"></div></div>
         <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--hint);margin-top:4px;">
-          <span style="cursor:pointer;text-decoration:underline dotted;" onclick="editCredPendiente(${i})" title="Clic para editar saldo">${fmt(c.pendiente)} pendiente</span>
-          <span>~${cuotasRest} cuotas restantes</span>
+          <span style="cursor:pointer;text-decoration:underline dotted;" onclick="editCredPendiente(${i})" title="${tieneTabla ? 'Segun el cuadro de amortizacion del banco (clic para poner a mano)' : 'Clic para editar saldo'}">${fmtDec(pend)} pendiente${tieneTabla ? ' ✓' : ''}</span>
+          <span>${tieneTabla ? '' : '~'}${cuotasRest} cuotas restantes</span>
         </div>
       </div>
       <div style="text-align:right;margin-left:16px;flex-shrink:0;">
@@ -2337,13 +2583,16 @@ function saveCredNombre(i, val) {
 function editCredPendiente(i) {
   const el = document.querySelector(`#cred-${i} span[onclick*="editCredPendiente"]`);
   if (!el) return;
-  el.outerHTML = `<input type="text" inputmode="decimal" style="font-size:11px;border:1.5px solid var(--amber);border-radius:4px;padding:2px 6px;width:100px;outline:none;background:var(--amber-dim);color:var(--text);font-family:'JetBrains Mono',monospace;" value="${CREDITOS[i].pendiente}" onblur="saveCredPendiente(${i},this.value)" onkeydown="if(event.key==='Enter')saveCredPendiente(${i},this.value)">`;
-  document.querySelector(`#cred-${i} input[type=number]`)?.focus();
+  const c = CREDITOS[i];
+  if (Array.isArray(c.tabla) && c.tabla.length && !confirm(`"${c.nombre}" se actualiza solo con el cuadro de amortizacion del banco.\n\nSi pones el saldo a mano, dejara de actualizarse automaticamente. Continuar?`)) return;
+  el.outerHTML = `<input type="text" inputmode="decimal" style="font-size:11px;border:1.5px solid var(--amber);border-radius:4px;padding:2px 6px;width:100px;outline:none;background:var(--amber-dim);color:var(--text);font-family:'JetBrains Mono',monospace;" value="${pendienteHoy(c)}" onblur="saveCredPendiente(${i},this.value)" onkeydown="if(event.key==='Enter')saveCredPendiente(${i},this.value)">`;
+  document.querySelector(`#cred-${i} input`)?.focus();
 }
 function saveCredPendiente(i, val) {
   const v = pf(val);
-  if (!isNaN(v) && v >= 0) CREDITOS[i].pendiente = v;
-  if (CREDITOS[i].pendiente <= 0) { CREDITOS[i].pendiente = 0; CREDITOS[i].pagado = true; }
+  const c = CREDITOS[i];
+  if (!isNaN(v) && v >= 0) { c.pendiente = v; delete c.tabla; }
+  if (c.pendiente <= 0) { c.pendiente = 0; c.pagado = true; }
   saveCreditos(); renderCreditos();
 }
 
@@ -2460,6 +2709,46 @@ function editOtroI(i) {
 }
 function saveOtroI(i) { const inp = document.getElementById('oie-'+i); if (!inp) return; const o = otrosMes()[i]; o.importe = pf(inp.value)||o.importe; renderOtros(); renderMes(); autoSave(); }
 function delOtro(i) { otrosMes().splice(i,1); renderOtros(); renderMes(); autoSave(); }
+
+// ── A MI FAVOR (v8.4) ──
+function renderActivos() {
+  const list = document.getElementById('activos-list');
+  if (!list) return;
+  const tot = document.getElementById('activos-total'); if (tot) tot.textContent = fmt(Math.round(totalActivos()));
+  if (!ACTIVOS.length) { list.innerHTML = '<div style="padding:12px 18px;font-size:12px;color:var(--hint);">Nada apuntado. Ejemplo: la fianza del piso, que te devuelven al dejarlo.</div>'; return; }
+  list.innerHTML = ACTIVOS.map((a,i) => `
+    <div class="otro-row">
+      <span class="otro-nom" id="an-${i}" onclick="editActivoN(${i})" title="Clic para editar">${a.nombre}${a.nota ? `<div style="font-size:11px;color:var(--hint);">${a.nota}</div>` : ''}</span>
+      <span class="otro-imp" id="ai-${i}" onclick="editActivoI(${i})" title="Clic para editar" style="color:var(--sky);">${fmtDec(a.importe||0)}</span>
+      <button class="otro-del" onclick="delActivo(${i})" title="Quitar">x</button>
+    </div>`).join('');
+}
+function editActivoN(i) {
+  const el = document.getElementById('an-'+i); if (!el) return;
+  const a = ACTIVOS[i];
+  el.outerHTML = `<input class="otro-nom-edit" id="ane-${i}" value="${(a.nombre||'').replace(/"/g,'&quot;')}" placeholder="Concepto" onblur="saveActivoN(${i})" onkeydown="if(event.key==='Enter')saveActivoN(${i})">`;
+  document.getElementById('ane-'+i)?.focus();
+}
+function saveActivoN(i) { const inp = document.getElementById('ane-'+i); if (!inp) return; const a = ACTIVOS[i]; a.nombre = inp.value.trim()||a.nombre; renderActivos(); autoSave(); }
+function editActivoI(i) {
+  const el = document.getElementById('ai-'+i); if (!el) return;
+  el.outerHTML = `<input class="otro-imp-edit" id="aie-${i}" type="text" inputmode="decimal" value="${ACTIVOS[i].importe}" onblur="saveActivoI(${i})" onkeydown="if(event.key==='Enter')saveActivoI(${i})">`;
+  document.getElementById('aie-'+i)?.focus();
+}
+function saveActivoI(i) { const inp = document.getElementById('aie-'+i); if (!inp) return; const a = ACTIVOS[i]; a.importe = pf(inp.value)||a.importe; renderActivos(); renderDebtSummary(); autoSave(); }
+function delActivo(i) {
+  const a = ACTIVOS[i];
+  if (a && !confirm(`Quitar "${a.nombre}" (${fmtDec(a.importe||0)}) de "A mi favor"?`)) return;
+  ACTIVOS.splice(i,1); renderActivos(); renderDebtSummary(); autoSave();
+}
+function addActivo() {
+  const c = document.getElementById('activo-con').value.trim();
+  const v = pf(document.getElementById('activo-imp').value);
+  if (!c || !v) return;
+  ACTIVOS.push({ nombre: c, importe: v });
+  document.getElementById('activo-con').value = ''; document.getElementById('activo-imp').value = '';
+  renderActivos(); renderDebtSummary(); autoSave();
+}
 function addOtro() {
   const n = document.getElementById('otro-con').value.trim();
   const v = pf(document.getElementById('otro-imp').value);
@@ -2511,9 +2800,10 @@ function renderDebtCountdown() {
   const extra = 50;
   let mesesAhorrados = 0, intAhorrados = 0, libreIdx = -1;
   const cols = activos.map(c => {
-    const rest = mesesHasta(c.vence) ?? simula(c.pendiente, c.tasa, c.cuota).meses;
-    const normal = simula(c.pendiente, c.tasa, c.cuota);
-    const conExtra = simula(c.pendiente, c.tasa, c.cuota + extra);
+    const pend = pendienteHoy(c);
+    const rest = (Array.isArray(c.tabla) && c.tabla.length) ? cuotasRestantes(c) : (mesesHasta(c.vence) ?? simula(pend, c.tasa, c.cuota).meses);
+    const normal = simula(pend, c.tasa, c.cuota);
+    const conExtra = simula(pend, c.tasa, c.cuota + extra);
     mesesAhorrados += Math.max(0, normal.meses - conExtra.meses);
     intAhorrados += Math.max(0, normal.ints - conExtra.ints);
     const fin = nowMonth + rest; if (fin > libreIdx) libreIdx = fin;
@@ -2542,50 +2832,63 @@ function renderDebtCountdown() {
   `;
 }
 
-// ── INCOME VS EXPENSE CHART (improvement #7) ──
-function renderIEChart() {
+// ── EVOLUCION MES A MES (v8.4): los 12 meses hasta el mes seleccionado, en Historial ──
+function ingresosMes(id) { const n = getNominas(id); return (ST[id+'_e'] ?? n.e) + (ST[id+'_s'] ?? n.s) + totalOtros(id); }
+function chartTheme() {
+  const dark = document.body.getAttribute('data-theme') === 'dark';
+  return { grid: dark ? 'rgba(255,255,255,.07)' : 'rgba(0,0,0,.07)', tick: dark ? '#94a3b8' : '#6b7280' };
+}
+function renderEvolucion() {
+  const list = document.getElementById('evo-list');
   const ctx = document.getElementById('chart-ie')?.getContext('2d');
-  if (!ctx) return;
+  if (!list || !ctx) return;
+  const ventana = MESES.slice(Math.max(0, mesIdx - 11), mesIdx + 1);
+  const filas = ventana.map(m => {
+    const ing = ingresosMes(m.id), gas = totalGastos(m);
+    return { id: m.id, ing, gas, aho: ing > 0 ? ing - gas : null };
+  });
+  const conDatos = filas.filter(f => f.gas > 0);
+  const sub = document.getElementById('evo-sub');
+  if (sub) sub.textContent = `${filas[0].id} → ${filas[filas.length-1].id}${conDatos.length ? ' · media gastos ' + fmt(Math.round(conDatos.reduce((s,f)=>s+f.gas,0)/conDatos.length)) : ''}`;
+
+  // Tabla: cada mes comparado con el anterior
+  const delta = (cur, prev) => {
+    if (prev == null || prev === 0) return '<span class="cmp-flat">—</span>';
+    const d = cur - prev; if (Math.abs(d) < 1) return '<span class="cmp-flat">=</span>';
+    return `<span class="${d > 0 ? 'cmp-up' : 'cmp-down'}">${d > 0 ? '▲' : '▼'} ${fmt(Math.abs(Math.round(d)))} (${Math.round(Math.abs(d)/prev*100)}%)</span>`;
+  };
+  const selId = MESES[mesIdx].id;
+  list.innerHTML = `<div class="evo-row head"><span>Mes</span><span class="mono">Ingresos</span><span class="mono">Gastos</span><span class="mono">Ahorro</span><span class="mono">Gastos vs anterior</span></div>` +
+    filas.map((f, i) => {
+      const prev = i > 0 ? filas[i-1].gas : null;
+      return `<div class="evo-row${f.id === selId ? ' sel' : ''}">
+        <span>${f.id}</span>
+        <span class="mono" style="color:var(--emerald);">${f.ing > 0 ? fmt(Math.round(f.ing)) : '—'}</span>
+        <span class="mono" style="color:var(--coral);">${fmt(Math.round(f.gas))}</span>
+        <span class="mono" style="color:${f.aho == null ? 'var(--hint)' : f.aho >= 0 ? 'var(--emerald)' : 'var(--coral)'};">${f.aho == null ? '—' : fmt(Math.round(f.aho))}</span>
+        <span class="mono" style="font-size:11px;">${delta(f.gas, prev)}</span>
+      </div>`;
+    }).join('');
+
+  // Grafico: barras ingresos/gastos + linea de ahorro (hueco donde no hay nominas)
   if (window._cie) window._cie.destroy();
-
-  // Get last 6 months with income data
-  const allMonths = MESES.filter(m => {
-    const n = getNominas(m.id);
-    const e = ST[m.id+'_e'] ?? n.e;
-    const s = ST[m.id+'_s'] ?? n.s;
-    return (e + s) > 0;
-  });
-  const last6 = allMonths.slice(-6);
-  if (last6.length < 2) {
-    document.getElementById('chart-ie-wrap').style.display = 'none';
-    return;
-  }
-  document.getElementById('chart-ie-wrap').style.display = '';
-
-  const labels = last6.map(m => m.id);
-  const ingresos = last6.map(m => {
-    const n = getNominas(m.id);
-    return Math.round((ST[m.id+'_e'] ?? n.e) + (ST[m.id+'_s'] ?? n.s) + totalOtros(m.id));
-  });
-  const gastos = last6.map(m => Math.round(totalGastos(m)));
-  const ahorro = ingresos.map((v, i) => v - gastos[i]);
-
+  const th = chartTheme();
   window._cie = new Chart(ctx, {
     type: 'bar',
     data: {
-      labels,
+      labels: filas.map(f => f.id.replace(' 20', ' ')),
       datasets: [
-        { label: 'Ingresos', data: ingresos, backgroundColor: 'rgba(16,185,129,.6)', borderRadius: 4, order: 2 },
-        { label: 'Gastos', data: gastos, backgroundColor: 'rgba(239,68,68,.6)', borderRadius: 4, order: 3 },
-        { label: 'Ahorro', data: ahorro, type: 'line', borderColor: '#8b5cf6', backgroundColor: 'rgba(139,92,246,.1)', fill: true, tension: 0.3, pointRadius: 4, order: 1 }
+        { label: 'Ingresos', data: filas.map(f => f.ing > 0 ? Math.round(f.ing) : null), backgroundColor: 'rgba(0,214,143,.55)', borderRadius: 4, order: 2 },
+        { label: 'Gastos', data: filas.map(f => Math.round(f.gas)), backgroundColor: 'rgba(255,61,113,.55)', borderRadius: 4, order: 3 },
+        { label: 'Ahorro', data: filas.map(f => f.aho == null ? null : Math.round(f.aho)), type: 'line', borderColor: '#7b61ff', backgroundColor: 'rgba(123,97,255,.12)', fill: true, tension: 0.3, pointRadius: 3, spanGaps: false, order: 1 }
       ]
     },
     options: {
       responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { labels: { color: '#6b7280', font: { family: 'Plus Jakarta Sans', size: 12 }, boxWidth: 12 } } },
+      plugins: { legend: { labels: { color: th.tick, font: { family: 'Plus Jakarta Sans', size: 12 }, boxWidth: 12 } } },
       scales: {
-        x: { grid: { display: false }, ticks: { color: '#6b7280', font: { family: 'JetBrains Mono', size: 10 } } },
-        y: { grid: { color: 'rgba(0,0,0,.07)' }, ticks: { color: '#6b7280', font: { family: 'JetBrains Mono', size: 10 }, callback: v => (v/1000).toFixed(1)+'k' } }
+        x: { grid: { display: false }, ticks: { color: th.tick, font: { family: 'JetBrains Mono', size: 10 } } },
+        y: { grid: { color: th.grid }, ticks: { color: th.tick, font: { family: 'JetBrains Mono', size: 10 }, callback: v => (v/1000).toFixed(1)+'k' } }
       }
     }
   });
@@ -2647,6 +2950,7 @@ function toggleDarkMode() {
   document.body.setAttribute('data-theme', isDark ? '' : 'dark');
   updateThemeButton();
   autoSave();
+  if (document.getElementById('page-historico')?.classList.contains('active')) renderEvolucion();
 }
 function updateThemeButton() {
   const btn = document.getElementById('theme-toggle');
@@ -2669,9 +2973,10 @@ function exportPDF() {
 
   // Agrupar por categoría
   const porCat = {};
-  mes.gastos.forEach(([concepto, importe, cat]) => {
+  mes.gastos.forEach(g => {
+    const [concepto, importe, cat] = g; const f = fechaGasto(g);
     if (!porCat[cat]) porCat[cat] = { items: [], total: 0 };
-    porCat[cat].items.push({ concepto, importe });
+    porCat[cat].items.push({ concepto, importe, fecha: f });
     porCat[cat].total += importe;
   });
 
@@ -2684,7 +2989,8 @@ function exportPDF() {
     porCat[cat].items.forEach(g => {
       const pagado = isPagado(id, mes.gastos.indexOf(mes.gastos.find(x => x[0]===g.concepto && x[1]===g.importe)));
       const estado = cat === 'fijos' ? (pagado ? ' ✓' : ' ⏳') : '';
-      tablaHTML += `<tr><td style="padding:5px 12px 5px 28px;font-size:12px;">${g.concepto}${estado}</td><td style="padding:5px 12px;text-align:right;font-family:monospace;font-size:12px;">${g.importe.toLocaleString('es-ES',{minimumFractionDigits:2})} &euro;</td></tr>`;
+      const fechaTxt = g.fecha ? ` <span style="color:#94a3b8;font-size:10px;">${fmtFecha(g.fecha)}</span>` : '';
+      tablaHTML += `<tr><td style="padding:5px 12px 5px 28px;font-size:12px;">${g.concepto}${fechaTxt}${estado}</td><td style="padding:5px 12px;text-align:right;font-family:monospace;font-size:12px;">${g.importe.toLocaleString('es-ES',{minimumFractionDigits:2})} &euro;</td></tr>`;
     });
   });
 
@@ -2731,10 +3037,24 @@ function exportPDF() {
 function renderDebtSummary() {
   const sc = document.getElementById('saldo-cuenta');
   if (sc && !sc.querySelector('input')) sc.textContent = fmt(Math.round(saldoCuenta));
+  const totalDeuda = CREDITOS.filter(c => !c.pagado).reduce((s, c) => s + pendienteHoy(c), 0);
+  const totalCuotas = CREDITOS.filter(c => !c.pagado).reduce((s, c) => s + c.cuota, 0);
+  const aFavor = totalActivos();
+  // Patrimonio neto (Finanzas): cuenta + a mi favor + ahorro ninos - deuda
+  const neto = document.getElementById('saldo-neto');
+  if (neto) {
+    const ninosTot = NINOS.reduce((s,n) => s + (n.saldo||0), 0);
+    const pn = saldoCuenta + aFavor + ninosTot - totalDeuda;
+    neto.innerHTML = `Patrimonio neto: <b style="font-family:'JetBrains Mono',monospace;color:${pn >= 0 ? 'var(--emerald)' : 'var(--coral)'};">${fmt(Math.round(pn))}</b><br><span style="font-size:10px;color:var(--hint);">cuenta + a mi favor + ahorro ninos &minus; deuda</span>`;
+  }
   const el = document.getElementById('resumen-debt-summary');
   if (!el) return;
-  const totalDeuda = CREDITOS.filter(c => !c.pagado).reduce((s, c) => s + c.pendiente, 0);
-  const totalCuotas = CREDITOS.filter(c => !c.pagado).reduce((s, c) => s + c.cuota, 0);
+  const aFavorHtml = aFavor > 0 ? `
+      <div style="width:1px;height:36px;background:var(--border);"></div>
+      <div style="text-align:center;min-width:120px;">
+        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--sky);margin-bottom:4px;">A mi favor</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--sky);">${fmt(Math.round(aFavor))}</div>
+      </div>` : '';
   el.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-around;padding:16px 18px;gap:16px;flex-wrap:wrap;" class="debt-summary-bar">
       <div style="text-align:center;min-width:120px;">
@@ -2750,7 +3070,7 @@ function renderDebtSummary() {
       <div style="text-align:center;min-width:120px;">
         <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--emerald);margin-bottom:4px;">Saldo en cuenta</div>
         <div style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--emerald);">${fmt(Math.round(saldoCuenta))}</div>
-      </div>
+      </div>${aFavorHtml}
     </div>
     <div style="text-align:center;padding:0 18px 10px;font-size:11px;color:var(--hint);">Toca para ver detalle en Finanzas &rarr;</div>
   `;
@@ -2775,7 +3095,6 @@ function crearNuevoMes() {
   MESES.push({ id: nuevoId, gastos: gastosFijos });
   mesIdx = MESES.length - 1;
   poblarSel();
-  ['mes-sel','mes-sel-m','mes-sel-top'].forEach(id => { const el = document.getElementById(id); if (el) el.value = mesIdx; });
   renderMes();
   autoSave();
 }
@@ -2789,7 +3108,7 @@ function showPage(name, btn) {
   if (name==='categorias') renderCategorias();
   if (name==='nominas') renderNominas();
   if (name==='historico') renderHistorico();
-  if (name==='finanzas') { renderCreditos(); renderNinos(); renderOtros(); renderDebtCountdown(); renderBackups(); }
+  if (name==='finanzas') { renderCreditos(); renderNinos(); renderOtros(); renderActivos(); renderDebtCountdown(); renderBackups(); }
   renderMes();
 }
 

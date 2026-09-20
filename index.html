@@ -6,7 +6,7 @@
 <script>
 // Limpiar Service Workers y caches viejos - APP NO USA CACHE
 (async function() {
-  const APP_VERSION = '8.6';
+  const APP_VERSION = '8.6.1';
   const stored = localStorage.getItem('app_version');
   if ('serviceWorker' in navigator) {
     const regs = await navigator.serviceWorker.getRegistrations();
@@ -688,6 +688,12 @@ body {
 .hdr-menu button { display: block; width: 100%; text-align: left; background: transparent; border: none; color: var(--text); padding: 12px 12px; font-size: 14px; border-radius: 8px; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; }
 .hdr-menu button:active { background: var(--card2); }
 
+/* ── AVISO DE VERSION NUEVA (v8.6.1) ── */
+.upd-banner { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(80px + env(safe-area-inset-bottom)); z-index: 400; background: var(--card); color: var(--text); border: 1px solid var(--emerald); border-radius: 14px; padding: 10px 12px 10px 16px; display: flex; align-items: center; gap: 12px; font-size: 13px; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,.25); }
+.upd-banner[hidden] { display: none; }
+.upd-banner button { background: var(--emerald); color: #000; border: none; border-radius: 8px; padding: 8px 14px; font-weight: 700; font-size: 13px; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; }
+@media (min-width: 769px) { .upd-banner { bottom: 24px; } }
+
 /* ── ELEMENTOS SOLO MOVIL (ocultos en escritorio) ── */
 .tabbar, .fab, .ptr { display: none; }
 .sheet-bg[hidden], .sheet[hidden], .ptr[hidden] { display: none !important; }
@@ -1239,7 +1245,7 @@ body {
     <div style="text-align:center;padding:30px 20px 20px;color:var(--hint);font-size:11px;border-top:1px solid var(--border);margin-top:30px;">
       <div style="font-weight:600;margin-bottom:4px;">Propiedad Familia Díaz González</div>
       <div>Creado por Emmanuel Díaz</div>
-      <div style="margin-top:6px;font-size:10px;opacity:.6;">v8.6 — 2026</div>
+      <div style="margin-top:6px;font-size:10px;opacity:.6;">v8.6.1 — 2026</div>
     </div>
   </div><!-- /content -->
 </div><!-- /app -->
@@ -1261,6 +1267,7 @@ body {
 <div class="sheet-bg" id="sheet-bg" hidden onclick="closeSheet()"></div>
 <div class="sheet" id="sheet" hidden></div>
 <div class="ptr" id="ptr" hidden>&#8635; Sincronizando...</div>
+<div class="upd-banner" id="upd-banner" hidden><span>Version nueva disponible</span><button onclick="actualizarApp()">Actualizar</button></div>
 
 <script>
 // ══ FIREBASE SYNC ══
@@ -1407,7 +1414,7 @@ function descargarJSON() {
   a.download = 'familia-diaz-gonzalez-' + hoyISO() + '.json'; document.body.appendChild(a); a.click();
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
 }
-const APP_VERSION_STR = '8.6';
+const APP_VERSION_STR = '8.6.1';
 
 // Load from Firestore
 function syncFromCloud() {
@@ -3541,6 +3548,31 @@ document.body.dataset.page = 'resumen';
 // Load from cloud on startup, then listen for changes
 syncFromCloud();
 listenForChanges();
+
+// ══ AVISO DE VERSION NUEVA (v8.6.1) ══
+// GitHub Pages sirve index.html con cache de 10 min y la app instalada en el movil puede quedarse con la version vieja.
+// Se pide la pagina saltando la cache (query unica + no-store); si la version publicada es otra, se muestra un boton para recargar.
+function comprobarVersion() {
+  if (!/^https?:/.test(location.protocol)) return;
+  fetch(location.pathname + '?chk=' + Date.now(), { cache: 'no-store' })
+    .then(r => r.ok ? r.text() : '')
+    .then(html => {
+      const m = html.match(/APP_VERSION_STR = '([^']+)'/);
+      if (!m || m[1] === APP_VERSION_STR) return;
+      const el = document.getElementById('upd-banner');
+      if (!el) return;
+      el.querySelector('span').textContent = 'Version ' + m[1] + ' disponible';
+      el.hidden = false;
+    })
+    .catch(() => {});
+}
+function actualizarApp() {
+  localStorage.removeItem('app_version');
+  location.replace(location.pathname + '?v=' + Date.now());
+}
+setTimeout(comprobarVersion, 4000);
+setInterval(comprobarVersion, 10 * 60 * 1000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) comprobarVersion(); });
 
 // NO registrar Service Worker - la app usa Firebase sync y no necesita cache offline
 </script>

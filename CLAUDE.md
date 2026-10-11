@@ -16,7 +16,7 @@ nóminas, créditos, tarjetas, ahorro de los niños, «A mi favor», jubilación
 
 ## Actualización del 11/10/2026 (desde los PDF del 11/09 al 11/10 y capturas)
 - Saldo en cuenta 1.469,74 €; préstamos tras las cuotas de octubre: coche 12.090,12 €, consumo 9.244,22 € (deuda 21.334,34 €, igual que el banco).
-- Tarjeta de Elibel: 1.107,64 € consumidos (disponible 892,36 € de 2.000 €). La de Emmanuel sin actualizar (252,99 €).
+- Tarjeta de Elibel: 1.107,64 € consumidos (disponible 892,36 € de 2.000 €). La de Emmanuel: 985,64 € consumidos (disponible 214,36 € de 1.200 €), con los retenidos del 8 al 11/10 (Burger King, Repsol, Tabacs, Anthropic 10 USD ≈ 8,62 €).
 - Octubre: +31 gastos agrupados (1.534,57 €) y 1.140 € «Devolución a los niños» (2 × 570, a sus cuentas de ahorro: +570 a cada niño).
 - Ingresos extra de octubre: CA Vida 80,20 €, CASS 65,52 € (reembolsos de salud).
 - **Salud se devuelve**: la CASS y CA Vida reembolsan fisioterapia, farmacia, dental y la FPNSM (fundación del hijo, 41,66 €/mes). Lo pagado y aún no devuelto va en «A mi favor» → «Reembolsos de salud pendientes» (399,87 € en oct.: dental 281, fisio 66,42, farmacia 52,45); ajustarlo cuando llegue el reembolso.

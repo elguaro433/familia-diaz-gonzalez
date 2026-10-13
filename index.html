@@ -6,7 +6,7 @@
 <script>
 // Limpiar Service Workers y caches viejos - APP NO USA CACHE
 (async function() {
-  const APP_VERSION = '8.7';
+  const APP_VERSION = '8.8';
   const stored = localStorage.getItem('app_version');
   if ('serviceWorker' in navigator) {
     const regs = await navigator.serviceWorker.getRegistrations();
@@ -1295,7 +1295,7 @@ body {
     <div style="text-align:center;padding:30px 20px 20px;color:var(--hint);font-size:11px;border-top:1px solid var(--border);margin-top:30px;">
       <div style="font-weight:600;margin-bottom:4px;">Propiedad Familia Díaz González</div>
       <div>Creado por Emmanuel Díaz</div>
-      <div style="margin-top:6px;font-size:10px;opacity:.6;">v8.7 — 2026</div>
+      <div style="margin-top:6px;font-size:10px;opacity:.6;">v8.8 — 2026</div>
     </div>
   </div><!-- /content -->
 </div><!-- /app -->
@@ -1465,7 +1465,7 @@ function descargarJSON() {
   a.download = 'familia-diaz-gonzalez-' + hoyISO() + '.json'; document.body.appendChild(a); a.click();
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
 }
-const APP_VERSION_STR = '8.7';
+const APP_VERSION_STR = '8.8';
 
 // Load from Firestore
 function syncFromCloud() {
@@ -1604,7 +1604,8 @@ let ACTIVOS = [];
 function totalActivos() { return ACTIVOS.reduce((s,a) => s + (a.importe||0), 0); }
 
 // ══ JUBILACION CASS (v8.5): puntos de vejez ══
-// { e: { nombre, nacimiento:"AAAA-MM-DD", puntos, fecha:"AAAA-MM-DD", porAno:{ "2025": 213.31 }, fuente }, s: {...},
+// { e: { nombre, nacimiento:"AAAA-MM-DD", puntos, fecha:"AAAA-MM-DD", porAno:{ "2025": 213.31 }, fuente,
+//        meses:{ ordinaria:81, anticipada:74, fecha } (v8.8, «Situación para acceder a la pensión») }, s: {...},
 //   valorVenta, valorCompra, anoValor }  — valores del punto segun el decreto anual (BOPA)
 let JUBILACION = { valorVenta: 2.7735, valorCompra: 26.6256, anoValor: 2026 };
 
@@ -3081,8 +3082,28 @@ function renderJubilacion() {
       </div>
       ${barras ? `<div class="jub-bars">${barras}</div>` : ''}
       ${proy}
+      ${jubMeses(p, hoy)}
     </div>`;
   }).join('');
+}
+// v8.8: meses cotizados que pide la CASS para tener derecho a pension (art. 196: 180 a los 65; art. 202: 481 anticipada).
+// Cuentan tambien los periodos de Espana, Francia o Portugal (convenio) si hay al menos 12 meses en la CASS.
+function jubMeses(p, hoy) {
+  const m = p.meses; if (!m) return '';
+  const fila = (txt, n, req) => {
+    const falta = Math.max(0, req - n);
+    const d = new Date(m.fecha ? m.fecha + 'T00:00:00' : hoy); d.setMonth(d.getMonth() + falta);
+    const nac = p.nacimiento ? new Date(p.nacimiento + 'T00:00:00') : null;
+    const j65 = nac ? new Date(nac.getFullYear() + 65, nac.getMonth(), nac.getDate()) : null;
+    const tarde = req === 481 && j65 && d > j65;      // la anticipada solo sirve si llega ANTES de los 65
+    const cuando = !falta ? 'cumplido'
+      : tarde ? `faltan ${falta} meses: solo con Andorra no llega antes de los 65 (suman Espana, Francia o Portugal)`
+      : `faltan ${falta} meses (~${_MSHORT[d.getMonth()]} ${d.getFullYear()} cotizando cada mes)`;
+    return `<div class="jub-bar-row" style="margin-top:6px;"><span class="jub-bar-lbl" style="width:auto;flex:0 0 150px;">${txt}</span><div class="jub-bar-bg"><div class="jub-bar-fill" style="width:${Math.min(100, n / req * 100)}%;background:var(--sky);"></div></div><span class="jub-bar-val mono" style="width:70px;">${n} / ${req}</span></div><div style="font-size:11px;color:var(--muted);margin-left:2px;">${cuando}</div>`;
+  };
+  return `<div style="margin-top:10px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;">Meses cotizados para tener pension${m.fecha ? ' · ' + m.fecha.split('-').reverse().join('/') : ''}</div>`
+    + (m.ordinaria != null ? fila('Pension a los 65', m.ordinaria, 180) : '')
+    + (m.anticipada != null ? fila('Jubilacion anticipada', m.anticipada, 481) : '');
 }
 function editJubPuntos(k) {
   const el = document.getElementById('jub-pts-' + k); if (!el) return;

@@ -1,6 +1,6 @@
 # Finanzas Familia Díaz González — notas para seguir trabajando
 
-App estática (`index.html`, v8.7) en GitHub Pages: control financiero de Emmanuel y Elibel (gastos por mes y categoría,
+App estática (`index.html`, v8.8) en GitHub Pages: control financiero de Emmanuel y Elibel (gastos por mes y categoría,
 nóminas, créditos, tarjetas, ahorro de los niños, «A mi favor», jubilación CASS).
 
 - Datos: Firestore `appdata/familia-diaz-gonzalez` (mismo proyecto que el calendario). Casi todos los campos son
@@ -22,3 +22,10 @@ nóminas, créditos, tarjetas, ahorro de los niños, «A mi favor», jubilación
 - **Salud se devuelve**: la CASS y CA Vida reembolsan fisioterapia, farmacia, dental y la FPNSM (fundación del hijo, 41,66 €/mes). Lo pagado y aún no devuelto va en «A mi favor» → «Reembolsos de salud pendientes» (399,87 € en oct.: dental 281, fisio 66,42, farmacia 52,45); ajustarlo cuando llegue el reembolso.
 - Bizum de «Chiqui» (50 €): favor a un tercero, no es ingreso. Caprabo, Hiper, Andorra 2000… = supermercado.
 - Números completos de tarjeta quitados de la base de datos, de las 8 copias y del código (siguen en el historial de Git).
+
+## 13/10/2026 (v8.8): CASS, situación para la pensión
+- Captura de la CASS online: 865,40 puntos de vejez (en el extracto del 20/09 eran 873,04: la CASS dio menos;
+  el reparto por año de `porAno` es una estimación nuestra y suma 873,04).
+- `jubilacion.e.meses` = { ordinaria: 81 (de 180, art. 196, pensión a los 65), anticipada: 74 (de 481, art. 202), fecha }.
+  `jubMeses()` pinta las dos barras y cuándo se llega cotizando cada mes; la anticipada solo cuenta si llega antes de
+  los 65. Para los mínimos suman los periodos de España, Francia o Portugal (convenio) si hay ≥ 12 meses en la CASS.

@@ -6,7 +6,7 @@
 <script>
 // Limpiar Service Workers y caches viejos - APP NO USA CACHE
 (async function() {
-  const APP_VERSION = '8.9';
+  const APP_VERSION = '8.10';
   const stored = localStorage.getItem('app_version');
   if ('serviceWorker' in navigator) {
     const regs = await navigator.serviceWorker.getRegistrations();
@@ -1295,7 +1295,7 @@ body {
     <div style="text-align:center;padding:30px 20px 20px;color:var(--hint);font-size:11px;border-top:1px solid var(--border);margin-top:30px;">
       <div style="font-weight:600;margin-bottom:4px;">Propiedad Familia Díaz González</div>
       <div>Creado por Emmanuel Díaz</div>
-      <div style="margin-top:6px;font-size:10px;opacity:.6;">v8.9 — 2026</div>
+      <div style="margin-top:6px;font-size:10px;opacity:.6;">v8.10 — 2026</div>
     </div>
   </div><!-- /content -->
 </div><!-- /app -->
@@ -1374,8 +1374,16 @@ function famPedir(comprobar) {
 }
 // La clave es buena si con ella existen los datos de la familia
 function famListo() {
-  if (FAM) return Promise.resolve(FAM);
-  return famPedir(id => db.collection('familias').doc(id).collection('appdata').doc(SYNC_DOC).get({ source: 'server' }).then(d => d.exists));
+  const comprobar = id => db.collection('familias').doc(id).collection('appdata').doc(SYNC_DOC).get({ source: 'server' }).then(d => d.exists);
+  if (!FAM) return famPedir(comprobar);
+  // Si la clave familiar cambio, con la guardada ya no hay datos: olvidarla y pedir la nueva
+  // (nunca subir nada a la ruta vieja). Sin conexion se sigue con la guardada.
+  return comprobar(FAM).then(ok => {
+    if (ok) return FAM;
+    try { localStorage.removeItem(FAM_LS); } catch (e) {}
+    FAM = null;
+    return famPedir(comprobar);
+  }, () => FAM);
 }
 let syncEnabled = true;
 let lastSyncTime = 0;
@@ -1511,7 +1519,7 @@ function descargarJSON() {
   a.download = 'familia-diaz-gonzalez-' + hoyISO() + '.json'; document.body.appendChild(a); a.click();
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
 }
-const APP_VERSION_STR = '8.9';
+const APP_VERSION_STR = '8.10';
 
 // Load from Firestore
 function syncFromCloud() {

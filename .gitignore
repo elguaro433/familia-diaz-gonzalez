@@ -1,0 +1,5 @@
+backup_*.xlsx
+*.xlsx
+
+# Icono del acceso directo del Escritorio (solo local)
+app_icon.ico

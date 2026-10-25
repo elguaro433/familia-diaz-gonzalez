@@ -14,6 +14,9 @@ nóminas, créditos, tarjetas, ahorro de los niños, «A mi favor», jubilación
   dispositivo. Para tocar datos desde fuera: PATCH con `updateMask` solo de los campos tocados, copia antes y releer después.
 - El repositorio es público: **nunca guardar números completos de tarjetas, IBAN ni
   datos que permitan pagar**. Las tarjetas van solo con los 4 últimos dígitos.
+- **Nada de datos en el código (25/10/2026):** `MESES`, `NOMINAS_REAL`, `CREDITOS`, `TARJETAS`, `NINOS`, saldo… arrancan
+  vacíos; todo viene de la nube (o de la copia local del móvil, `loadAllData` rehace los meses). No volver a escribir
+  gastos ni cifras en `index.html`. Historial de Git reiniciado ese día (copia del viejo en `..\backups\*.bundle`, solo PC).
 - Gastos de un mes: `meses[i].gastos` = `[concepto, importe, categoría, fecha?]`; categorías `fijos`, `variable`,
   `super`, `restaurante`, `salud`, `otros`. Se apuntan agrupados como en septiembre de 2026 («Caprabo (varias)»…).
 - El usuario manda los movimientos en PDF de MoraBanc (cuenta y tarjetas) y capturas de la banca online.

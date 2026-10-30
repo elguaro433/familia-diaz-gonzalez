@@ -33,4 +33,5 @@ actualización, apuntar el detalle allí (PATCH con `updateMask=finanzas`) y aqu
 - Pensión: `jubilacion.e.meses` = { ordinaria, anticipada, fecha }; `jubMeses()` pinta las dos barras.
 - Un crédito nuevo va en `creditos` con su cuadro de cuotas; la cuota de los años sin crear sale con «+ Mes».
 - APACEF: julio y agosto sin cobro.
+- «Basas salud» y «Crem Salud» son seguros FIJOS de por vida: categoría `fijos` en todos los meses (no `salud`).
 - Los PDF del banco NO se suben al repositorio (llevan IBAN y números de tarjeta completos).
